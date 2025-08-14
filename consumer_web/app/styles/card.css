@@ -1,0 +1,29 @@
+/* 카드 컴포넌트 공통 스타일 */
+.dashboard-card {
+  padding: 24px;
+}
+
+.dashboard-card-header {
+  margin-bottom: 16px;
+}
+
+.dashboard-card-content {
+  /* 카드 내용 영역 스타일 */
+}
+
+/* 카드 내부 테이블 스타일 */
+.dashboard-card .rt-TableRoot {
+  margin-top: 8px;
+}
+
+/* 카드 내부 Flex 컨테이너 스타일 */
+.dashboard-card .rt-Flex {
+  gap: 16px;
+}
+
+/* 반응형 카드 스타일 */
+@media (max-width: 768px) {
+  .dashboard-card {
+    padding: 16px;
+  }
+} 

@@ -1,0 +1,1 @@
+export type MenuKey = '현황판' | '사용자' | '캘린더' | '설정'; 
