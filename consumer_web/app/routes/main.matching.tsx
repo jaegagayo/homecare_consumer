@@ -233,7 +233,7 @@ export default function MatchingPage() {
               variant="outline"
               onClick={() => navigate('/main/change-options')}
             >
-              변경하기
+              조건 변경하기
             </Button>
           </Flex>
           <Flex direction="column" gap="3">

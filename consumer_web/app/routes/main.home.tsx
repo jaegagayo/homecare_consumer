@@ -11,8 +11,7 @@ import {
 import { 
   Clock, 
   MapPin, 
-  User,
-  Plus
+  User
 } from "lucide-react";
 
 interface Schedule {
@@ -141,13 +140,7 @@ export default function HomePage() {
           </Text>
         </div>
 
-        {/* 빠른 서비스 요청 버튼 */}
-        <Link to="/main/service-request">
-          <Button size="3" className="w-full">
-            <Plus size={16} />
-            <Text>새로운 서비스 요청</Text>
-          </Button>
-        </Link>
+
 
         {/* 곧 받을 서비스 */}
         {schedules.filter(s => s.status === 'upcoming').length > 0 ? (

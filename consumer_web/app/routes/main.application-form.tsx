@@ -7,20 +7,12 @@ import {
   Button,
   TextArea,
   Heading,
-  Card,
   Select,
-  Checkbox,
   Dialog,
-  Badge,
-  Callout
+  TextField
 } from "@radix-ui/themes";
 import { 
-  Calendar,
-  Clock,
-  MapPin,
-  User,
-  X,
-  AlertTriangle,
+  CreditCard,
   Info
 } from "lucide-react";
 
@@ -30,6 +22,8 @@ interface ServiceType {
   description: string;
 }
 
+
+
 interface ApplicationForm {
   // 기본 정보
   serviceType: string;
@@ -38,10 +32,8 @@ interface ApplicationForm {
   address: string;
   specialRequests: string;
   
-  // 바우처 정보
-  voucherLimit: number;
-  currentUsage: number;
-  isVoucherExceeded: boolean;
+  // 바우처 정보 (간소화)
+  estimatedUsage: number;
   
   // 조건 정보
   preferredDays: string[];
@@ -50,10 +42,14 @@ interface ApplicationForm {
     end: string;
   };
   preferredAreas: string[];
-  maxHourlyRate: number;
-  
-  // 자연어 입력
-  naturalLanguageInput: string;
+}
+
+interface VoucherInfo {
+  selectedGrade: string;
+  voucherLimit: number;
+  currentUsage: number;
+  selfPayAmount: number;
+  isMedicalBenefitRecipient: boolean;
 }
 
 const serviceTypes: ServiceType[] = [
@@ -71,12 +67,11 @@ const timeSlots = [
   '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
 ];
 
+
+
 export default function ApplicationFormPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'natural' | 'structured'>('natural');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isVoucherDialogOpen, setIsVoucherDialogOpen] = useState(false);
-  const [isWorkDaysDialogOpen, setIsWorkDaysDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
   const [form, setForm] = useState<ApplicationForm>({
@@ -85,48 +80,40 @@ export default function ApplicationFormPage() {
     time: '',
     address: '',
     specialRequests: '',
-    voucherLimit: 100000,
-    currentUsage: 75000,
-    isVoucherExceeded: false,
+    estimatedUsage: 0,
     preferredDays: ['월', '화', '수', '목', '금'],
     preferredHours: { start: '09:00', end: '18:00' },
-    preferredAreas: ['서울시 강남구'],
-    maxHourlyRate: 20000,
-    naturalLanguageInput: ''
+    preferredAreas: ['서울시 강남구']
+  });
+
+  // 바우처 정보 (실제로는 프로필에서 가져와야 함)
+  const [voucherInfo] = useState<VoucherInfo>({
+    selectedGrade: '3등급',
+    voucherLimit: 1295400,
+    currentUsage: 750000,
+    selfPayAmount: 194310,
+    isMedicalBenefitRecipient: false
   });
 
   useEffect(() => {
-    // 바우처 한도 체크
-    const isExceeded = form.currentUsage >= form.voucherLimit;
-    setForm(prev => ({ ...prev, isVoucherExceeded: isExceeded }));
-  }, [form.currentUsage, form.voucherLimit]);
-
-
-
-  const handleAnalyze = async () => {
-    if (!form.naturalLanguageInput.trim()) return;
-    
-    setIsAnalyzing(true);
-    try {
-      // TODO: 실제 AI 분석 로직 구현
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // 분석 결과를 폼에 적용 (더미 데이터)
-      setForm(prev => ({
-        ...prev,
-        serviceType: 'visiting-care',
-        preferredDays: ['월', '화', '수', '목', '금'],
-        preferredHours: { start: '09:00', end: '18:00' },
-        maxHourlyRate: 15000
-      }));
-      
-      setActiveTab('structured');
-    } catch (error) {
-      alert('분석 중 오류가 발생했습니다.');
-    } finally {
-      setIsAnalyzing(false);
+    // 예상 사용량 계산 (서비스 유형과 시간에 따라)
+    let estimatedCost = 0;
+    if (form.serviceType && form.time) {
+      // 간단한 예상 비용 계산 (실제로는 더 복잡한 로직 필요)
+      const baseHourlyRate = 15000; // 기본 시급
+      const serviceHours = 2; // 기본 서비스 시간
+      estimatedCost = baseHourlyRate * serviceHours;
     }
-  };
+    
+    setForm(prev => ({ 
+      ...prev, 
+      estimatedUsage: estimatedCost
+    }));
+  }, [form.serviceType, form.time]);
+
+
+
+
 
   const handleSubmit = async () => {
     if (!form.serviceType || !form.date || !form.time || !form.address) {
@@ -134,8 +121,8 @@ export default function ApplicationFormPage() {
       return;
     }
 
-    // 바우처 한도 초과 시 확인
-    if (form.isVoucherExceeded) {
+    // 예상 사용량이 있는 경우 안내
+    if (isOverLimit) {
       setIsVoucherDialogOpen(true);
       return;
     }
@@ -160,16 +147,7 @@ export default function ApplicationFormPage() {
     handleSubmit();
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '날짜 선택';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long'
-    });
-  };
+
 
   const handleDayToggle = (day: string) => {
     setForm(prev => ({
@@ -216,269 +194,174 @@ export default function ApplicationFormPage() {
     }
   };
 
-  const remainingVoucher = form.voucherLimit - form.currentUsage;
+  // 바우처 정보 계산
+  const totalUsage = voucherInfo.currentUsage + form.estimatedUsage;
+  const remainingAmount = voucherInfo.voucherLimit - totalUsage;
+  const isOverLimit = totalUsage > voucherInfo.voucherLimit;
 
   return (
     <Container size="2" className="p-4">
       <Flex direction="column" gap="6">
 
-        {/* 바우처 정보 */}
-        <Card className="p-4">
-          <Flex justify="between" align="center" className="mb-3">
-            <Text size="2" weight="medium">바우처 현황</Text>
-            {form.isVoucherExceeded && (
-              <Badge color="red">
-                <AlertTriangle size={12} />
-                한도 초과
-              </Badge>
-            )}
-          </Flex>
-          <Flex direction="column" gap="2">
-            <Flex justify="between">
-              <Text size="2" color="gray">사용 금액</Text>
-              <Text size="2">{form.currentUsage.toLocaleString()}원</Text>
-            </Flex>
-            <Flex justify="between">
-              <Text size="2" color="gray">한도</Text>
-              <Text size="2">{form.voucherLimit.toLocaleString()}원</Text>
-            </Flex>
-            <Flex justify="between">
-              <Text size="2" weight="medium">잔여</Text>
-              <Text size="2" weight="medium" color={remainingVoucher < 0 ? "red" : "green"}>
-                {remainingVoucher.toLocaleString()}원
-              </Text>
-            </Flex>
-          </Flex>
-          {form.isVoucherExceeded && (
-            <Callout.Root color="red" className="mt-3">
-              <Callout.Icon>
-                <AlertTriangle size={16} />
-              </Callout.Icon>
-              <Callout.Text>
-                바우처 한도를 초과했습니다. 부담금이 발생할 수 있습니다.
-              </Callout.Text>
-            </Callout.Root>
-          )}
-        </Card>
 
-        {/* 입력 방식 선택 */}
-        <Card className="p-4">
-          <Flex gap="2">
-            <Button 
-              variant={activeTab === 'natural' ? 'solid' : 'outline'}
-              onClick={() => setActiveTab('natural')}
-              className="flex-1"
-            >
-              자연어 입력
-            </Button>
-            <Button 
-              variant={activeTab === 'structured' ? 'solid' : 'outline'}
-              onClick={() => setActiveTab('structured')}
-              className="flex-1"
-            >
-              구조화 입력
-            </Button>
-          </Flex>
-        </Card>
 
-        {/* 자연어 입력 */}
-        {activeTab === 'natural' && (
-          <Card className="p-6">
-            <Heading size="3" className="mb-4">자연어로 요청사항 입력</Heading>
-            <Text size="2" color="gray" className="mb-4">
-              원하는 서비스 조건을 자유롭게 작성해주세요. AI가 분석하여 자동으로 설정해드립니다.
+        {/* 서비스 신청서 */}
+        <div className="space-y-6">
+          <div>
+            <Heading size="3" className="mb-2">서비스 신청서</Heading>
+            <Text size="2" color="gray">
+              원하시는 서비스 조건을 입력해주세요.
             </Text>
-            
-            <Card className="p-4 mb-4 bg-gray-50">
-              <Text size="2" weight="medium" className="mb-2 block">입력 예시</Text>
-              <Text size="1" color="gray" className="leading-relaxed">
-                • "평일 오전에 강남구에서 방문요양 하고 싶어요"<br/>
-                • "시급은 15만원 정도면 좋겠어요"<br/>
-                • "치매 케어 경험이 있어서 중증 어르신도 괜찮아요"<br/>
-                • "야간은 어렵고, 평일 오전에만 가능해요"
-              </Text>
-            </Card>
+          </div>
 
-            <TextArea
-              placeholder="평일 오전 9시부터 6시까지 강남구, 서초구에서 방문요양 하고 싶어요. 시급은 15만원 정도면 좋겠고, 치매 케어 경험이 있어요."
-              value={form.naturalLanguageInput}
-              onChange={(e) => setForm(prev => ({ ...prev, naturalLanguageInput: e.target.value }))}
-              className="min-h-32 mb-4"
-            />
+          {/* 서비스 유형 선택 */}
+          <div className="space-y-3">
+            <Text size="2" weight="medium">서비스 유형 *</Text>
+                         <Select.Root value={form.serviceType} onValueChange={(value) => setForm(prev => ({ ...prev, serviceType: value }))}>
+               <Select.Trigger placeholder="서비스 유형을 선택하세요" className="w-full" />
+               <Select.Content>
+                 {serviceTypes.map((service) => (
+                   <Select.Item key={service.value} value={service.value}>
+                     {service.label}
+                   </Select.Item>
+                 ))}
+               </Select.Content>
+             </Select.Root>
+          </div>
 
-            <Button 
-              onClick={handleAnalyze}
-              disabled={!form.naturalLanguageInput.trim() || isAnalyzing}
-              className="w-full"
-              size="3"
-            >
-              {isAnalyzing ? '분석 중...' : '분석하기'}
-            </Button>
-          </Card>
-        )}
-
-        {/* 구조화 입력 */}
-        {activeTab === 'structured' && (
-          <Flex direction="column" gap="4">
-            {/* 서비스 유형 선택 */}
-            <Card className="p-6">
-              <Heading size="3" className="mb-4">서비스 유형</Heading>
-              <Select.Root value={form.serviceType} onValueChange={(value) => setForm(prev => ({ ...prev, serviceType: value }))}>
-                <Select.Trigger placeholder="서비스 유형을 선택하세요" />
-                <Select.Content>
-                  {serviceTypes.map((service) => (
-                    <Select.Item key={service.value} value={service.value}>
-                      <Flex direction="column" align="start">
-                        <Text weight="medium">{service.label}</Text>
-                        <Text size="1" color="gray">{service.description}</Text>
-                      </Flex>
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
-            </Card>
-
-            {/* 날짜 및 시간 선택 */}
-            <Card className="p-6">
-              <Heading size="3" className="mb-4">서비스 일정</Heading>
-              <Flex direction="column" gap="4">
-                <div>
-                  <Text size="2" weight="medium" className="mb-2 block">서비스 날짜</Text>
-                  <input
-                    type="date"
-                    value={form.date}
-                    onChange={(e) => setForm(prev => ({ ...prev, date: e.target.value }))}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
+          {/* 서비스 일정 */}
+          <div className="space-y-3">
+            <Text size="2" weight="medium">서비스 일정 *</Text>
+            <Flex gap="4" align="start">
+              <div className="flex-1">
+                <Text size="1" color="gray" className="mb-2 block">서비스 날짜</Text>
+                <TextField.Root 
+                  value={form.date}
+                  onChange={(e) => setForm(prev => ({ ...prev, date: e.target.value }))}
+                  placeholder="날짜를 선택하세요"
+                  type="date"
+                  className="w-full h-8"
+                />
+              </div>
+              <div className="flex-1">
+                <Text size="1" color="gray" className="mb-2 block">서비스 시간</Text>
+                <Select.Root value={form.time} onValueChange={(value) => setForm(prev => ({ ...prev, time: value }))}>
+                  <Select.Trigger 
+                    placeholder="시간을 선택하세요"
+                    className="w-full h-8"
                   />
-                </div>
-                <div>
-                  <Text size="2" weight="medium" className="mb-2 block">서비스 시간</Text>
-                  <Select.Root value={form.time} onValueChange={(value) => setForm(prev => ({ ...prev, time: value }))}>
-                    <Select.Trigger placeholder="시간을 선택하세요" />
-                    <Select.Content>
-                      {timeSlots.map((time) => (
-                        <Select.Item key={time} value={time}>
-                          {time}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Root>
-                </div>
-              </Flex>
-            </Card>
-
-            {/* 주소 입력 */}
-            <Card className="p-6">
-              <Heading size="3" className="mb-4">서비스 주소</Heading>
-              <input
-                type="text"
-                value={form.address}
-                onChange={(e) => setForm(prev => ({ ...prev, address: e.target.value }))}
-                placeholder="서비스를 받을 주소를 입력하세요"
-                className="w-full p-3 border border-gray-300 rounded-lg"
-              />
-            </Card>
-
-            {/* 선호 조건 */}
-            <Card className="p-6">
-              <Heading size="3" className="mb-4">선호 조건</Heading>
-              <Flex direction="column" gap="4">
-                {/* 선호 요일 */}
-                <div>
-                  <Text size="2" weight="medium" className="mb-2 block">선호 요일</Text>
-                  <Flex gap="2" wrap="wrap">
-                    <Button 
-                      size="1" 
-                      variant="outline" 
-                      onClick={handleWeekdaySelect}
-                    >
-                      평일 전체
-                    </Button>
-                    <Button 
-                      size="1" 
-                      variant="outline" 
-                      onClick={handleWeekendSelect}
-                    >
-                      주말 전체
-                    </Button>
-                  </Flex>
-                  <Flex gap="2" wrap="wrap" className="mt-2">
-                    {daysOfWeek.map((day) => (
-                      <Button
-                        key={day}
-                        size="1"
-                        variant={form.preferredDays.includes(day) ? "solid" : "outline"}
-                        onClick={() => handleDayToggle(day)}
-                      >
-                        {day}
-                      </Button>
+                  <Select.Content>
+                    {timeSlots.map((time) => (
+                      <Select.Item key={time} value={time}>
+                        {time}
+                      </Select.Item>
                     ))}
-                  </Flex>
-                </div>
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </Flex>
+          </div>
 
-                {/* 선호 시간대 */}
-                <div>
-                  <Text size="2" weight="medium" className="mb-2 block">선호 시간대</Text>
-                  <Flex gap="2" align="center">
-                    <Select.Root 
-                      value={form.preferredHours.start} 
-                      onValueChange={(value) => setForm(prev => ({ 
-                        ...prev, 
-                        preferredHours: { ...prev.preferredHours, start: value } 
-                      }))}
-                    >
-                      <Select.Trigger />
-                      <Select.Content>
-                        {timeSlots.map((time) => (
-                          <Select.Item key={time} value={time}>{time}</Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Root>
-                    <Text>~</Text>
-                    <Select.Root 
-                      value={form.preferredHours.end} 
-                      onValueChange={(value) => setForm(prev => ({ 
-                        ...prev, 
-                        preferredHours: { ...prev.preferredHours, end: value } 
-                      }))}
-                    >
-                      <Select.Trigger />
-                      <Select.Content>
-                        {timeSlots.map((time) => (
-                          <Select.Item key={time} value={time}>{time}</Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Root>
-                  </Flex>
-                </div>
+          {/* 서비스 주소 */}
+          <div className="space-y-3">
+            <Text size="2" weight="medium">서비스 주소 *</Text>
+            <input
+              type="text"
+              value={form.address}
+              onChange={(e) => setForm(prev => ({ ...prev, address: e.target.value }))}
+              placeholder="서비스를 받을 주소를 입력하세요"
+              className="w-full h-8 px-3 border border-gray-300 rounded text-sm"
+            />
+          </div>
 
-                {/* 최대 시급 */}
-                <div>
-                  <Text size="2" weight="medium" className="mb-2 block">최대 시급</Text>
-                  <input
-                    type="number"
-                    value={form.maxHourlyRate}
-                    onChange={(e) => setForm(prev => ({ ...prev, maxHourlyRate: parseInt(e.target.value) || 0 }))}
-                    placeholder="최대 시급을 입력하세요"
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                  />
-                </div>
+          {/* 선호 조건 */}
+          <div className="space-y-4">
+            <Text size="2" weight="medium">선호 조건</Text>
+            
+            {/* 선호 요일 */}
+            <div className="space-y-2">
+              <Text size="1" color="gray">선호 요일</Text>
+              <Flex gap="2" wrap="wrap">
+                <Button 
+                  size="1" 
+                  variant="outline" 
+                  onClick={handleWeekdaySelect}
+                >
+                  평일 전체
+                </Button>
+                <Button 
+                  size="1" 
+                  variant="outline" 
+                  onClick={handleWeekendSelect}
+                >
+                  주말 전체
+                </Button>
               </Flex>
-            </Card>
+              <Flex gap="2" wrap="wrap">
+                {daysOfWeek.map((day) => (
+                  <Button
+                    key={day}
+                    size="1"
+                    variant={form.preferredDays.includes(day) ? "solid" : "outline"}
+                    onClick={() => handleDayToggle(day)}
+                  >
+                    {day}
+                  </Button>
+                ))}
+              </Flex>
+            </div>
 
-            {/* 특별 요청사항 */}
-            <Card className="p-6">
-              <Heading size="3" className="mb-4">특별 요청사항</Heading>
-              <TextArea
-                value={form.specialRequests}
-                onChange={(e) => setForm(prev => ({ ...prev, specialRequests: e.target.value }))}
-                placeholder="요양보호사에게 전달할 특별한 요청사항이 있다면 입력해주세요"
-                className="w-full"
-                rows={4}
-              />
-            </Card>
-          </Flex>
-        )}
+            {/* 선호 시간대 */}
+            <div className="space-y-2">
+              <Text size="1" color="gray">선호 시간대</Text>
+              <Flex gap="2" align="center">
+                <Select.Root 
+                  value={form.preferredHours.start} 
+                  onValueChange={(value) => setForm(prev => ({ 
+                    ...prev, 
+                    preferredHours: { ...prev.preferredHours, start: value } 
+                  }))}
+                >
+                  <Select.Trigger />
+                  <Select.Content>
+                    {timeSlots.map((time) => (
+                      <Select.Item key={time} value={time}>{time}</Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+                <Text>~</Text>
+                <Select.Root 
+                  value={form.preferredHours.end} 
+                  onValueChange={(value) => setForm(prev => ({ 
+                    ...prev, 
+                    preferredHours: { ...prev.preferredHours, end: value } 
+                  }))}
+                >
+                  <Select.Trigger />
+                  <Select.Content>
+                    {timeSlots.map((time) => (
+                      <Select.Item key={time} value={time}>{time}</Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              </Flex>
+            </div>
+
+
+          </div>
+
+          {/* 특별 요청사항 */}
+          <div className="space-y-3">
+            <Text size="2" weight="medium">특별 요청사항</Text>
+            <TextArea
+              value={form.specialRequests}
+              onChange={(e) => setForm(prev => ({ ...prev, specialRequests: e.target.value }))}
+              placeholder="요양보호사에게 전달할 특별한 요청사항이 있다면 입력해주세요"
+              className="w-full"
+              rows={4}
+            />
+          </div>
+        </div>
 
         {/* 제출 버튼 */}
         <Button 
@@ -489,15 +372,65 @@ export default function ApplicationFormPage() {
         >
           {isLoading ? '요청 중...' : '서비스 요청하기'}
         </Button>
+
+        {/* 플로팅 카드 공간 확보 */}
+        <div className="h-20"></div>
       </Flex>
 
-      {/* 바우처 한도 초과 확인 다이얼로그 */}
+      {/* 플로팅 바우처 정보 */}
+      <div className="fixed bottom-20 left-0 right-0 z-50 px-4">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+            <Flex align="center" justify="between" className="mb-2">
+              <Flex align="center" gap="2">
+                <CreditCard size={16} className="text-blue-600" />
+                <Text size="2" weight="medium">바우처 현황</Text>
+              </Flex>
+              {isOverLimit && (
+                <div className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
+                  한도 초과
+                </div>
+              )}
+            </Flex>
+            <Flex direction="column" gap="1">
+              <Flex justify="between">
+                <Text size="1" color="gray">예상 사용 금액</Text>
+                <Text size="1" weight="medium">{form.estimatedUsage.toLocaleString()}원</Text>
+              </Flex>
+              <Flex justify="between">
+                <Text size="1" color="gray">남은 금액</Text>
+                <Text 
+                  size="1" 
+                  weight="medium" 
+                  color={remainingAmount < 0 ? "red" : remainingAmount < 100000 ? "orange" : "green"}
+                >
+                  {remainingAmount.toLocaleString()}원
+                </Text>
+              </Flex>
+            </Flex>
+            {isOverLimit && (
+              <Flex align="center" gap="1" className="mt-2 pt-2 border-t border-gray-100">
+                <Info size={12} className="text-red-500" />
+                <Text size="1" color="red">본인부담금 발생 가능</Text>
+              </Flex>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 바우처 사용 확인 다이얼로그 */}
       <Dialog.Root open={isVoucherDialogOpen} onOpenChange={setIsVoucherDialogOpen}>
         <Dialog.Content>
-          <Dialog.Title>바우처 한도 초과</Dialog.Title>
+          <Dialog.Title>바우처 사용 안내</Dialog.Title>
           <Dialog.Description>
-            현재 바우처 한도를 초과하여 부담금이 발생할 수 있습니다. 
-            계속 진행하시겠습니까?
+            <Flex direction="column" gap="3">
+              <Text>
+                이번 신청으로 인한 예상 사용 금액은 {form.estimatedUsage.toLocaleString()}원입니다.
+              </Text>
+              <Text size="1" color="gray">
+                상세한 바우처 현황은 프로필 페이지에서 확인하실 수 있습니다.
+              </Text>
+            </Flex>
           </Dialog.Description>
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
