@@ -52,6 +52,12 @@ export default function MainLayout() {
       setCurrentPageTitle("서비스 신청서");
     } else if (path.includes("/main/change-options")) {
       setCurrentPageTitle("변경 옵션 선택");
+    } else if (path.includes("/main/review-write")) {
+      setCurrentPageTitle("리뷰 작성");
+    } else if (path.includes("/main/regular-service-proposal")) {
+      setCurrentPageTitle("정기 서비스 제안");
+    } else if (path.includes("/main/blacklist-report")) {
+      setCurrentPageTitle("블랙리스트 신고");
     }
   }, [navigate, location]);
 

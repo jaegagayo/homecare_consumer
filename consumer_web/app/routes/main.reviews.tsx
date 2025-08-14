@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "@remix-run/react";
 import { 
   Container, 
   Flex, 
@@ -6,24 +7,18 @@ import {
   Button,
   Heading,
   Card,
-  Badge,
-  TextArea,
-  Select,
-  Dialog
+  Badge
 } from "@radix-ui/themes";
 import { 
   Star,
   Calendar,
-  User,
-  MessageSquare,
-  ThumbsUp,
-  ThumbsDown,
-  X
+  MessageSquare
 } from "lucide-react";
 
 interface Review {
   id: string;
   date: string;
+  time?: string;
   caregiverName: string;
   serviceType: string;
   rating: number;
@@ -31,24 +26,12 @@ interface Review {
   status: 'pending' | 'completed';
 }
 
-interface ReviewForm {
-  rating: number;
-  comment: string;
-  isBlacklist: boolean;
-  blacklistReason: string;
-}
+
 
 export default function ReviewsPage() {
+  const navigate = useNavigate();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>('');
-  const [reviewForm, setReviewForm] = useState<ReviewForm>({
-    rating: 0,
-    comment: '',
-    isBlacklist: false,
-    blacklistReason: ''
-  });
 
   useEffect(() => {
     // 더미 데이터 로드
@@ -59,6 +42,7 @@ export default function ReviewsPage() {
         {
           id: "1",
           date: "2024-08-13",
+          time: "09:00-18:00",
           caregiverName: "김케어",
           serviceType: "방문요양",
           rating: 5,
@@ -68,6 +52,7 @@ export default function ReviewsPage() {
         {
           id: "2",
           date: "2024-08-12",
+          time: "10:00-16:00",
           caregiverName: "박케어",
           serviceType: "방문요양",
           rating: 4,
@@ -77,6 +62,7 @@ export default function ReviewsPage() {
         {
           id: "3",
           date: "2024-08-11",
+          time: "14:00-16:00",
           caregiverName: "이케어",
           serviceType: "방문목욕",
           rating: 0,
@@ -100,49 +86,19 @@ export default function ReviewsPage() {
     });
   };
 
-  const renderStars = (rating: number, interactive: boolean = false) => {
+  const renderStars = (rating: number) => {
     return (
       <Flex gap="1">
         {[1, 2, 3, 4, 5].map((star) => (
-          <button
+          <Star
             key={star}
-            type={interactive ? "button" : "button"}
-            onClick={interactive ? () => setReviewForm(prev => ({ ...prev, rating: star })) : undefined}
-            className={interactive ? "cursor-pointer" : "cursor-default"}
-          >
-            <Star
-              size={20}
-              fill={star <= rating ? "#fbbf24" : "none"}
-              color={star <= rating ? "#fbbf24" : "#d1d5db"}
-            />
-          </button>
+            size={20}
+            fill={star <= rating ? "#fbbf24" : "none"}
+            color={star <= rating ? "#fbbf24" : "#d1d5db"}
+          />
         ))}
       </Flex>
     );
-  };
-
-  const handleSubmitReview = async () => {
-    if (reviewForm.rating === 0) {
-      alert('평점을 선택해주세요.');
-      return;
-    }
-
-    if (reviewForm.comment.trim() === '') {
-      alert('리뷰 내용을 입력해주세요.');
-      return;
-    }
-
-    // TODO: 실제 API 호출
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    alert('리뷰가 성공적으로 등록되었습니다.');
-    setShowReviewForm(false);
-    setReviewForm({
-      rating: 0,
-      comment: '',
-      isBlacklist: false,
-      blacklistReason: ''
-    });
   };
 
   if (isLoading) {
@@ -192,8 +148,7 @@ export default function ReviewsPage() {
                     <Button 
                       size="2" 
                       onClick={() => {
-                        setSelectedService(review.id);
-                        setShowReviewForm(true);
+                        navigate(`/main/review-write?serviceId=${review.id}&caregiverName=${review.caregiverName}&serviceType=${review.serviceType}&serviceDate=${review.date}&serviceTime=${review.time || '09:00-18:00'}`);
                       }}
                     >
                       <MessageSquare size={16} />
@@ -249,74 +204,9 @@ export default function ReviewsPage() {
         )}
 
 
-      {/* 리뷰 작성 다이얼로그 */}
-      <Dialog.Root open={showReviewForm} onOpenChange={setShowReviewForm}>
-        <Dialog.Content>
-          <Flex direction="column" gap="4">
-            <Flex justify="between" align="center">
-              <Dialog.Title className="flex items-center">리뷰 작성</Dialog.Title>
-              <Button 
-                variant="ghost" 
-                size="2"
-                onClick={() => setShowReviewForm(false)}
-                className="flex items-center gap-1 self-center -mt-4"
-              >
-                <X size={16} />
-                <Text size="2" weight="medium">닫기</Text>
-              </Button>
-            </Flex>
-            
-            <Flex direction="column" gap="4">
-              {/* 평점 선택 */}
-              <div>
-                <Text size="2" weight="medium" className="mb-2 block">평점</Text>
-                {renderStars(reviewForm.rating, true)}
-              </div>
 
-              {/* 리뷰 내용 */}
-              <div>
-                <Text size="2" weight="medium" className="mb-2 block">리뷰 내용</Text>
-                <TextArea
-                  value={reviewForm.comment}
-                  onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
-                  placeholder="서비스에 대한 솔직한 리뷰를 작성해주세요"
-                  rows={4}
-                />
-              </div>
 
-              {/* 블랙리스트 신고 */}
-              {reviewForm.rating <= 2 && (
-                <div>
-                  <Text size="2" weight="medium" className="mb-2 block">
-                    블랙리스트 신고 (선택사항)
-                  </Text>
-                  <TextArea
-                    value={reviewForm.blacklistReason}
-                    onChange={(e) => setReviewForm(prev => ({ ...prev, blacklistReason: e.target.value }))}
-                    placeholder="블랙리스트 신고 사유를 입력해주세요"
-                    rows={3}
-                  />
-                </div>
-              )}
-            </Flex>
-
-            <Flex gap="3" className="mt-4">
-              <Button 
-                variant="outline"
-                onClick={() => setShowReviewForm(false)}
-                className="flex-1"
-              >
-                취소
-              </Button>
-              <Button onClick={handleSubmitReview} className="flex-1">
-                리뷰 등록
-              </Button>
-            </Flex>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
-
-        {/* 빈 상태 */}
+      {/* 빈 상태 */}
         {reviews.length === 0 && (
           <Card className="p-8 text-center">
             <MessageSquare size={48} className="text-gray-400 mx-auto mb-3" />
