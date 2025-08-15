@@ -11,7 +11,8 @@ import {
   Users, 
   FileText,
   User,
-  ArrowLeft
+  ArrowLeft,
+  Plus
 } from "lucide-react";
 
 export default function MainLayout() {
@@ -38,11 +39,14 @@ export default function MainLayout() {
     } else if (path.includes("/main/schedule")) {
       setCurrentTab(1);
       setCurrentPageTitle("일정");
-    } else if (path.includes("/main/matching")) {
+    } else if (path.includes("/main/application-form")) {
       setCurrentTab(2);
+      setCurrentPageTitle("서비스 신청서");
+    } else if (path.includes("/main/matching")) {
+      setCurrentTab(3);
       setCurrentPageTitle("매칭");
     } else if (path.includes("/main/reviews")) {
-      setCurrentTab(3);
+      setCurrentTab(4);
       setCurrentPageTitle("리뷰");
     } else if (path.includes("/main/service-request")) {
       setCurrentPageTitle("서비스 요청");
@@ -72,8 +76,9 @@ export default function MainLayout() {
   const tabs = [
     { id: 0, label: "홈", icon: Home, path: "/main/home" },
     { id: 1, label: "일정", icon: Calendar, path: "/main/schedule" },
-    { id: 2, label: "매칭", icon: Users, path: "/main/matching" },
-    { id: 3, label: "리뷰", icon: FileText, path: "/main/reviews" },
+    { id: 2, label: "신청", icon: Plus, path: "/main/application-form" },
+    { id: 3, label: "매칭", icon: Users, path: "/main/matching" },
+    { id: 4, label: "리뷰", icon: FileText, path: "/main/reviews" },
   ];
 
   const handleTabChange = (tabId: number) => {
