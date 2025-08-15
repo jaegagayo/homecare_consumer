@@ -38,85 +38,84 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex flex-col">
       {/* 헤더 */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3">
         <Flex align="center" gap="3">
-          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-            <div className="w-4 h-4 text-blue-600">🏠</div>
+          <div className="w-8 h-8 bg-accent-3 rounded-full flex items-center justify-center">
+            <div className="w-4 h-4 text-accent-11">🏠</div>
           </div>
-          <Text size="4" weight="medium">재가가요 소비자</Text>
+          <Text size="3" weight="medium">재가가요</Text>
         </Flex>
       </div>
 
       {/* 메인 콘텐츠 */}
       <div className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-sm">
-          <Flex direction="column" align="center" gap="8">
-            <Flex direction="column" align="center" gap="4">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                <div className="w-10 h-10 text-blue-600">🏠</div>
-              </div>
-              <Heading size="6" className="text-center">
-                로그인
-              </Heading>
-              <Text size="3" color="gray" className="text-center">
-                재가가요 소비자 계정으로 로그인하세요
-              </Text>
-            </Flex>
-
-            <form onSubmit={handleSubmit} className="w-full">
-              <Flex direction="column" gap="5" className="w-full">
-                {error && (
-                  <Callout.Root color="red">
-                    <Callout.Text>{error}</Callout.Text>
-                  </Callout.Root>
-                )}
-
-                <Flex direction="column" gap="3">
-                  <Text size="2" weight="medium">이메일</Text>
-                  <TextField.Root
-                    type="email"
-                    placeholder="이메일을 입력하세요"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    size="3"
-                  />
-                </Flex>
-
-                <Flex direction="column" gap="3">
-                  <Text size="2" weight="medium">비밀번호</Text>
-                  <TextField.Root
-                    type="password"
-                    placeholder="비밀번호를 입력하세요"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    size="3"
-                  />
-                </Flex>
-
-                <Button 
-                  type="submit" 
-                  size="3" 
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? "로그인 중..." : "로그인"}
-                </Button>
+        <div className="w-full max-w-md">
+          <div className="p-8">
+            <Flex direction="column" align="center" gap="6">
+              <Flex direction="column" align="center" gap="4">
+                <Heading size="6" className="text-center">
+                  로그인
+                </Heading>
+                <Text size="3" color="gray" className="text-center">
+                  재가가요 계정으로 로그인하세요
+                </Text>
               </Flex>
-            </form>
 
-            <Flex direction="column" align="center" gap="2">
-              <Text size="2" color="gray">
-                계정이 없으신가요?{" "}
-                <Link to="/signup" className="text-blue-600 hover:underline">
-                  회원가입
-                </Link>
-              </Text>
+              <form onSubmit={handleSubmit} className="w-full">
+                <Flex direction="column" gap="5" className="w-full">
+                  {error && (
+                    <Callout.Root color="red">
+                      <Callout.Text>{error}</Callout.Text>
+                    </Callout.Root>
+                  )}
+
+                  <Flex direction="column" gap="3">
+                    <Text size="2" weight="medium">이메일</Text>
+                    <TextField.Root
+                      type="email"
+                      placeholder="이메일을 입력하세요"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      size="3"
+                    />
+                  </Flex>
+
+                  <Flex direction="column" gap="3">
+                    <Text size="2" weight="medium">비밀번호</Text>
+                    <TextField.Root
+                      type="password"
+                      placeholder="비밀번호를 입력하세요"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      size="3"
+                    />
+                  </Flex>
+
+                  <Button 
+                    type="submit" 
+                    size="3" 
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    {isLoading ? "로그인 중..." : "로그인"}
+                  </Button>
+                </Flex>
+              </form>
+
+              <Flex direction="column" align="center" gap="2">
+                <Text size="2" color="gray">
+                  계정이 없으신가요?{" "}
+                  <Link to="/signup" className="text-accent-11 hover:underline">
+                    회원가입
+                  </Link>
+                </Text>
+              </Flex>
             </Flex>
-          </Flex>
+          </div>
         </div>
       </div>
     </div>

@@ -38,7 +38,7 @@ export default function ProfilePage() {
 
 
   const handleLogout = () => {
-    localStorage.removeItem("caregiver_token");
+    localStorage.removeItem("consumer_token");
     localStorage.removeItem("caregiver_email");
     navigate("/");
   };

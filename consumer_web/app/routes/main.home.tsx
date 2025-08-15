@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { 
   Container, 
   Flex, 
@@ -27,8 +27,16 @@ export default function HomePage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [userName, setUserName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // 인증 상태 확인
+    const token = localStorage.getItem("consumer_token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
     // 사용자 이름 가져오기
     // 실제로는 API에서 사용자 정보를 가져와야 함
     setUserName("김소비");
