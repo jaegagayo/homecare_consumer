@@ -4,7 +4,7 @@ import {
   Flex, 
   Text
 } from "@radix-ui/themes";
-import ScheduleGrid from "../components/ScheduleGrid";
+import { ScheduleGrid } from "../components/Schedule";
 
 interface Schedule {
   id: string;
@@ -203,10 +203,6 @@ export default function SchedulePage() {
 
     loadData();
   }, []);
-
-
-
-
 
   if (isLoading) {
     return (
