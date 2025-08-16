@@ -147,13 +147,18 @@ export default function ApplicationFormPage() {
     setIsLoading(true);
 
     try {
-      // TODO: 실제 API 호출
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // TODO: 실제 API 호출 - 신청서 저장
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      alert('서비스 요청이 성공적으로 접수되었습니다.');
-      navigate('/main/matching');
+      // 신청서 데이터를 매칭 페이지로 전달
+      navigate('/main/matching', { 
+        state: { 
+          applicationData: form,
+          fromApplication: true 
+        } 
+      });
     } catch (error) {
-      alert('서비스 요청 중 오류가 발생했습니다.');
+      alert('신청서 저장 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -463,7 +468,7 @@ export default function ApplicationFormPage() {
           disabled={isLoading || !form.serviceType || !form.address}
           className="w-full"
         >
-          {isLoading ? '요청 중...' : '서비스 요청하기'}
+          {isLoading ? '저장 중...' : '후보 보기'}
         </Button>
 
         {/* 플로팅 카드 공간 확보 */}

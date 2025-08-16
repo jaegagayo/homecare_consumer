@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useLocation } from "@remix-run/react";
 import { 
   Container, 
   Flex, 
@@ -8,13 +8,11 @@ import {
   Heading,
   Card,
   Badge,
-  Dialog
+  Dialog,
+  RadioCards
 } from "@radix-ui/themes";
 import { 
-  Calendar,
   Star,
-  MapPin,
-  Clock,
   X,
   ChevronLeftIcon,
   ChevronRightIcon
@@ -23,15 +21,18 @@ import {
 interface Caregiver {
   id: string;
   name: string;
-  rating: number;
+  gender: 'male' | 'female';
+  age: number;
   experience: number;
-  specialties: string[];
-  location: string;
-  hourlyRate: number;
-  availableDays: string[];
-  availableHours: string;
-  profileImage: string;
-  status: 'available' | 'busy' | 'offline';
+  rating: number;
+  koreanProficiency: 'basic' | 'intermediate' | 'advanced' | 'native';
+  specialCaseExperience: {
+    dementia: boolean;
+    bedridden: boolean;
+  };
+  outingAvailable: boolean;
+  rejectionRate: number;
+  selfIntroduction: string;
 }
 
 interface ServiceRequest {
@@ -43,6 +44,8 @@ interface ServiceRequest {
   specialRequests: string;
   status: 'pending' | 'matched' | 'confirmed' | 'completed';
   matchedCaregiver?: Caregiver;
+  totalDays?: number;
+  requestedDates?: string[];
 }
 
 interface ApplicationForm {
@@ -61,37 +64,40 @@ interface ApplicationForm {
 
 export default function MatchingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isApplicationDialogOpen, setIsApplicationDialogOpen] = useState(false);
+
   const [isDateCalendarDialogOpen, setIsDateCalendarDialogOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedCaregiverId, setSelectedCaregiverId] = useState<string>('');
   
-  // 모킹 신청서 데이터
-  const [applicationData] = useState<ApplicationForm>({
-    serviceType: 'visiting-care',
-    address: '서울시 강남구 역삼동 123-45',
-    specialRequests: '계단이 있는 3층입니다. 보행기 사용이 필요합니다.',
-    estimatedUsage: 30000,
-    duration: 2,
-    requestedDates: [
-      '2025-08-18', '2025-08-19', '2025-08-20', 
-      '2025-08-22', '2025-08-23', '2025-08-24', '2025-08-25',
-      '2025-08-27', '2025-08-28', '2025-08-29', '2025-08-30',
-      '2025-09-01', '2025-09-02', '2025-09-03'
-    ],
-    preferredHours: { start: '09:00', end: '11:00' },
-    preferredAreas: [] // 신청서에는 선호 지역 선택 기능이 없으므로 빈 배열
-  });
-
-  // 모킹 바우처 정보 (신청서에 표시되는 정보)
-  const [voucherInfo] = useState({
-    selectedGrade: '3등급',
-    voucherLimit: 1295400,
-    currentUsage: 1200000,
-    selfPayAmount: 194310,
-    isMedicalBenefitRecipient: false
+  // 신청서에서 전달받은 데이터 또는 기본 모킹 데이터
+  const [applicationData] = useState<ApplicationForm>(() => {
+    const state = location.state as { applicationData?: ApplicationForm; fromApplication?: boolean };
+    
+    if (state?.applicationData && state?.fromApplication) {
+      // 신청서에서 전달받은 데이터 사용
+      return state.applicationData;
+    }
+    
+    // 기본 모킹 데이터
+    return {
+      serviceType: 'visiting-care',
+      address: '서울시 강남구 역삼동 123-45',
+      specialRequests: '계단이 있는 3층입니다. 보행기 사용이 필요합니다.',
+      estimatedUsage: 30000,
+      duration: 2,
+      requestedDates: [
+        '2025-08-18', '2025-08-19', '2025-08-20', 
+        '2025-08-22', '2025-08-23', '2025-08-24', '2025-08-25',
+        '2025-08-27', '2025-08-28', '2025-08-29', '2025-08-30',
+        '2025-09-01', '2025-09-02', '2025-09-03'
+      ],
+      preferredHours: { start: '09:00', end: '11:00' },
+      preferredAreas: [] // 신청서에는 선호 지역 선택 기능이 없으므로 빈 배열
+    };
   });
 
   // 캘린더 다이얼로그가 열릴 때 요청 날짜가 있는 월로 이동
@@ -110,122 +116,105 @@ export default function MatchingPage() {
       setCaregivers([
         {
           id: "1",
-          name: "김케어",
-          rating: 4.8,
+          name: "김미영",
+          gender: "female",
+          age: 45,
           experience: 5,
-          specialties: ["방문요양", "방문목욕"],
-          location: "서울시 강남구",
-          hourlyRate: 15000,
-          availableDays: ["월", "화", "수", "목", "금"],
-          availableHours: "09:00-18:00",
-          profileImage: "",
-          status: "available"
+          rating: 4.8,
+          koreanProficiency: "native",
+          specialCaseExperience: {
+            dementia: true,
+            bedridden: true
+          },
+          outingAvailable: true,
+          rejectionRate: 2.3,
+          selfIntroduction: "따뜻한 마음으로 환자님을 돌보겠습니다."
         },
         {
           id: "2",
-          name: "박케어",
-          rating: 4.6,
+          name: "박철수",
+          gender: "male",
+          age: 38,
           experience: 3,
-          specialties: ["방문요양", "주야간보호"],
-          location: "서울시 서초구",
-          hourlyRate: 14000,
-          availableDays: ["월", "화", "수", "목", "금", "토"],
-          availableHours: "08:00-20:00",
-          profileImage: "",
-          status: "available"
+          rating: 4.6,
+          koreanProficiency: "advanced",
+          specialCaseExperience: {
+            dementia: false,
+            bedridden: true
+          },
+          outingAvailable: false,
+          rejectionRate: 5.1,
+          selfIntroduction: "체계적이고 전문적인 케어를 제공합니다."
         },
         {
           id: "3",
-          name: "이케어",
-          rating: 4.9,
+          name: "이영희",
+          gender: "female",
+          age: 52,
           experience: 7,
-          specialties: ["방문요양", "방문간호"],
-          location: "서울시 마포구",
-          hourlyRate: 16000,
-          availableDays: ["월", "화", "수", "목", "금"],
-          availableHours: "10:00-16:00",
-          profileImage: "",
-          status: "busy"
+          rating: 4.9,
+          koreanProficiency: "native",
+          specialCaseExperience: {
+            dementia: true,
+            bedridden: false
+          },
+          outingAvailable: true,
+          rejectionRate: 1.8,
+          selfIntroduction: "오랜 경험을 바탕으로 안전하고 믿을 수 있는 서비스를 제공합니다."
         }
       ]);
 
-      setServiceRequests([
-        {
-          id: "1",
-          serviceType: "방문요양",
-          date: "2024-08-15",
-          time: "09:00-11:00",
-          address: "서울시 강남구 역삼동",
-          specialRequests: "계단이 있는 3층입니다. 보행기 사용이 필요합니다.",
-          status: "pending"
-        },
-        {
-          id: "2",
-          serviceType: "방문목욕",
-          date: "2024-08-16",
-          time: "14:00-16:00",
-          address: "서울시 서초구 서초동",
-          specialRequests: "화장실이 복도 끝에 있습니다.",
-          status: "matched",
-          matchedCaregiver: {
-            id: "1",
-            name: "김케어",
-            rating: 4.8,
-            experience: 5,
-            specialties: ["방문요양", "방문목욕"],
-            location: "서울시 강남구",
-            hourlyRate: 15000,
-            availableDays: ["월", "화", "수", "목", "금"],
-            availableHours: "09:00-18:00",
-            profileImage: "",
-            status: "available"
-          }
-        }
-      ]);
+      // 신청서 데이터를 기반으로 하나의 통합된 서비스 요청 생성
+      const sortedDates = [...applicationData.requestedDates].sort();
+      const startDate = sortedDates[0];
+      const endDate = sortedDates[sortedDates.length - 1];
+      
+      const serviceRequestFromApplication = {
+        id: "application-request",
+        serviceType: applicationData.serviceType === 'visiting-care' ? '방문요양' : 
+                    applicationData.serviceType === 'day-night-care' ? '주야간보호' :
+                    applicationData.serviceType === 'respite-care' ? '단기보호' :
+                    applicationData.serviceType === 'visiting-bath' ? '방문목욕' :
+                    applicationData.serviceType === 'in-home-support' ? '재가노인지원' :
+                    applicationData.serviceType === 'visiting-nursing' ? '방문간호' : '방문요양',
+        date: `${startDate} ~ ${endDate}`,
+        time: `${applicationData.preferredHours.start}-${applicationData.preferredHours.end}`,
+        address: applicationData.address,
+        specialRequests: applicationData.specialRequests,
+        status: "pending" as const,
+        totalDays: applicationData.requestedDates.length,
+        requestedDates: applicationData.requestedDates
+      };
+
+      setServiceRequests([serviceRequestFromApplication]);
 
       setIsLoading(false);
     };
 
     loadData();
-  }, []);
+  }, [applicationData]);
 
-  const getStatusColor = (status: string): "green" | "yellow" | "red" | "gray" => {
-    switch (status) {
-      case 'available': return 'green';
-      case 'busy': return 'yellow';
-      case 'offline': return 'red';
-      default: return 'gray';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'available': return '가능';
-      case 'busy': return '바쁨';
-      case 'offline': return '오프라인';
+  const getKoreanProficiencyText = (level: string) => {
+    switch (level) {
+      case 'basic': return '기초';
+      case 'intermediate': return '중급';
+      case 'advanced': return '고급';
+      case 'native': return '원어민';
       default: return '알 수 없음';
     }
   };
 
-  const getRequestStatusColor = (status: string): "blue" | "green" | "yellow" | "gray" => {
-    switch (status) {
-      case 'pending': return 'blue';
-      case 'matched': return 'yellow';
-      case 'confirmed': return 'green';
-      case 'completed': return 'gray';
+  const getKoreanProficiencyColor = (level: string): "green" | "yellow" | "red" | "gray" => {
+    switch (level) {
+      case 'native': return 'green';
+      case 'advanced': return 'green';
+      case 'intermediate': return 'yellow';
+      case 'basic': return 'red';
       default: return 'gray';
     }
   };
 
-  const getRequestStatusText = (status: string) => {
-    switch (status) {
-      case 'pending': return '매칭 대기';
-      case 'matched': return '매칭 완료';
-      case 'confirmed': return '확정됨';
-      case 'completed': return '완료';
-      default: return '알 수 없음';
-    }
-  };
+
 
   const renderStars = (rating: number) => {
     return (
@@ -242,17 +231,21 @@ export default function MatchingPage() {
     );
   };
 
-  const handleSelectCaregiver = async (requestId: string, caregiverId: string) => {
-    // TODO: 실제 API 호출
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  const handleConfirmSelection = () => {
+    if (!selectedCaregiverId) {
+      alert('보호사를 선택해주세요.');
+      return;
+    }
     
-    setServiceRequests(prev => 
-      prev.map(request => 
-        request.id === requestId 
-          ? { ...request, status: 'matched', matchedCaregiver: caregivers.find(c => c.id === caregiverId) }
-          : request
-      )
-    );
+    // TODO: 실제 API 호출
+    console.log(`선택된 보호사: ${selectedCaregiverId}`);
+    
+    // 선택된 보호사로 서비스 요청 상태 업데이트
+    setServiceRequests(prev => prev.map(request => 
+      request.id === "application-request" 
+        ? { ...request, status: 'matched', matchedCaregiver: caregivers.find(c => c.id === selectedCaregiverId) }
+        : request
+    ));
     
     alert('요양보호사가 매칭되었습니다.');
   };
@@ -279,352 +272,259 @@ export default function MatchingPage() {
           </Text>
         </div>
 
-        {/* 서비스 요청 목록 */}
+        {/* 신청서 섹션 */}
         <div>
           <Flex justify="between" align="center" className="mb-4">
-            <Heading size="4">서비스 요청</Heading>
+            <Heading size="4">나의 신청서</Heading>
             <Button 
               size="2" 
               variant="outline"
-              onClick={() => setIsApplicationDialogOpen(true)}
+              onClick={() => navigate('/main/change-options')}
             >
-              신청서 조회/변경
+              변경하기
             </Button>
           </Flex>
-          <Flex direction="column" gap="3">
-            {serviceRequests.map((request) => (
-              <Card key={request.id} className="p-4">
-                <Flex direction="column" gap="3">
-                  <Flex justify="between" align="start">
-                    <Flex direction="column" gap="2" className="flex-1">
-                      <Flex align="center" gap="2">
-                        <Calendar size={16} className="text-gray-500" />
-                        <Text size="2" weight="medium">
-                          {request.date} {request.time}
-                        </Text>
-                        <Badge color={getRequestStatusColor(request.status)}>
-                          {getRequestStatusText(request.status)}
-                        </Badge>
-                      </Flex>
-                      <Text size="3" weight="medium">
-                        {request.serviceType}
-                      </Text>
-                      <Flex align="center" gap="2">
-                        <MapPin size={16} className="text-gray-500" />
-                        <Text size="2" color="gray">
-                          {request.address}
-                        </Text>
-                      </Flex>
-                      {request.specialRequests && (
-                        <Text size="2" color="gray" className="bg-gray-50 p-2 rounded">
-                          {request.specialRequests}
-                        </Text>
-                      )}
-                    </Flex>
-                  </Flex>
-
-                  {/* 매칭된 요양보호사 정보 */}
-                  {request.matchedCaregiver && (
-                    <div className="border-t border-gray-200 pt-3">
-                      <Text size="2" weight="medium" className="mb-2 block">매칭된 요양보호사</Text>
-                      <Card className="p-3 bg-blue-50">
-                        <Flex justify="between" align="center">
-                          <Flex direction="column" gap="1">
-                            <Text size="2" weight="medium">
-                              {request.matchedCaregiver.name}
-                            </Text>
-                            <Flex align="center" gap="2">
-                              {renderStars(request.matchedCaregiver.rating)}
-                              <Text size="1" color="gray">
-                                {request.matchedCaregiver.rating}
-                              </Text>
-                            </Flex>
-                            <Text size="1" color="gray">
-                              {request.matchedCaregiver.experience}년 경력
-                            </Text>
-                          </Flex>
-                          <Text size="2" weight="medium">
-                            {request.matchedCaregiver.hourlyRate.toLocaleString()}원/시간
-                          </Text>
-                        </Flex>
-                      </Card>
-                    </div>
-                  )}
-
-                  {/* 매칭 대기 중인 경우 요양보호사 선택 */}
-                  {request.status === 'pending' && (
-                    <div className="border-t border-gray-200 pt-3">
-                      <Text size="2" weight="medium" className="mb-2 block">요양보호사 선택</Text>
-                      <Flex direction="column" gap="2">
-                        {caregivers.filter(c => c.status === 'available').map((caregiver) => (
-                          <Card key={caregiver.id} className="p-3">
-                            <Flex justify="between" align="center">
-                              <Flex direction="column" gap="1" className="flex-1">
-                                <Text size="2" weight="medium">
-                                  {caregiver.name}
-                                </Text>
-                                <Flex align="center" gap="2">
-                                  {renderStars(caregiver.rating)}
-                                  <Text size="1" color="gray">
-                                    {caregiver.rating}
-                                  </Text>
-                                </Flex>
-                                <Text size="1" color="gray">
-                                  {caregiver.experience}년 경력 • {caregiver.specialties.join(', ')}
-                                </Text>
-                                <Text size="1" color="gray">
-                                  {caregiver.location} • {caregiver.availableHours}
-                                </Text>
-                              </Flex>
-                              <Flex direction="column" align="end" gap="2">
-                                <Text size="2" weight="medium">
-                                  {caregiver.hourlyRate.toLocaleString()}원/시간
-                                </Text>
-                                <Button 
-                                  size="1" 
-                                  onClick={() => handleSelectCaregiver(request.id, caregiver.id)}
-                                >
-                                  선택
-                                </Button>
-                              </Flex>
-                            </Flex>
-                          </Card>
-                        ))}
-                      </Flex>
-                    </div>
-                  )}
-                </Flex>
-              </Card>
-            ))}
-          </Flex>
-        </div>
-
-        {/* 요양보호사 목록 */}
-        <div>
-          <Heading size="4" className="mb-4">사용 가능한 요양보호사</Heading>
-          <Flex direction="column" gap="3">
-            {caregivers.map((caregiver) => (
-              <Card key={caregiver.id} className="p-4">
-                <Flex justify="between" align="center">
-                  <Flex direction="column" gap="2" className="flex-1">
-                    <Flex align="center" gap="2">
-                      <Text size="3" weight="medium">
-                        {caregiver.name}
-                      </Text>
-                      <Badge color={getStatusColor(caregiver.status)}>
-                        {getStatusText(caregiver.status)}
-                      </Badge>
-                    </Flex>
-                    <Flex align="center" gap="2">
-                      {renderStars(caregiver.rating)}
-                      <Text size="1" color="gray">
-                        {caregiver.rating} ({caregiver.experience}년 경력)
-                      </Text>
-                    </Flex>
-                    <Text size="2" color="gray">
-                      {caregiver.specialties.join(', ')}
-                    </Text>
-                    <Flex align="center" gap="2">
-                      <MapPin size={16} className="text-gray-500" />
-                      <Text size="2" color="gray">
-                        {caregiver.location}
-                      </Text>
-                    </Flex>
-                    <Flex align="center" gap="2">
-                      <Clock size={16} className="text-gray-500" />
-                      <Text size="2" color="gray">
-                        {caregiver.availableDays.join(', ')} {caregiver.availableHours}
-                      </Text>
-                    </Flex>
-                  </Flex>
-                  <Flex direction="column" align="end" gap="2">
-                    <Text size="3" weight="bold">
-                      {caregiver.hourlyRate.toLocaleString()}원/시간
-                    </Text>
-                    <Button 
-                      size="2" 
-                      variant="outline"
-                      disabled={caregiver.status !== 'available'}
-                    >
-                      상세보기
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Card>
-            ))}
-          </Flex>
-        </div>
-      </Flex>
-
-      {/* 신청서 조회/변경 다이얼로그 */}
-      <Dialog.Root open={isApplicationDialogOpen} onOpenChange={setIsApplicationDialogOpen}>
-        <Dialog.Content>
-          <Flex direction="column" gap="4">
-            <Flex justify="between" align="center">
-              <Dialog.Title className="flex items-center">신청서 조회</Dialog.Title>
-              <Button
-                variant="ghost"
-                size="2"
-                onClick={() => setIsApplicationDialogOpen(false)}
-                className="flex items-center gap-1 self-center -mt-4"
-              >
-                <X size={16} />
-                <Text size="2" weight="medium">닫기</Text>
-              </Button>
-            </Flex>
-            
-            <Dialog.Description>
-              <Text size="2" color="gray">
-                현재 신청서 내용을 확인하고 필요시 수정할 수 있습니다.
-              </Text>
-            </Dialog.Description>
-
+          <Card className="p-4">
             <Flex direction="column" gap="4">
-              {/* 서비스 유형 섹션 */}
+              {/* 서비스 유형 및 기간 */}
               <div>
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 유형</Text>
-                  <Badge color="blue">
-                    {applicationData.serviceType === 'visiting-care' ? '방문요양서비스' : 
-                     applicationData.serviceType === 'day-night-care' ? '주야간보호서비스' :
-                     applicationData.serviceType === 'respite-care' ? '단기보호서비스' :
-                     applicationData.serviceType === 'visiting-bath' ? '방문목욕서비스' :
-                     applicationData.serviceType === 'in-home-support' ? '재가노인지원서비스' :
-                     applicationData.serviceType === 'visiting-nursing' ? '방문간호서비스' : applicationData.serviceType}
-                  </Badge>
+                  <Badge color="blue">{serviceRequests[0]?.serviceType}</Badge>
                 </Flex>
               </div>
 
               <div className="w-full h-px bg-gray-200"></div>
 
-              {/* 주소 섹션 */}
-              <div>
-                <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">서비스 주소</Text>
-                  <Text size="2">{applicationData.address}</Text>
-                </Flex>
-              </div>
-
-              <div className="w-full h-px bg-gray-200"></div>
-
-              {/* 시간 정보 섹션 */}
+              {/* 날짜 및 시간 */}
               <div>
                 <Flex justify="between" align="center" className="mb-2">
-                  <Text size="2" weight="medium">서비스 시간</Text>
-                  <Text size="2">{applicationData.preferredHours.start} ~ {applicationData.preferredHours.end}</Text>
+                  <Text size="2" weight="medium">서비스 기간</Text>
+                  <Text size="2" color="gray">{serviceRequests[0]?.date} (총 {serviceRequests[0]?.totalDays}일)</Text>
                 </Flex>
-                <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">소요 시간</Text>
-                  <Text size="2" color="gray">{applicationData.duration}시간</Text>
-                </Flex>
-              </div>
-
-              <div className="w-full h-px bg-gray-200"></div>
-
-              {/* 요청 날짜 섹션 */}
-              <div>
-                <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">요청 날짜</Text>
+                <Flex justify="end" className="mb-2">
                   <Button 
                     size="1" 
                     variant="outline"
                     onClick={() => setIsDateCalendarDialogOpen(true)}
                   >
-                    자세히 보기
+                    상세보기
                   </Button>
                 </Flex>
-                <Text size="2" color="gray" className="mt-1">
-                  {applicationData.requestedDates.length > 0 ? (
-                    (() => {
-                      const sortedDates = [...applicationData.requestedDates].sort();
-                      const startDate = sortedDates[0];
-                      const endDate = sortedDates[sortedDates.length - 1];
-                      return `${startDate} ~ ${endDate} (${applicationData.requestedDates.length}일)`;
-                    })()
-                  ) : (
-                    '선택된 날짜 없음'
-                  )}
-                </Text>
+                <div className="mb-4"></div>
+                <Flex justify="between" align="center">
+                  <Text size="2" weight="medium">서비스 시간</Text>
+                  <Text size="2" color="gray">{serviceRequests[0]?.time}</Text>
+                </Flex>
               </div>
 
               <div className="w-full h-px bg-gray-200"></div>
 
+              {/* 주소 */}
+              <div>
+                <Flex justify="between" align="center">
+                  <Text size="2" weight="medium">서비스 주소</Text>
+                  <Text size="2">{serviceRequests[0]?.address}</Text>
+                </Flex>
+              </div>
 
-
-              {/* 특별 요청사항 섹션 */}
-              {applicationData.specialRequests && (
+              {/* 특별 요청사항이 있는 경우에만 표시 */}
+              {serviceRequests[0]?.specialRequests && (
                 <>
+                  <div className="w-full h-px bg-gray-200"></div>
                   <div>
                     <div><Text size="2" weight="medium" className="mb-3">특별 요청사항</Text></div>
-                    <div><Text size="2" className="leading-relaxed whitespace-pre-line">{applicationData.specialRequests}</Text></div>
+                    <div><Text size="2" className="leading-relaxed whitespace-pre-line">{serviceRequests[0]?.specialRequests}</Text></div>
                   </div>
-                  <div className="w-full h-px bg-gray-200"></div>
                 </>
               )}
+            </Flex>
+          </Card>
+        </div>
 
-              {/* 예상 사용 금액 섹션 */}
-              <div>
-                <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">예상 사용 금액</Text>
-                  <Text size="3" weight="bold" style={{ color: 'var(--accent-9)' }}>
-                    ₩{applicationData.estimatedUsage.toLocaleString()}
+        {/* 요양보호사 선택 섹션 */}
+        <div>
+          <div className="mb-4">
+            <Heading size="4">요양보호사 선택</Heading>
+            <Text size="2" color="gray">
+              카드를 눌러서 요양보호사를 선택할 수 있습니다.
+            </Text>
+          </div>
+          {caregivers.length > 0 ? (
+            <RadioCards.Root 
+              value={selectedCaregiverId} 
+              onValueChange={setSelectedCaregiverId}
+              className="space-y-3"
+              style={{ display: 'flex', flexDirection: 'column' }}
+            >
+              {caregivers.map((caregiver) => (
+                <RadioCards.Item key={caregiver.id} value={caregiver.id} className="w-full">
+                  <Flex direction="column" gap="3" className="w-full">
+                    {/* 기본 정보 */}
+                    <Flex justify="between" align="center">
+                      <Flex align="center" gap="2">
+                        <Text size="3" weight="medium">
+                          {caregiver.name}
+                        </Text>
+                        <Text size="2" color="gray">
+                          {caregiver.gender === 'female' ? '여' : '남'} / {caregiver.age}세 / 경력 {caregiver.experience}년
+                        </Text>
+                      </Flex>
+                      <Flex align="center" gap="2">
+                        {renderStars(caregiver.rating)}
+                        <Text size="2" color="gray">
+                          {caregiver.rating}
+                        </Text>
+                      </Flex>
+                    </Flex>
+
+                    <div className="w-full h-px bg-gray-200"></div>
+                    
+                    {/* 상세 정보 - 2열 레이아웃 */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* 왼쪽 열 */}
+                      <div className="space-y-3">
+                        {/* 한국어 숙련도 */}
+                        <div>
+                          <Flex justify="between" align="center">
+                            <Text size="2" weight="medium">한국어 숙련도</Text>
+                            <Badge color={getKoreanProficiencyColor(caregiver.koreanProficiency)}>
+                              {getKoreanProficiencyText(caregiver.koreanProficiency)}
+                            </Badge>
+                          </Flex>
+                        </div>
+
+                        <div className="w-full h-px bg-gray-200"></div>
+
+                        {/* 특수케이스 경험도 */}
+                        <div>
+                          <Flex justify="between" align="center">
+                            <Text size="2" weight="medium">특수</Text>
+                            <Flex gap="2">
+                              {caregiver.specialCaseExperience.dementia && (
+                                <Badge color="blue">치매</Badge>
+                              )}
+                              {caregiver.specialCaseExperience.bedridden && (
+                                <Badge color="purple">와상</Badge>
+                              )}
+                              {!caregiver.specialCaseExperience.dementia && !caregiver.specialCaseExperience.bedridden && (
+                                <Text size="2" color="gray">없음</Text>
+                              )}
+                            </Flex>
+                          </Flex>
+                        </div>
+                      </div>
+
+                      {/* 오른쪽 열 */}
+                      <div className="space-y-3">
+                        {/* 외출 동행 가능 여부 */}
+                        <div>
+                          <Flex justify="between" align="center">
+                            <Text size="2" weight="medium">외출 동행 가능 여부</Text>
+                            <Badge color={caregiver.outingAvailable ? "green" : "red"}>
+                              {caregiver.outingAvailable ? "가능" : "불가능"}
+                            </Badge>
+                          </Flex>
+                        </div>
+
+                        <div className="w-full h-px bg-gray-200"></div>
+
+                        {/* 거절률 */}
+                        <div>
+                          <Flex justify="between" align="center">
+                            <Text size="2" weight="medium">거절률</Text>
+                            <Text size="2" color={caregiver.rejectionRate > 5 ? "red" : caregiver.rejectionRate > 3 ? "orange" : "green"}>
+                              {caregiver.rejectionRate}%
+                            </Text>
+                          </Flex>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 자기소개 */}
+                    <Text size="2" color="gray" className="leading-relaxed">
+                      &ldquo;{caregiver.selfIntroduction}&rdquo;
+                    </Text>
+                  </Flex>
+                </RadioCards.Item>
+              ))}
+            </RadioCards.Root>
+          ) : (
+            <Card className="p-8 text-center">
+              <Flex direction="column" gap="3" align="center">
+                <Text size="3" weight="medium" color="gray">
+                  현재 조건에 맞는 보호사가 없습니다.
+                </Text>
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate('/main')}
+                >
+                  홈으로 돌아가기
+                </Button>
+              </Flex>
+            </Card>
+          )}
+        </div>
+
+
+      </Flex>
+
+      {/* 플로팅 확정 버튼 */}
+      {selectedCaregiverId && (
+        <div className="fixed bottom-20 left-0 right-0 z-50 px-4">
+          <div className="max-w-md mx-auto">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+              <Flex align="center" justify="between" className="mb-3">
+                <Flex align="center" gap="2">
+                  <Text size="2" weight="medium">선택된 요양보호사</Text>
+                </Flex>
+                <Badge color="green">선택됨</Badge>
+              </Flex>
+              <Flex justify="between" align="center" className="mb-4">
+                <Flex align="center" gap="2">
+                  <Text size="3" weight="medium">
+                    {caregivers.find(c => c.id === selectedCaregiverId)?.name}
+                  </Text>
+                  <Text size="2" color="gray">
+                    {caregivers.find(c => c.id === selectedCaregiverId)?.gender === 'female' ? '여' : '남'} / {' '}
+                    {caregivers.find(c => c.id === selectedCaregiverId)?.age}세 / {' '}
+                    경력 {caregivers.find(c => c.id === selectedCaregiverId)?.experience}년
                   </Text>
                 </Flex>
-              </div>
-
-              <div className="w-full h-px bg-gray-200"></div>
-
-              {/* 바우처 정보 섹션 */}
-              <div>
-                <Flex justify="between" align="center" className="mb-2">
-                  <Text size="2" weight="medium">바우처 등급</Text>
-                  <Text size="2">{voucherInfo.selectedGrade}</Text>
-                </Flex>
-                <Flex justify="between" align="center" className="mb-2">
-                  <Text size="2" weight="medium">월 한도</Text>
-                  <Text size="2" color="gray">₩{voucherInfo.voucherLimit.toLocaleString()}</Text>
-                </Flex>
-                <Flex justify="between" align="center" className="mb-2">
-                  <Text size="2" weight="medium">현재 사용량</Text>
-                  <Text size="2" color="gray">₩{voucherInfo.currentUsage.toLocaleString()}</Text>
-                </Flex>
-                <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">남은 금액</Text>
-                  <Text 
-                    size="2" 
-                    weight="medium"
-                    style={{ 
-                      color: (voucherInfo.voucherLimit - voucherInfo.currentUsage - applicationData.estimatedUsage) < 0 ? 'var(--red-9)' : 
-                              (voucherInfo.voucherLimit - voucherInfo.currentUsage - applicationData.estimatedUsage) < 100000 ? 'var(--orange-9)' : 'var(--green-9)' 
-                    }}
-                  >
-                    ₩{(voucherInfo.voucherLimit - voucherInfo.currentUsage - applicationData.estimatedUsage).toLocaleString()}
+                <Flex align="center" gap="2">
+                  {renderStars(caregivers.find(c => c.id === selectedCaregiverId)?.rating || 0)}
+                  <Text size="2" color="gray">
+                    {caregivers.find(c => c.id === selectedCaregiverId)?.rating}
                   </Text>
                 </Flex>
-              </div>
-            </Flex>
+              </Flex>
+              <Flex gap="3">
+                <Button 
+                  variant="outline"
+                  className="flex-1" 
+                  size="3"
+                  onClick={() => {
+                    // TODO: 리뷰 보기 다이얼로그 열기
+                    console.log('리뷰 보기:', selectedCaregiverId);
+                  }}
+                >
+                  리뷰 보기
+                </Button>
+                <Button 
+                  className="flex-1" 
+                  size="3"
+                  onClick={handleConfirmSelection}
+                >
+                  신청 확정하기
+                </Button>
+              </Flex>
+            </div>
+          </div>
+        </div>
+      )}
 
-            <Flex gap="3" className="mt-4">
-              <Button 
-                variant="outline"
-                onClick={() => setIsApplicationDialogOpen(false)}
-                className="flex-1"
-              >
-                확인하기
-              </Button>
-              <Button 
-                onClick={() => {
-                  setIsApplicationDialogOpen(false);
-                  navigate('/main/change-options');
-                }}
-                className="flex-1"
-              >
-                변경하기
-              </Button>
-            </Flex>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+      {/* 플로팅 카드 공간 확보 */}
+      {selectedCaregiverId && <div className="h-36"></div>}
 
       {/* 요청 날짜 캘린더 다이얼로그 */}
       <Dialog.Root open={isDateCalendarDialogOpen} onOpenChange={setIsDateCalendarDialogOpen}>
