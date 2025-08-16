@@ -237,17 +237,30 @@ export default function MatchingPage() {
       return;
     }
     
-    // TODO: 실제 API 호출
-    console.log(`선택된 보호사: ${selectedCaregiverId}`);
+    // 선택된 보호사 정보
+    const selectedCaregiver = caregivers.find(c => c.id === selectedCaregiverId);
+    if (!selectedCaregiver) {
+      alert('선택된 보호사 정보를 찾을 수 없습니다.');
+      return;
+    }
     
-    // 선택된 보호사로 서비스 요청 상태 업데이트
-    setServiceRequests(prev => prev.map(request => 
-      request.id === "application-request" 
-        ? { ...request, status: 'matched', matchedCaregiver: caregivers.find(c => c.id === selectedCaregiverId) }
-        : request
-    ));
+    // 서비스 요청 정보
+    const currentServiceRequest = serviceRequests.find(r => r.id === "application-request");
+    if (!currentServiceRequest) {
+      alert('서비스 요청 정보를 찾을 수 없습니다.');
+      return;
+    }
     
-    alert('요양보호사가 매칭되었습니다.');
+    // 확정된 데이터 준비
+    const confirmedData = {
+      caregiver: selectedCaregiver,
+      serviceRequest: currentServiceRequest
+    };
+    
+    // 확정 안내 페이지로 이동
+    navigate('/main/confirmation', { 
+      state: { confirmedData } 
+    });
   };
 
   if (isLoading) {

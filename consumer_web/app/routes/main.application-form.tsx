@@ -71,7 +71,6 @@ const timeSlots = [
 
 export default function ApplicationFormPage() {
   const navigate = useNavigate();
-  const [isVoucherDialogOpen, setIsVoucherDialogOpen] = useState(false);
   const [isPreferredDaysDialogOpen, setIsPreferredDaysDialogOpen] = useState(false);
   const [isPreferredHoursDialogOpen, setIsPreferredHoursDialogOpen] = useState(false);
   const [isDurationDialogOpen, setIsDurationDialogOpen] = useState(false);
@@ -138,12 +137,6 @@ export default function ApplicationFormPage() {
       return;
     }
 
-    // 예상 사용량이 있는 경우 안내
-    if (isOverLimit) {
-      setIsVoucherDialogOpen(true);
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -164,10 +157,7 @@ export default function ApplicationFormPage() {
     }
   };
 
-  const handleVoucherConfirm = () => {
-    setIsVoucherDialogOpen(false);
-    handleSubmit();
-  };
+
 
 
 
@@ -347,10 +337,9 @@ export default function ApplicationFormPage() {
     });
   };
 
-  // 바우처 정보 계산
+  // 바우처 정보 계산 (단순화)
   const totalUsage = voucherInfo.currentUsage + form.estimatedUsage;
   const remainingAmount = voucherInfo.voucherLimit - totalUsage;
-  const isOverLimit = totalUsage > voucherInfo.voucherLimit;
 
   return (
     <Container size="2" className="p-4">
@@ -484,11 +473,6 @@ export default function ApplicationFormPage() {
                 <CreditCard size={16} className="text-blue-600" />
                 <Text size="2" weight="medium">바우처 현황</Text>
               </Flex>
-              {isOverLimit && (
-                <div className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
-                  한도 초과
-                </div>
-              )}
             </Flex>
             <Flex direction="column" gap="1">
               <Flex justify="between">
@@ -506,12 +490,7 @@ export default function ApplicationFormPage() {
                 </Text>
               </Flex>
             </Flex>
-            {isOverLimit && (
-              <Flex align="center" gap="1" className="mt-2 pt-2 border-t border-gray-100">
-                <Info size={12} className="text-red-500" />
-                <Text size="1" color="red">본인부담금 발생 가능</Text>
-              </Flex>
-            )}
+
           </div>
         </div>
       </div>
@@ -908,32 +887,7 @@ export default function ApplicationFormPage() {
         </Dialog.Content>
       </Dialog.Root>
 
-      {/* 바우처 사용 확인 다이얼로그 */}
-      <Dialog.Root open={isVoucherDialogOpen} onOpenChange={setIsVoucherDialogOpen}>
-        <Dialog.Content>
-          <Dialog.Title>바우처 사용 안내</Dialog.Title>
-          <Dialog.Description>
-            <Flex direction="column" gap="3">
-              <Text>
-                이번 신청으로 인한 예상 사용 금액은 {form.estimatedUsage.toLocaleString()}원입니다.
-              </Text>
-              <Text size="1" color="gray">
-                상세한 바우처 현황은 프로필 페이지에서 확인하실 수 있습니다.
-              </Text>
-            </Flex>
-          </Dialog.Description>
-          <Flex gap="3" mt="4" justify="end">
-            <Dialog.Close>
-              <Button variant="soft" color="gray">
-                취소
-              </Button>
-            </Dialog.Close>
-            <Button onClick={handleVoucherConfirm}>
-              계속 진행
-            </Button>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+
     </Container>
   );
 }

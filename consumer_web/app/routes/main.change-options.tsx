@@ -23,7 +23,7 @@ export default function ChangeOptionsPage() {
   };
 
   const handleApplicationForm = () => {
-    navigate('/main/application-form');
+    navigate('/main/voucher-preview');
   };
 
   return (

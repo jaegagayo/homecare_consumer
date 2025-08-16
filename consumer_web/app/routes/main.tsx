@@ -39,6 +39,9 @@ export default function MainLayout() {
     } else if (path.includes("/main/schedule")) {
       setCurrentTab(1);
       setCurrentPageTitle("일정");
+    } else if (path.includes("/main/voucher-preview")) {
+      setCurrentTab(2);
+      setCurrentPageTitle("바우처 사용 안내");
     } else if (path.includes("/main/application-form")) {
       setCurrentTab(2);
       setCurrentPageTitle("서비스 신청서");
@@ -60,6 +63,8 @@ export default function MainLayout() {
       setCurrentPageTitle("리뷰 작성");
     } else if (path.includes("/main/regular-service-proposal")) {
       setCurrentPageTitle("정기 서비스 제안");
+    } else if (path.includes("/main/confirmation")) {
+      setCurrentPageTitle("확정 안내");
     } else if (path.includes("/main/blacklist-report")) {
       setCurrentPageTitle("블랙리스트 신고");
     }
@@ -76,7 +81,7 @@ export default function MainLayout() {
   const tabs = [
     { id: 0, label: "홈", icon: Home, path: "/main/home" },
     { id: 1, label: "일정", icon: Calendar, path: "/main/schedule" },
-    { id: 2, label: "신청", icon: Plus, path: "/main/application-form" },
+    { id: 2, label: "신청", icon: Plus, path: "/main/voucher-preview" },
     { id: 3, label: "매칭", icon: Users, path: "/main/matching" },
     { id: 4, label: "리뷰", icon: FileText, path: "/main/reviews" },
   ];
