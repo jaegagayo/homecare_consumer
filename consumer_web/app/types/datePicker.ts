@@ -4,6 +4,7 @@ export interface DateRange {
 }
 
 export type SelectionStep = 'start' | 'end' | 'weekday';
+export type SelectionMode = 'range' | 'single';
 
 export interface DatePickerProps {
   open: boolean;
@@ -11,6 +12,8 @@ export interface DatePickerProps {
   selectedDates: string[];
   onConfirm: (dates: string[]) => void;
   onClose: () => void;
+  mode?: SelectionMode; // 'range' | 'single', 기본값은 'range'
+  title?: string; // 다이얼로그 제목
 }
 
 export interface DateRangeSelectorProps {
@@ -31,6 +34,7 @@ export interface CalendarProps {
   onDateSelection: (dateString: string) => void;
   onWeekdayToggle: (index: number) => void;
   onDateToggle: (dateString: string) => void;
+  mode: SelectionMode;
 }
 
 export interface StepHeaderProps {
@@ -38,4 +42,5 @@ export interface StepHeaderProps {
   dateRange: DateRange;
   selectedDates: Set<string>;
   onStepClick: (step: SelectionStep) => void;
+  mode: SelectionMode;
 }

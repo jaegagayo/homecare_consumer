@@ -8,14 +8,10 @@ import {
   Heading,
   Card,
   Badge,
-  Dialog,
   RadioCards
 } from "@radix-ui/themes";
 import { 
-  Star,
-  X,
-  ChevronLeftIcon,
-  ChevronRightIcon
+  Star
 } from "lucide-react";
 
 interface Caregiver {
@@ -69,8 +65,6 @@ export default function MatchingPage() {
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [isDateCalendarDialogOpen, setIsDateCalendarDialogOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedCaregiverId, setSelectedCaregiverId] = useState<string>('');
   
   // 신청서에서 전달받은 데이터 또는 기본 모킹 데이터
@@ -89,24 +83,13 @@ export default function MatchingPage() {
       specialRequests: '계단이 있는 3층입니다. 보행기 사용이 필요합니다.',
       estimatedUsage: 30000,
       duration: 2,
-      requestedDates: [
-        '2025-08-18', '2025-08-19', '2025-08-20', 
-        '2025-08-22', '2025-08-23', '2025-08-24', '2025-08-25',
-        '2025-08-27', '2025-08-28', '2025-08-29', '2025-08-30',
-        '2025-09-01', '2025-09-02', '2025-09-03'
-      ],
+      requestedDates: ['2025-01-15'], // 단일 날짜
       preferredHours: { start: '09:00', end: '11:00' },
       preferredAreas: [] // 신청서에는 선호 지역 선택 기능이 없으므로 빈 배열
     };
   });
 
-  // 캘린더 다이얼로그가 열릴 때 요청 날짜가 있는 월로 이동
-  useEffect(() => {
-    if (isDateCalendarDialogOpen && applicationData.requestedDates.length > 0) {
-      const firstRequestedDate = new Date(applicationData.requestedDates[0]);
-      setCurrentMonth(new Date(firstRequestedDate.getFullYear(), firstRequestedDate.getMonth(), 1));
-    }
-  }, [isDateCalendarDialogOpen, applicationData.requestedDates]);
+
 
   useEffect(() => {
     // 더미 데이터 로드
@@ -165,9 +148,9 @@ export default function MatchingPage() {
       ]);
 
       // 신청서 데이터를 기반으로 하나의 통합된 서비스 요청 생성
-      const sortedDates = [...applicationData.requestedDates].sort();
-      const startDate = sortedDates[0];
-      const endDate = sortedDates[sortedDates.length - 1];
+      const selectedDate = applicationData.requestedDates[0];
+      const date = new Date(selectedDate);
+      const formattedDate = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
       
       const serviceRequestFromApplication = {
         id: "application-request",
@@ -177,12 +160,12 @@ export default function MatchingPage() {
                     applicationData.serviceType === 'visiting-bath' ? '방문목욕' :
                     applicationData.serviceType === 'in-home-support' ? '재가노인지원' :
                     applicationData.serviceType === 'visiting-nursing' ? '방문간호' : '방문요양',
-        date: `${startDate} ~ ${endDate}`,
+        date: formattedDate,
         time: `${applicationData.preferredHours.start}-${applicationData.preferredHours.end}`,
         address: applicationData.address,
         specialRequests: applicationData.specialRequests,
         status: "pending" as const,
-        totalDays: applicationData.requestedDates.length,
+        totalDays: 1,
         requestedDates: applicationData.requestedDates
       };
 
@@ -311,20 +294,10 @@ export default function MatchingPage() {
 
               {/* 날짜 및 시간 */}
               <div>
-                <Flex justify="between" align="center" className="mb-2">
-                  <Text size="2" weight="medium">서비스 기간</Text>
-                  <Text size="2" color="gray">{serviceRequests[0]?.date} (총 {serviceRequests[0]?.totalDays}일)</Text>
+                <Flex justify="between" align="center" className="mb-4">
+                  <Text size="2" weight="medium">서비스 날짜</Text>
+                  <Text size="2" color="gray">{serviceRequests[0]?.date}</Text>
                 </Flex>
-                <Flex justify="end" className="mb-2">
-                  <Button 
-                    size="1" 
-                    variant="outline"
-                    onClick={() => setIsDateCalendarDialogOpen(true)}
-                  >
-                    상세보기
-                  </Button>
-                </Flex>
-                <div className="mb-4"></div>
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 시간</Text>
                   <Text size="2" color="gray">{serviceRequests[0]?.time}</Text>
@@ -539,144 +512,7 @@ export default function MatchingPage() {
       {/* 플로팅 카드 공간 확보 */}
       {selectedCaregiverId && <div className="h-36"></div>}
 
-      {/* 요청 날짜 캘린더 다이얼로그 */}
-      <Dialog.Root open={isDateCalendarDialogOpen} onOpenChange={setIsDateCalendarDialogOpen}>
-        <Dialog.Content>
-          <Flex direction="column" gap="4">
-            <Flex justify="between" align="center">
-              <Dialog.Title className="flex items-center">요청 날짜 상세보기</Dialog.Title>
-              <Button
-                variant="ghost"
-                size="2"
-                onClick={() => setIsDateCalendarDialogOpen(false)}
-                className="flex items-center gap-1 self-center -mt-4"
-              >
-                <X size={16} />
-                <Text size="2" weight="medium">닫기</Text>
-              </Button>
-            </Flex>
-            
-            {/* 캘린더 */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              {/* 년월 표시 */}
-              <div className="flex items-center justify-center gap-8 mb-4">
-                <Button 
-                  variant="ghost" 
-                  size="3"
-                  onClick={() => {
-                    setCurrentMonth(prev => {
-                      const newMonth = new Date(prev);
-                      newMonth.setMonth(prev.getMonth() - 1);
-                      return newMonth;
-                    });
-                  }}
-                  className="p-3"
-                >
-                  <ChevronLeftIcon width={20} height={20} />
-                </Button>
-                <Text size="3" weight="medium">
-                  {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
-                </Text>
-                <Button 
-                  variant="ghost" 
-                  size="3"
-                  onClick={() => {
-                    setCurrentMonth(prev => {
-                      const newMonth = new Date(prev);
-                      newMonth.setMonth(prev.getMonth() + 1);
-                      return newMonth;
-                    });
-                  }}
-                  className="p-3"
-                >
-                  <ChevronRightIcon width={20} height={20} />
-                </Button>
-              </div>
 
-              {/* 캘린더 헤더 */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
-                  <div key={day} className="text-center py-2">
-                    <Text size="1" weight="medium">{day}</Text>
-                  </div>
-                ))}
-              </div>
-
-              {/* 캘린더 바디 */}
-              <div className="grid grid-cols-7 gap-1">
-                {Array.from({ length: 35 }, (_, index) => {
-                  const date = new Date(currentMonth);
-                  date.setDate(1);
-                  date.setDate(date.getDate() + index - date.getDay());
-
-                  const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
-                  const isToday = date.toDateString() === new Date().toDateString();
-                  const isPast = date < new Date();
-                  const dateString = (() => {
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    return `${year}-${month}-${day}`;
-                  })();
-                  
-                  // 범위 선택을 위한 스타일링 (신청서와 동일한 로직)
-                  const sortedDates = [...applicationData.requestedDates].sort();
-                  const startDate = sortedDates[0];
-                  const endDate = sortedDates[sortedDates.length - 1];
-                  const isStart = startDate === dateString;
-                  const isEnd = endDate === dateString;
-                  const isInRange = startDate && endDate && 
-                    dateString >= startDate && dateString <= endDate;
-                  const isSelected = applicationData.requestedDates.includes(dateString);
-                  
-                  let cellClass = '';
-                  let cellStyle = {};
-
-                  if (!isCurrentMonth || isPast) {
-                    cellClass = 'text-gray-300';
-                  } else if (isStart || isEnd) {
-                    // 시작일/종료일 - 진한 색
-                    cellClass = 'text-white';
-                    cellStyle = { backgroundColor: 'var(--accent-9)' };
-                  } else if (isInRange && isSelected) {
-                    // 중간 날짜 - 연한 녹색
-                    cellClass = 'text-accent-11';
-                    cellStyle = { backgroundColor: 'var(--accent-4)' };
-                  } else {
-                    cellClass = 'text-gray-700';
-                  }
-
-                  return (
-                    <div
-                      key={index}
-                      className={`aspect-square flex items-center justify-center rounded-lg ${cellClass}`}
-                      style={cellStyle}
-                    >
-                      <Text 
-                        size="2" 
-                        weight={isToday ? "bold" : "medium"}
-                        className={isToday && !isStart && !isEnd && !isInRange ? "underline" : ""}
-                        style={isToday && !isPast && !isStart && !isEnd && !isInRange ? { color: 'var(--accent-9)' } : {}}
-                      >
-                        {date.getDate()}
-                      </Text>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <Flex gap="3" className="mt-4">
-              <Button 
-                onClick={() => setIsDateCalendarDialogOpen(false)}
-                className="flex-1"
-              >
-                확인
-              </Button>
-            </Flex>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
     </Container>
   );
 }

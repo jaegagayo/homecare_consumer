@@ -36,7 +36,7 @@ interface ApplicationForm {
 
   // 조건 정보
   duration: number; // 1회 소요시간
-  requestedDates: string[]; // 요청 일자들 (YYYY-MM-DD 형식)
+  requestedDates: string[]; // 요청 일자 (단일 날짜, YYYY-MM-DD 형식)
   preferredHours: {
     start: string;
     end: string;
@@ -84,7 +84,7 @@ export default function ApplicationFormPage() {
     specialRequests: '',
     estimatedUsage: 0,
     duration: 2, // 기본 2시간
-    requestedDates: [], // 빈 배열로 시작
+    requestedDates: [], // 빈 배열로 시작 (단일 날짜)
     preferredHours: { start: '09:00', end: '18:00' },
     preferredAreas: ['서울시 강남구']
   });
@@ -145,7 +145,9 @@ export default function ApplicationFormPage() {
 
   // 날짜 선택 다이얼로그 핸들러
   const handleDateConfirm = (dates: string[]) => {
-    setForm(prev => ({ ...prev, requestedDates: dates }));
+    // 단일 날짜만 사용 (첫 번째 날짜)
+    const selectedDate = dates.length > 0 ? [dates[0]] : [];
+    setForm(prev => ({ ...prev, requestedDates: selectedDate }));
     setIsPreferredDaysDialogOpen(false);
   };
 
@@ -223,10 +225,9 @@ export default function ApplicationFormPage() {
                   {form.requestedDates.length > 0 ? (
                     <>
                       {(() => {
-                        const sortedDates = [...form.requestedDates].sort();
-                        const startDate = sortedDates[0];
-                        const endDate = sortedDates[sortedDates.length - 1];
-                        return `${startDate} ~ ${endDate} (${form.requestedDates.length}일)`;
+                        const selectedDate = form.requestedDates[0];
+                        const date = new Date(selectedDate);
+                        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
                       })()}
                     </>
                   ) : (
@@ -370,6 +371,8 @@ export default function ApplicationFormPage() {
         selectedDates={form.requestedDates}
         onConfirm={handleDateConfirm}
         onClose={handleDateDialogClose}
+        mode="single"
+        title="요청 일자 선택"
       />
 
       {/* 선호 시간대 설정 다이얼로그 */}

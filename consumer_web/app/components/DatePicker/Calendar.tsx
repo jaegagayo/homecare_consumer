@@ -11,7 +11,8 @@ export default function Calendar({
   onMonthChange,
   onDateSelection,
   onWeekdayToggle,
-  onDateToggle
+  onDateToggle,
+  mode
 }: CalendarProps) {
   // 로컬 날짜 문자열 생성 (YYYY-MM-DD 형식)
   const toLocalDateString = (date: Date) => {
@@ -77,19 +78,19 @@ export default function Calendar({
             <button
               key={day}
               onClick={() => {
-                if (selectionStep === 'weekday') {
+                if (mode === 'range' && selectionStep === 'weekday') {
                   onWeekdayToggle(index);
                 }
               }}
               className={`text-center py-2 rounded-lg transition-colors ${
-                selectionStep === 'weekday'
+                mode === 'range' && selectionStep === 'weekday'
                   ? weekdayFilter[index]
                     ? 'text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                   : 'text-gray-700'
               }`}
               style={
-                selectionStep === 'weekday'
+                mode === 'range' && selectionStep === 'weekday'
                   ? weekdayFilter[index]
                     ? { backgroundColor: 'var(--accent-9)' }
                     : { backgroundColor: 'var(--gray-3)' }
@@ -127,7 +128,7 @@ export default function Calendar({
             // 요일 필터 단계에서의 스타일링
             const isInSelectedRange = hasRange && startDate && endDate && 
               (dateString >= dateRange.start! && dateString <= dateRange.end!);
-            const isWeekdayFiltered = selectionStep === 'weekday' && isInSelectedRange && weekdayFilter[dayOfWeek];
+            const isWeekdayFiltered = mode === 'range' && selectionStep === 'weekday' && isInSelectedRange && weekdayFilter[dayOfWeek];
             const isDateSelected = selectedDates.has(dateString);
 
             let cellClass = '';
@@ -135,7 +136,15 @@ export default function Calendar({
 
             if (!isCurrentMonth || isPast) {
               cellClass = 'text-gray-300 cursor-not-allowed';
-            } else if (selectionStep === 'weekday') {
+            } else if (mode === 'single') {
+              // 단일 날짜 선택 모드
+              if (isDateSelected) {
+                cellClass = 'text-white';
+                cellStyle = { backgroundColor: 'var(--accent-9)' };
+              } else {
+                cellClass = 'hover:bg-gray-100';
+              }
+            } else if (mode === 'range' && selectionStep === 'weekday') {
               // 요일 필터 단계
               if (isStart || isEnd) {
                 // 시작일/종료일은 항상 선택된 상태로 표시
@@ -182,7 +191,10 @@ export default function Calendar({
                 style={cellStyle}
                 onClick={() => {
                   if (isCurrentMonth && !isPast) {
-                    if (selectionStep === 'weekday') {
+                    if (mode === 'single') {
+                      // 단일 날짜 선택 모드
+                      onDateToggle(dateString);
+                    } else if (mode === 'range' && selectionStep === 'weekday') {
                       // 요일 필터 단계에서는 범위 내 날짜만 클릭 가능
                       if (isInSelectedRange) {
                         onDateToggle(dateString);
@@ -195,12 +207,12 @@ export default function Calendar({
                 }}
                 disabled={!isCurrentMonth || isPast}
               >
-                <Text 
-                  size="2" 
-                  weight={isToday ? "bold" : "medium"}
-                  className={isToday && !isStart && !isEnd && !isWeekdayFiltered && (selectionStep !== 'weekday' || isInSelectedRange) ? "underline" : ""}
-                  style={isToday && !isPast && !isStart && !isEnd && !isWeekdayFiltered && (selectionStep !== 'weekday' || isInSelectedRange) ? { color: 'var(--accent-9)' } : {}}
-                >
+                                        <Text 
+                          size="2" 
+                          weight={isToday ? "bold" : "medium"}
+                          className={isToday && !isStart && !isEnd && !isWeekdayFiltered && (mode === 'single' || (mode === 'range' && selectionStep !== 'weekday' || isInSelectedRange)) ? "underline" : ""}
+                          style={isToday && !isPast && !isStart && !isEnd && !isWeekdayFiltered && (mode === 'single' || (mode === 'range' && selectionStep !== 'weekday' || isInSelectedRange)) ? { color: 'var(--accent-9)' } : {}}
+                        >
                   {date.getDate()}
                 </Text>
               </button>

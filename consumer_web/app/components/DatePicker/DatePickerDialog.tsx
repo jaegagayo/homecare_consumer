@@ -10,13 +10,22 @@ export default function DatePickerDialog({
   onOpenChange,
   selectedDates: initialSelectedDates,
   onConfirm,
-  onClose
+  onClose,
+  mode = 'range',
+  title = '요청 일자 설정'
 }: DatePickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [dateRange, setDateRange] = useState<DateRange>({ start: null, end: null });
   const [selectionStep, setSelectionStep] = useState<SelectionStep>('start');
   const [weekdayFilter, setWeekdayFilter] = useState<boolean[]>([true, true, true, true, true, true, true]);
   const [selectedDates, setSelectedDates] = useState<Set<string>>(new Set());
+
+  // 단일 날짜 선택 모드일 때 초기 선택된 날짜 설정
+  useEffect(() => {
+    if (mode === 'single' && initialSelectedDates.length > 0) {
+      setSelectedDates(new Set(initialSelectedDates));
+    }
+  }, [mode, initialSelectedDates]);
 
   // 시작일/종료일에 따라 현재 월 자동 설정
   useEffect(() => {
@@ -50,27 +59,38 @@ export default function DatePickerDialog({
   };
 
   const handleDateSelection = (dateString: string) => {
-    if (selectionStep === 'start') {
-      setDateRange({ start: dateString, end: null });
-      setSelectionStep('end');
-    } else if (selectionStep === 'end') {
-      if (!dateRange.start) return;
-      if (dateString < dateRange.start) {
-        setDateRange({ start: dateString, end: dateRange.start });
-      } else {
-        setDateRange(prev => ({ ...prev, end: dateString }));
+    if (mode === 'single') {
+      // 단일 날짜 선택 모드
+      setSelectedDates(new Set([dateString]));
+    } else {
+      // 범위 선택 모드
+      if (selectionStep === 'start') {
+        setDateRange({ start: dateString, end: null });
+        setSelectionStep('end');
+      } else if (selectionStep === 'end') {
+        if (!dateRange.start) return;
+        if (dateString < dateRange.start) {
+          setDateRange({ start: dateString, end: dateRange.start });
+        } else {
+          setDateRange(prev => ({ ...prev, end: dateString }));
+        }
+        setSelectionStep('weekday');
+        
+        // 요일 필터 단계 진입 시 전체 범위를 선택된 상태로 설정
+        const startDate = dateString < dateRange.start ? dateString : dateRange.start;
+        const endDate = dateString < dateRange.start ? dateRange.start : dateString;
+        const allDates = getDatesBetween(startDate, endDate);
+        setSelectedDates(new Set(allDates));
       }
-      setSelectionStep('weekday');
-      
-      // 요일 필터 단계 진입 시 전체 범위를 선택된 상태로 설정
-      const startDate = dateString < dateRange.start ? dateString : dateRange.start;
-      const endDate = dateString < dateRange.start ? dateRange.start : dateString;
-      const allDates = getDatesBetween(startDate, endDate);
-      setSelectedDates(new Set(allDates));
     }
   };
 
   const handleStepClick = (step: SelectionStep) => {
+    if (mode === 'single') {
+      // 단일 날짜 선택 모드에서는 단계 변경 불가
+      return;
+    }
+    
     if (step === 'start') {
       setSelectionStep('start');
     } else if (step === 'end' && dateRange.start) {
@@ -81,6 +101,11 @@ export default function DatePickerDialog({
   };
 
   const toggleWeekday = (index: number) => {
+    if (mode === 'single') {
+      // 단일 날짜 선택 모드에서는 요일 필터 사용 불가
+      return;
+    }
+    
     setWeekdayFilter(prev => {
       const newFilter = [...prev];
       newFilter[index] = !newFilter[index];
@@ -115,28 +140,36 @@ export default function DatePickerDialog({
   const toggleDate = (dateString: string) => {
     setSelectedDates(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(dateString)) {
-        newSet.delete(dateString);
-      } else {
-        newSet.add(dateString);
-      }
       
-      // 개별 날짜 토글 후 해당 요일의 모든 날짜가 선택되었는지 확인
-      if (dateRange.start && dateRange.end) {
-        const dayOfWeek = new Date(dateString).getDay();
-        const allDates = getDatesBetween(dateRange.start, dateRange.end);
-        const targetWeekdayDates = allDates.filter(date => {
-          const dateDayOfWeek = new Date(date).getDay();
-          return dateDayOfWeek === dayOfWeek;
-        });
+      if (mode === 'single') {
+        // 단일 날짜 선택 모드: 기존 선택을 모두 제거하고 새로운 날짜만 선택
+        newSet.clear();
+        newSet.add(dateString);
+      } else {
+        // 범위 선택 모드: 기존 로직 유지
+        if (newSet.has(dateString)) {
+          newSet.delete(dateString);
+        } else {
+          newSet.add(dateString);
+        }
         
-        const allWeekdaySelected = targetWeekdayDates.every(date => newSet.has(date));
-        
-        setWeekdayFilter(prev => {
-          const newFilter = [...prev];
-          newFilter[dayOfWeek] = allWeekdaySelected;
-          return newFilter;
-        });
+        // 개별 날짜 토글 후 해당 요일의 모든 날짜가 선택되었는지 확인
+        if (dateRange.start && dateRange.end) {
+          const dayOfWeek = new Date(dateString).getDay();
+          const allDates = getDatesBetween(dateRange.start, dateRange.end);
+          const targetWeekdayDates = allDates.filter(date => {
+            const dateDayOfWeek = new Date(date).getDay();
+            return dateDayOfWeek === dayOfWeek;
+          });
+          
+          const allWeekdaySelected = targetWeekdayDates.every(date => newSet.has(date));
+          
+          setWeekdayFilter(prev => {
+            const newFilter = [...prev];
+            newFilter[dayOfWeek] = allWeekdaySelected;
+            return newFilter;
+          });
+        }
       }
       
       return newSet;
@@ -144,8 +177,13 @@ export default function DatePickerDialog({
   };
 
   const handleConfirm = () => {
-    if (!dateRange.start || !dateRange.end) {
+    if (mode === 'range' && (!dateRange.start || !dateRange.end)) {
       alert('시작일과 종료일을 선택해주세요.');
+      return;
+    }
+    
+    if (mode === 'single' && selectedDates.size === 0) {
+      alert('날짜를 선택해주세요.');
       return;
     }
     
@@ -162,7 +200,7 @@ export default function DatePickerDialog({
       <Dialog.Content>
         <Flex direction="column" gap="4">
           <Flex justify="between" align="center">
-            <Dialog.Title className="flex items-center">요청 일자 설정</Dialog.Title>
+            <Dialog.Title className="flex items-center">{title}</Dialog.Title>
             <Button
               variant="ghost"
               size="2"
@@ -179,6 +217,7 @@ export default function DatePickerDialog({
             dateRange={dateRange}
             selectedDates={selectedDates}
             onStepClick={handleStepClick}
+            mode={mode}
           />
 
           <Calendar
@@ -191,12 +230,13 @@ export default function DatePickerDialog({
             onDateSelection={handleDateSelection}
             onWeekdayToggle={toggleWeekday}
             onDateToggle={toggleDate}
+            mode={mode}
           />
 
           <Flex gap="3" className="mt-4">
             <Button
               onClick={handleConfirm}
-              disabled={!dateRange.start || !dateRange.end}
+              disabled={mode === 'range' ? (!dateRange.start || !dateRange.end) : selectedDates.size === 0}
               className="flex-1"
             >
               확인
