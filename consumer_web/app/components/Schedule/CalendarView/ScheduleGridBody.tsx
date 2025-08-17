@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { ClockIcon, HomeIcon, PersonIcon } from '@radix-ui/react-icons';
-import { Popover, Text, Flex, Badge } from '@radix-ui/themes';
+import { Text, Flex, Badge, ScrollArea } from '@radix-ui/themes';
+import { useNavigate } from '@remix-run/react';
 import { Schedule } from '../../../types/schedule';
 
 interface ScheduleGridBodyProps {
@@ -15,6 +16,7 @@ const GRID_TOP_OFFSET = 28; // px, 헤더(요일) 높이
 const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ schedules, currentWeek }, ref) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const gridRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // ref를 gridRef와 연결
   useEffect(() => {
@@ -115,11 +117,10 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
   return (
     <div style={{ 
       flex: 1, 
-      overflow: 'auto', 
       position: 'relative', 
       background: 'transparent',
       minHeight: 0,
-      maxHeight: HOUR_HEIGHT * 32 + GRID_TOP_OFFSET // 더 많은 시간대를 보이도록 확장
+      height: 'calc(100vh - 400px)' // 적절한 높이 설정
     }} ref={gridRef}>
       {/* 요일 헤더 - 고정 */}
       <div style={{ 
@@ -149,6 +150,12 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
           }}>{formatDate(date)}</div>
         ))}
       </div>
+
+      {/* 스크롤 가능한 영역 */}
+      <ScrollArea type="always" scrollbars="vertical" style={{ 
+        height: 'calc(100% - 28px)', // 헤더 높이를 뺀 나머지
+        position: 'relative'
+      }}>
       
               {/* 시간 라벨 + 그리드 선 - 스크롤 가능 */}
         <div style={{ display: 'flex', position: 'relative', minHeight: HOUR_HEIGHT * 25 }}>
@@ -209,78 +216,38 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
                 const { top, height } = calculateSchedulePosition(schedule.time, schedule.duration * 60);
                 const statusColor = getStatusColor(schedule.status);
                 return (
-                  <Popover.Root key={idx}>
-                    <Popover.Trigger>
-                      <div style={{
-                        position: 'absolute',
-                        left: 2,
-                        right: 2,
-                        top,
-                        height,
-                        background: `var(--${statusColor}-3)`,
-                        border: `1px solid var(--${statusColor}-11)`,
-                        borderRadius: 4,
-                        color: `var(--${statusColor}-11)`,
-                        fontSize: 10,
-                        padding: '2px 4px',
-                        zIndex: 10,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'flex-start',
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 2px 0 rgba(0,0,0,0.08)'
-                      }}>
-                        <div style={{ fontWeight: 600, fontSize: 11, lineHeight: 1.1 }}>
-                          {schedule.serviceType}
-                        </div>
-                        <div style={{ fontSize: 10, lineHeight: 1.1, marginTop: 1 }}>
-                          {schedule.clientName}
-                        </div>
-                      </div>
-                    </Popover.Trigger>
-                    <Popover.Content style={{ width: 280, maxWidth: '90vw' }}>
-                      <Flex direction="column" gap="3">
-                        <Flex justify="between" align="center">
-                          <Text size="3" weight="bold">{schedule.serviceType}</Text>
-                          <Badge 
-                            color={statusColor === 'blue' ? 'blue' : statusColor === 'green' ? 'green' : 'red'}
-                            variant="soft"
-                          >
-                            {schedule.status === 'upcoming' ? '예정' : schedule.status === 'completed' ? '완료' : '취소'}
-                          </Badge>
-                        </Flex>
-                        
-                        <Flex direction="column" gap="2">
-                          <Flex align="center" gap="2">
-                            <PersonIcon width="14" height="14" />
-                            <Text size="2">{schedule.clientName}</Text>
-                          </Flex>
-                          
-                          <Flex align="center" gap="2">
-                            <HomeIcon width="14" height="14" />
-                            <Text size="2">{schedule.address}</Text>
-                          </Flex>
-                          
-                          <Flex align="center" gap="2">
-                            <ClockIcon width="14" height="14" />
-                            <Text size="2">{schedule.time}</Text>
-                          </Flex>
-                          
-                          <Flex justify="between" align="center">
-                            <Text size="2" color="gray">시급</Text>
-                            <Text size="2" weight="bold">₩{schedule.hourlyRate.toLocaleString()}</Text>
-                          </Flex>
-                          
-                          <Flex justify="between" align="center">
-                            <Text size="2" color="gray">총 금액</Text>
-                            <Text size="2" weight="bold">₩{(schedule.hourlyRate * schedule.duration).toLocaleString()}</Text>
-                          </Flex>
-                        </Flex>
-                      </Flex>
-                    </Popover.Content>
-                  </Popover.Root>
+                  <div
+                    key={idx}
+                    style={{
+                      position: 'absolute',
+                      left: 2,
+                      right: 2,
+                      top,
+                      height,
+                      background: `var(--${statusColor}-3)`,
+                      border: `1px solid var(--${statusColor}-11)`,
+                      borderRadius: 4,
+                      color: `var(--${statusColor}-11)`,
+                      fontSize: 10,
+                      padding: '2px 4px',
+                      zIndex: 10,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px 0 rgba(0,0,0,0.08)'
+                    }}
+                    onClick={() => navigate(`/main/schedule-detail?id=${schedule.id}`)}
+                  >
+                    <div style={{ fontWeight: 600, fontSize: 11, lineHeight: 1.1 }}>
+                      {schedule.serviceType}
+                    </div>
+                    <div style={{ fontSize: 10, lineHeight: 1.1, marginTop: 1 }}>
+                      {schedule.clientName}
+                    </div>
+                  </div>
                 );
               })}
               
@@ -300,6 +267,7 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
           ))}
         </div>
       </div>
+      </ScrollArea>
     </div>
   );
 });

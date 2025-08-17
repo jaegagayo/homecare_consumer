@@ -47,26 +47,26 @@ export default function HomePage() {
       
       setSchedules([
         {
+          id: "6",
+          time: "14:00 - 16:00",
+          caregiverName: "이요양사",
+          address: "서울시 영등포구 여의도동 789-12",
+          serviceType: "방문요양",
+          status: "upcoming"
+        },
+        {
+          id: "8",
+          time: "10:00 - 12:00",
+          caregiverName: "김요양사",
+          address: "서울시 광진구 구의동",
+          serviceType: "방문요양",
+          status: "upcoming"
+        },
+        {
           id: "1",
           time: "09:00 - 11:00",
-          caregiverName: "김케어",
-          address: "서울시 강남구 역삼동",
-          serviceType: "방문요양",
-          status: "upcoming"
-        },
-        {
-          id: "2",
-          time: "14:00 - 16:00",
-          caregiverName: "박케어",
-          address: "서울시 서초구 서초동",
-          serviceType: "방문요양",
-          status: "upcoming"
-        },
-        {
-          id: "3",
-          time: "08:00 - 10:00",
-          caregiverName: "이케어",
-          address: "서울시 마포구 합정동",
+          caregiverName: "박요양사",
+          address: "서울시 강남구 역삼동 123-45",
           serviceType: "방문요양",
           status: "completed"
         }
@@ -154,7 +154,14 @@ export default function HomePage() {
         {schedules.filter(s => s.status === 'upcoming').length > 0 ? (
           <div className="bg-white rounded-lg p-6 border border-gray-200">
             {schedules.filter(s => s.status === 'upcoming').slice(0, 1).map((schedule) => (
-              <div key={schedule.id} className="space-y-3">
+              <div 
+                key={schedule.id} 
+                className="space-y-3 cursor-pointer"
+                onClick={() => navigate(`/main/schedule-detail?id=${schedule.id}`)}
+                style={{ transition: 'all 0.2s ease' }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
                 <div className="flex justify-between items-start">
                   <div className="space-y-0">
                     <div>
@@ -205,7 +212,14 @@ export default function HomePage() {
             <Heading size="4" className="mb-4">최근 완료된 서비스</Heading>
             <div className="space-y-3">
               {schedules.filter(s => s.status === 'completed').slice(0, 2).map((schedule) => (
-                <div key={schedule.id} className="bg-white rounded-lg p-4 border border-gray-200">
+                <div 
+                  key={schedule.id} 
+                  className="bg-white rounded-lg p-4 border border-gray-200 cursor-pointer"
+                  onClick={() => navigate(`/main/schedule-detail?id=${schedule.id}`)}
+                  style={{ transition: 'all 0.2s ease' }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
                   <Flex justify="between" align="center">
                     <div>
                       <Text size="3" weight="medium">{schedule.caregiverName} 요양보호사</Text>
