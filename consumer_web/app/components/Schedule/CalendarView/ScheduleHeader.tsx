@@ -1,16 +1,5 @@
 import { Flex, Text, Button } from '@radix-ui/themes';
-
-interface Schedule {
-  id: string;
-  date: string;
-  time: string;
-  clientName: string;
-  address: string;
-  serviceType: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  duration: number;
-  hourlyRate: number;
-}
+import { Schedule } from '../../../types/schedule';
 
 interface ScheduleHeaderProps {
   currentWeek: Date;
@@ -78,6 +67,8 @@ export default function ScheduleHeader({ currentWeek, schedules, onNavigateWeek 
           <Button onClick={() => onNavigateWeek('next')} variant="ghost" size="2">{'>'}</Button>
         </Flex>
       </Flex>
+
+
 
       {/* 통계 정보 */}
       <Flex align="center" justify="between">

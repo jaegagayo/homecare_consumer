@@ -2,18 +2,7 @@
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { ClockIcon, HomeIcon, PersonIcon } from '@radix-ui/react-icons';
 import { Popover, Text, Flex, Badge } from '@radix-ui/themes';
-
-interface Schedule {
-  id: string;
-  date: string;
-  time: string;
-  clientName: string;
-  address: string;
-  serviceType: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  duration: number;
-  hourlyRate: number;
-}
+import { Schedule } from '../../../types/schedule';
 
 interface ScheduleGridBodyProps {
   schedules: Schedule[];
