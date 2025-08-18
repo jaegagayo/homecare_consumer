@@ -62,11 +62,10 @@ export default function MainLayout() {
     } else if (path.includes("/main/review-write")) {
       setCurrentPageTitle("리뷰 작성");
     } else if (path.includes("/main/regular-service-proposal")) {
-      setCurrentPageTitle("정기 서비스 제안");
+      setCurrentPageTitle("정기 신청");
     } else if (path.includes("/main/confirmation")) {
       setCurrentPageTitle("확정 안내");
-    } else if (path.includes("/main/blacklist-report")) {
-      setCurrentPageTitle("블랙리스트 신고");
+
     }
   }, [navigate, location]);
 

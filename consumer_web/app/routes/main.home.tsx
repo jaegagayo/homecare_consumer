@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
 import { 
   Container, 
   Flex, 
   Heading, 
-  Text, 
-  Button,
-  Badge
+  Text
 } from "@radix-ui/themes";
-import { 
-  Clock, 
-  MapPin, 
-  User
-} from "lucide-react";
+import {
+  NextVisitSchedule,
+  RejectionNotification,
+  RegularProposalNotification,
+  ReviewRequest,
+  RegularProposalRecommendation
+} from "../components/Home";
 
 interface Schedule {
   id: string;
@@ -23,11 +23,54 @@ interface Schedule {
   status: 'upcoming' | 'completed' | 'cancelled';
 }
 
+interface RejectedSchedule {
+  id: string;
+  date: string;
+  time: string;
+  caregiverName: string;
+  serviceType: string;
+  rejectionReason?: string;
+}
+
+interface RegularProposal {
+  id: string;
+  date: string;
+  time: string;
+  caregiverName: string;
+  serviceType: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+interface ReviewRequest {
+  id: string;
+  date: string;
+  time: string;
+  caregiverName: string;
+  serviceType: string;
+  completedAt: string;
+}
+
+interface RegularProposalRecommendation {
+  id: string;
+  dayOfWeek: string;
+  timeSlot: string;
+  period: string;
+  caregiverName: string;
+  serviceType: string;
+  reviewRating: number;
+}
+
 export default function HomePage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [userName, setUserName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  // 더미 데이터 - 나중에 실제 API로 교체
+  const [rejections, setRejections] = useState<RejectedSchedule[]>([]);
+  const [regularProposals, setRegularProposals] = useState<RegularProposal[]>([]);
+  const [reviewRequests, setReviewRequests] = useState<ReviewRequest[]>([]);
+  const [recommendations, setRecommendations] = useState<RegularProposalRecommendation[]>([]);
 
   useEffect(() => {
     // 인증 상태 확인
@@ -72,56 +115,118 @@ export default function HomePage() {
         }
       ]);
 
+      // 거절 알림 더미 데이터
+      setRejections([
+        {
+          id: "rejected_1",
+          date: "2024-01-15",
+          time: "14:00 - 16:00",
+          caregiverName: "최요양사",
+          serviceType: "방문요양",
+          rejectionReason: "개인 사정으로 인한 취소"
+        },
+        {
+          id: "rejected_2", 
+          date: "2024-01-16",
+          time: "10:00 - 12:00",
+          caregiverName: "정요양사",
+          serviceType: "방문요양",
+          rejectionReason: "일정 변경 요청"
+        }
+      ]);
+
+      // 정기제안 알림 더미 데이터
+      setRegularProposals([
+        {
+          id: "proposal_1",
+          date: "2024-01-20",
+          time: "09:00 - 11:00",
+          caregiverName: "김요양사",
+          serviceType: "방문요양",
+          status: "pending"
+        },
+        {
+          id: "proposal_2",
+          date: "2024-01-22",
+          time: "14:00 - 16:00",
+          caregiverName: "이요양사",
+          serviceType: "방문요양",
+          status: "approved"
+        },
+        {
+          id: "proposal_3",
+          date: "2024-01-25",
+          time: "10:00 - 12:00",
+          caregiverName: "박요양사",
+          serviceType: "방문요양",
+          status: "rejected"
+        }
+      ]);
+
+      // 리뷰 요청 더미 데이터
+      setReviewRequests([
+        {
+          id: "review_1",
+          date: "2024-01-18",
+          time: "14:00 - 16:00",
+          caregiverName: "최요양사",
+          serviceType: "방문요양",
+          completedAt: "2024-01-18T16:00:00"
+        },
+        {
+          id: "review_2",
+          date: "2024-01-16",
+          time: "10:00 - 12:00",
+          caregiverName: "박요양사",
+          serviceType: "방문요양",
+          completedAt: "2024-01-16T12:00:00"
+        },
+        {
+          id: "review_3",
+          date: "2024-01-14",
+          time: "09:00 - 11:00",
+          caregiverName: "정요양사",
+          serviceType: "방문요양",
+          completedAt: "2024-01-14T11:00:00"
+        }
+      ]);
+
+      // 정기 제안 추천 더미 데이터
+      setRecommendations([
+        {
+          id: "rec_1",
+          dayOfWeek: "월요일",
+          timeSlot: "09:00 - 11:00",
+          period: "3개월",
+          caregiverName: "김요양사",
+          serviceType: "방문요양",
+          reviewRating: 4.5
+        },
+        {
+          id: "rec_2",
+          dayOfWeek: "수요일",
+          timeSlot: "14:00 - 16:00",
+          period: "6개월",
+          caregiverName: "이요양사",
+          serviceType: "방문요양",
+          reviewRating: 4.8
+        },
+        {
+          id: "rec_3",
+          dayOfWeek: "금요일",
+          timeSlot: "10:00 - 12:00",
+          period: "12개월",
+          caregiverName: "최요양사",
+          serviceType: "방문요양",
+          reviewRating: 4.9
+        }
+      ]);
+
       setIsLoading(false);
     };
 
     loadData();
   }, []);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'blue';
-      case 'completed': return 'green';
-      case 'cancelled': return 'red';
-      default: return 'gray';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'upcoming': return '예정';
-      case 'completed': return '완료';
-      case 'cancelled': return '취소';
-      default: return '알 수 없음';
-    }
-  };
-
-  const calculateTimeRemaining = (timeString: string) => {
-    // "09:00 - 11:00" 형태에서 시작 시간 추출
-    const startTime = timeString.split(' - ')[0];
-    const [hours, minutes] = startTime.split(':').map(Number);
-    
-    // 오늘 날짜로 시작 시간 설정
-    const today = new Date();
-    const scheduleTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
-    
-    // 현재 시간과의 차이 계산
-    const now = new Date();
-    const diffMs = scheduleTime.getTime() - now.getTime();
-    
-    if (diffMs <= 0) {
-      return '곧 시작';
-    }
-    
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (diffHours > 0) {
-      return `${diffHours}시간 ${diffMinutes}분`;
-    } else {
-      return `${diffMinutes}분`;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -141,97 +246,16 @@ export default function HomePage() {
         <div>
           <Heading size="5">안녕하세요, {userName}님! 👋</Heading>
           <Text size="3" color="gray">
-            {schedules.filter(s => s.status === 'upcoming').length > 0 
-              ? "곧 다가오는 서비스를 확인해 보세요" 
-              : "오늘도 좋은 하루 되세요"
-            }
+            오늘도 좋은 하루 되세요
           </Text>
         </div>
 
-
-
-        {/* 곧 받을 서비스 */}
-        {schedules.filter(s => s.status === 'upcoming').length > 0 ? (
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            {schedules.filter(s => s.status === 'upcoming').slice(0, 1).map((schedule) => (
-              <div 
-                key={schedule.id} 
-                className="space-y-3 cursor-pointer"
-                onClick={() => navigate(`/main/schedule-detail?id=${schedule.id}`)}
-                style={{ transition: 'all 0.2s ease' }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="space-y-0">
-                    <div>
-                      <Text size="5" weight="bold">{schedule.caregiverName} 요양보호사</Text>
-                    </div>
-                    <div>
-                      <Text size="3" color="gray">{schedule.address}</Text>
-                    </div>
-                  </div>
-                  <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded">
-                    {schedule.serviceType}
-                  </Text>
-                </div>
-                <div className="w-full aspect-[4/3] bg-gray-200 rounded-lg flex items-center justify-center">
-                  <Text size="2" color="gray">지도 영역</Text>
-                </div>
-                <div>
-                  <Text size="3" color="gray">
-                    시작까지 {calculateTimeRemaining(schedule.time)} 전 ({schedule.time})
-                  </Text>
-                </div>
-                <div className="border-t border-gray-200 pt-3">
-                  <Flex justify="between" align="center">
-                    <Flex align="center" gap="2">
-                      <Clock size={16} className="text-gray-500" />
-                      <Text size="2" color="gray">{schedule.time}</Text>
-                    </Flex>
-                    <Badge color={getStatusColor(schedule.status) as any}>
-                      {getStatusText(schedule.status)}
-                    </Badge>
-                  </Flex>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg p-6 border border-gray-200 text-center">
-            <Text size="3" color="gray">오늘 예정된 서비스가 없습니다</Text>
-            <Text size="2" color="gray" className="mt-2">
-              새로운 서비스를 요청해보세요
-            </Text>
-          </div>
-        )}
-
-        {/* 최근 완료된 서비스 */}
-        {schedules.filter(s => s.status === 'completed').length > 0 && (
-          <div>
-            <Heading size="4" className="mb-4">최근 완료된 서비스</Heading>
-            <div className="space-y-3">
-              {schedules.filter(s => s.status === 'completed').slice(0, 2).map((schedule) => (
-                <div 
-                  key={schedule.id} 
-                  className="bg-white rounded-lg p-4 border border-gray-200 cursor-pointer"
-                  onClick={() => navigate(`/main/schedule-detail?id=${schedule.id}`)}
-                  style={{ transition: 'all 0.2s ease' }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                >
-                  <Flex justify="between" align="center">
-                    <div>
-                      <Text size="3" weight="medium">{schedule.caregiverName} 요양보호사</Text>
-                      <Text size="2" color="gray">{schedule.time}</Text>
-                    </div>
-                    <Badge color="green">완료</Badge>
-                  </Flex>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* 홈 화면 구성 요소들 - 순서 보장 */}
+        <NextVisitSchedule schedules={schedules} />
+        <RejectionNotification rejections={rejections} />
+        <RegularProposalNotification proposals={regularProposals} />
+        <ReviewRequest reviewRequests={reviewRequests} />
+        <RegularProposalRecommendation recommendations={recommendations} />
       </Flex>
     </Container>
   );

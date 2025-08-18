@@ -11,6 +11,7 @@ import {
 import { 
   Star
 } from "lucide-react";
+import { BlacklistRegistrationDialog } from "../components/Blacklist";
 
 interface ReviewForm {
   rating: number;
@@ -38,6 +39,7 @@ export default function ReviewWritePage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBlacklistDialogOpen, setIsBlacklistDialogOpen] = useState(false);
 
   const renderStars = (rating: number, interactive: boolean = false) => {
     return (
@@ -79,22 +81,38 @@ export default function ReviewWritePage() {
       
       alert('리뷰가 성공적으로 등록되었습니다.');
       
-        // 평점에 따른 후속 페이지로 이동
-        if (reviewForm.rating >= 4) {
-          // 4점 이상일 때 정기제안 페이지로 이동
-          navigate(`/main/regular-service-proposal?serviceId=${serviceId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
-        } else if (reviewForm.rating <= 2) {
-          // 2점 이하일 때 블랙리스트 페이지로 이동
-          navigate(`/main/blacklist-report?serviceId=${serviceId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
-        } else {
-          // 3점일 때 바로 리뷰 페이지로 이동
-          navigate('/main/reviews');
-        }
+      // 평점에 따른 후속 처리
+      if (reviewForm.rating >= 4) {
+        // 4점 이상일 때 정기제안 페이지로 이동
+        navigate(`/main/regular-service-proposal?serviceId=${serviceId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
+      } else if (reviewForm.rating <= 2) {
+        // 2점 이하일 때 블랙리스트 다이얼로그 표시
+        setIsBlacklistDialogOpen(true);
+      } else {
+        // 3점일 때 바로 리뷰 페이지로 이동
+        navigate('/main/reviews');
+      }
     } catch (error) {
       alert('리뷰 등록 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleBlacklistConfirm = async () => {
+    try {
+      // TODO: 블랙리스트 등록 API 호출
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('블랙리스트에 등록되었습니다.');
+      navigate('/main/home');
+    } catch (error) {
+      alert('블랙리스트 등록 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleBlacklistCancel = () => {
+    setIsBlacklistDialogOpen(false);
+    navigate('/main/home');
   };
 
   const formatDate = (dateString: string) => {
@@ -161,6 +179,18 @@ export default function ReviewWritePage() {
           </Button>
         </Flex>
       </Flex>
+
+      {/* 블랙리스트 등록 다이얼로그 */}
+      <BlacklistRegistrationDialog
+        open={isBlacklistDialogOpen}
+        onOpenChange={setIsBlacklistDialogOpen}
+        caregiverName={caregiverName || ''}
+        serviceType={serviceType || ''}
+        serviceDate={serviceDate || ''}
+        serviceTime={serviceTime || ''}
+        onConfirm={handleBlacklistConfirm}
+        onCancel={handleBlacklistCancel}
+      />
     </Container>
   );
 }
