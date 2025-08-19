@@ -1,21 +1,26 @@
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { ClockIcon, HomeIcon, PersonIcon } from '@radix-ui/react-icons';
-import { Text, Flex, Badge, ScrollArea } from '@radix-ui/themes';
+import { Text, Flex, Badge } from '@radix-ui/themes';
 import { useNavigate } from '@remix-run/react';
 import { Schedule } from '../../../types/schedule';
 
 interface ScheduleGridBodyProps {
   schedules: Schedule[];
   currentWeek: Date;
+  currentDayIndex: number; // 현재 표시할 3일의 시작 인덱스 (0-4)
+  onDayIndexChange?: (newIndex: number) => void; // 헤더 동기화를 위한 콜백
 }
 
 const HOUR_HEIGHT = 60; // px, 1시간당 높이
 const GRID_TOP_OFFSET = 28; // px, 헤더(요일) 높이
+const TIME_LABEL_WIDTH = 60; // px, 시간 라벨 너비
+const MIN_DAY_COLUMN_WIDTH = 100; // px, 최소 날짜 컬럼 너비
 
-const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ schedules, currentWeek }, ref) => {
+const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ schedules, currentWeek, currentDayIndex, onDayIndexChange }, ref) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const gridRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   // ref를 gridRef와 연결
@@ -50,6 +55,17 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
     }
   }, []);
 
+  // 스크롤 이벤트 핸들러 - 헤더 동기화
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const scrollLeft = e.currentTarget.scrollLeft;
+    const newDayIndex = Math.round(scrollLeft / dayColumnWidth);
+    
+    // 유효한 범위 내에서만 업데이트
+    if (newDayIndex >= 0 && newDayIndex <= 4 && newDayIndex !== currentDayIndex) {
+      onDayIndexChange?.(newDayIndex);
+    }
+  };
+
   // 주간 날짜 배열 생성
   const getWeekDates = (startDate: Date) => {
     const dates = [];
@@ -70,6 +86,27 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
   }));
 
   const weekDates = getWeekDates(currentWeek);
+  
+  // 반응형 컬럼 너비 계산
+  const calculateColumnWidth = () => {
+    if (typeof window !== 'undefined') {
+      const containerWidth = window.innerWidth - 32; // 좌우 패딩 고려
+      const availableWidth = containerWidth - TIME_LABEL_WIDTH;
+      const columnWidth = Math.max(MIN_DAY_COLUMN_WIDTH, availableWidth / 3); // 3일 표시
+      return columnWidth;
+    }
+    return MIN_DAY_COLUMN_WIDTH;
+  };
+  
+  const dayColumnWidth = calculateColumnWidth();
+  
+  // currentDayIndex가 변경될 때 스크롤 위치 조정
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const targetScrollLeft = currentDayIndex * dayColumnWidth;
+      scrollContainerRef.current.scrollLeft = targetScrollLeft;
+    }
+  }, [currentDayIndex, dayColumnWidth]);
   
   const isToday = (date: Date) => {
     const today = new Date();
@@ -122,152 +159,178 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
       minHeight: 0,
       height: 'calc(100vh - 400px)' // 적절한 높이 설정
     }} ref={gridRef}>
-      {/* 요일 헤더 - 고정 */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '60px repeat(7, 1fr)', 
-        height: GRID_TOP_OFFSET,
-        position: 'sticky',
-        top: 0,
-        zIndex: 30,
-        background: 'white',
-        border: '1px solid var(--gray-6)',
-        borderBottom: '1px solid var(--gray-6)',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div style={{ background: 'white' }} />
-        {weekDates.map((date, idx) => (
-          <div key={idx} style={{
-            background: isToday(date) ? 'var(--accent-9)' : 'transparent',
-            color: isToday(date) ? 'var(--accent-3)' : 'var(--gray-11)',
-            textAlign: 'center',
-            fontWeight: 600,
-            fontSize: 10,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%'
-          }}>{formatDate(date)}</div>
-        ))}
-      </div>
-
-      {/* 스크롤 가능한 영역 */}
-      <ScrollArea type="always" scrollbars="vertical" style={{ 
-        height: 'calc(100% - 28px)', // 헤더 높이를 뺀 나머지
-        position: 'relative'
-      }}>
       
-              {/* 시간 라벨 + 그리드 선 - 스크롤 가능 */}
-        <div style={{ display: 'flex', position: 'relative', minHeight: HOUR_HEIGHT * 25 }}>
-        {/* 시간 라벨 - 고정 */}
-        <div style={{ 
-          width: 60, 
-          flexShrink: 0, 
-          position: 'sticky', 
-          left: 0,
-          zIndex: 20,
-          background: 'transparent'
-        }}>
-          {timeSlots.map((slot, i) => (
-            <div key={i} style={{
-              height: HOUR_HEIGHT,
-              borderTop: '1px solid var(--gray-6)',
-              fontSize: 10,
-              color: '#888',
-              display: 'flex',
-              alignItems: 'flex-start',
-              justifyContent: 'flex-end',
-              paddingRight: 4,
-              paddingTop: 2,
-              background: 'transparent'
-            }}>{slot.label}</div>
-          ))}
-        </div>
-        
-                  {/* 그리드 선만 있는 영역 - 스크롤 가능 */}
+      {/* 전체 스크롤 컨테이너 */}
+      <div 
+        ref={scrollContainerRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          overflow: 'auto',
+          scrollBehavior: 'smooth'
+        }}
+        onScroll={handleScroll}
+      >
+                 {/* 전체 그리드 컨테이너 */}
+         <div style={{
+           width: TIME_LABEL_WIDTH + (weekDates.length * dayColumnWidth),
+           minHeight: HOUR_HEIGHT * 25 + GRID_TOP_OFFSET,
+           position: 'relative'
+         }}>
+          
+          {/* 요일 헤더 */}
           <div style={{ 
-            flex: 1, 
-            position: 'relative', 
-            display: 'grid', 
-            gridTemplateColumns: `repeat(7, 1fr)`,
-            minHeight: HOUR_HEIGHT * 25
+            display: 'flex',
+            height: GRID_TOP_OFFSET,
+            position: 'sticky',
+            top: 0,
+            zIndex: 30,
+            background: 'white',
+            border: '1px solid var(--gray-6)',
+            borderBottom: '1px solid var(--gray-6)',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
           }}>
-            {weekDates.map((date, dateIdx) => (
-              <div key={dateIdx} style={{ 
-                position: 'relative', 
-                height: HOUR_HEIGHT * 24, 
-                borderRight: dateIdx < 6 ? '1px solid var(--gray-6)' : undefined 
-              }}>
-              {/* 수평선 */}
+            {/* 시간 라벨 헤더 공간 */}
+            <div style={{ 
+              width: TIME_LABEL_WIDTH, 
+              flexShrink: 0,
+              background: 'white',
+              borderRight: '1px solid var(--gray-6)'
+            }} />
+            
+            {/* 날짜 헤더 */}
+                         {weekDates.map((date, idx) => (
+               <div key={idx} style={{
+                 width: dayColumnWidth,
+                 flexShrink: 0,
+                 background: isToday(date) ? 'var(--accent-9)' : 'transparent',
+                 color: isToday(date) ? 'var(--accent-3)' : 'var(--gray-11)',
+                 textAlign: 'center',
+                 fontWeight: 600,
+                 fontSize: 12,
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 height: '100%',
+                 borderRight: idx < 6 ? '1px solid var(--gray-6)' : undefined
+               }}>{formatDate(date)}</div>
+             ))}
+          </div>
+
+          {/* 그리드 본문 */}
+          <div style={{ display: 'flex', position: 'relative' }}>
+            {/* 시간 라벨 - 고정 */}
+            <div style={{ 
+              width: TIME_LABEL_WIDTH, 
+              flexShrink: 0, 
+              position: 'sticky', 
+              left: 0,
+              zIndex: 20,
+              background: 'white',
+              borderRight: '1px solid var(--gray-6)'
+            }}>
               {timeSlots.map((slot, i) => (
                 <div key={i} style={{
-                  position: 'absolute',
-                  top: i * HOUR_HEIGHT,
-                  left: 0,
-                  right: 0,
-                  height: 0,
+                  height: HOUR_HEIGHT,
                   borderTop: '1px solid var(--gray-6)',
-                  zIndex: 1
-                }} />
+                  fontSize: 10,
+                  color: '#888',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'flex-end',
+                  paddingRight: 4,
+                  paddingTop: 2,
+                  background: 'white'
+                }}>{slot.label}</div>
               ))}
-              
-              {/* 스케줄 블록 오버레이 */}
-              {getSchedulesForDate(date).map((schedule, idx) => {
-                const { top, height } = calculateSchedulePosition(schedule.time, schedule.duration * 60);
-                const statusColor = getStatusColor(schedule.status);
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      position: 'absolute',
-                      left: 2,
-                      right: 2,
-                      top,
-                      height,
-                      background: `var(--${statusColor}-3)`,
-                      border: `1px solid var(--${statusColor}-11)`,
-                      borderRadius: 4,
-                      color: `var(--${statusColor}-11)`,
-                      fontSize: 10,
-                      padding: '2px 4px',
-                      zIndex: 10,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'flex-start',
-                      overflow: 'hidden',
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px 0 rgba(0,0,0,0.08)'
-                    }}
-                    onClick={() => navigate(`/main/schedule-detail?id=${schedule.id}`)}
-                  >
-                    <div style={{ fontWeight: 600, fontSize: 11, lineHeight: 1.1 }}>
-                      {schedule.serviceType}
-                    </div>
-                    <div style={{ fontSize: 10, lineHeight: 1.1, marginTop: 1 }}>
-                      {schedule.clientName}
-                    </div>
-                  </div>
-                );
-              })}
-              
-              {/* 현재 시간 라인 */}
-              {isToday(date) && (
-                <div style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  top: ((currentTime.getHours() * 60 + currentTime.getMinutes()) / 60) * HOUR_HEIGHT,
-                  height: 2,
-                  background: '#ef4444',
-                  zIndex: 20
-                }} />
-              )}
             </div>
-          ))}
+            
+            {/* 날짜 컬럼들 */}
+                         {weekDates.map((date, dateIdx) => (
+               <div key={dateIdx} style={{ 
+                 width: dayColumnWidth,
+                 flexShrink: 0,
+                 position: 'relative', 
+                 height: HOUR_HEIGHT * 24, 
+                 borderRight: dateIdx < 6 ? '1px solid var(--gray-6)' : undefined 
+               }}>
+                {/* 수평선 */}
+                {timeSlots.map((slot, i) => (
+                  <div key={i} style={{
+                    position: 'absolute',
+                    top: i * HOUR_HEIGHT,
+                    left: 0,
+                    right: 0,
+                    height: 0,
+                    borderTop: '1px solid var(--gray-6)',
+                    zIndex: 1
+                  }} />
+                ))}
+                
+                {/* 스케줄 블록 오버레이 */}
+                {getSchedulesForDate(date).map((schedule, idx) => {
+                  const { top, height } = calculateSchedulePosition(schedule.time, schedule.duration * 60);
+                  const statusColor = getStatusColor(schedule.status);
+                  return (
+                    <button
+                      key={idx}
+                      style={{
+                        position: 'absolute',
+                        left: 4,
+                        right: 4,
+                        top,
+                        height,
+                        background: `var(--${statusColor}-3)`,
+                        border: `1px solid var(--${statusColor}-11)`,
+                        borderRadius: 4,
+                        color: `var(--${statusColor}-11)`,
+                        fontSize: 10,
+                        padding: '4px 6px',
+                        zIndex: 10,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 2px 0 rgba(0,0,0,0.08)',
+                        outline: 'none'
+                      }}
+                      onClick={() => navigate(`/main/schedule-detail?id=${schedule.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(`/main/schedule-detail?id=${schedule.id}`);
+                        }
+                      }}
+                    >
+                      <div style={{ fontWeight: 600, fontSize: 11, lineHeight: 1.1 }}>
+                        {schedule.serviceType}
+                      </div>
+                      <div style={{ fontSize: 10, lineHeight: 1.1, marginTop: 1 }}>
+                        {schedule.clientName}
+                      </div>
+                    </button>
+                  );
+                })}
+                
+                {/* 현재 시간 라인 */}
+                {isToday(date) && (
+                  <div style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    top: ((currentTime.getHours() * 60 + currentTime.getMinutes()) / 60) * HOUR_HEIGHT,
+                    height: 2,
+                    background: '#ef4444',
+                    zIndex: 20
+                  }} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      </ScrollArea>
     </div>
   );
 });

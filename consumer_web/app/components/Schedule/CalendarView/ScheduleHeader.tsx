@@ -1,13 +1,13 @@
 import { Flex, Text, Button } from '@radix-ui/themes';
-import { Schedule } from '../../../types/schedule';
 
 interface ScheduleHeaderProps {
   currentWeek: Date;
-  schedules: Schedule[];
+  currentDayIndex: number;
   onNavigateWeek: (direction: 'prev' | 'next' | 'today') => void;
+  onNavigateDays: (direction: 'prev' | 'next' | number) => void;
 }
 
-export default function ScheduleHeader({ currentWeek, schedules, onNavigateWeek }: ScheduleHeaderProps) {
+export default function ScheduleHeader({ currentWeek, currentDayIndex, onNavigateWeek, onNavigateDays }: ScheduleHeaderProps) {
   // 주간 날짜 배열 생성
   const getWeekDates = (startDate: Date) => {
     const dates = [];
@@ -41,18 +41,7 @@ export default function ScheduleHeader({ currentWeek, schedules, onNavigateWeek 
   const weekStart = weekDates[0];
   const weekEnd = weekDates[6];
 
-  // 현재 주의 일정들만 필터링
-  const currentWeekSchedules = schedules.filter(schedule => {
-    const scheduleDate = new Date(schedule.date);
-    return scheduleDate >= weekStart && scheduleDate <= weekEnd;
-  });
 
-  // 통계 계산
-  const upcomingCount = currentWeekSchedules.filter(s => s.status === 'upcoming').length;
-  const completedCount = currentWeekSchedules.filter(s => s.status === 'completed').length;
-  const totalEarnings = currentWeekSchedules
-    .filter(s => s.status === 'completed')
-    .reduce((total, s) => total + (s.duration * s.hourlyRate), 0);
 
   return (
     <Flex direction="column" gap="3" style={{ flexShrink: 0, marginBottom: '16px' }}>
@@ -68,33 +57,53 @@ export default function ScheduleHeader({ currentWeek, schedules, onNavigateWeek 
         </Flex>
       </Flex>
 
-
-
-      {/* 통계 정보 */}
-      <Flex align="center" justify="between">
-        {/* 일정 현황 */}
-        <div className="flex-1">
-          <Flex align="center" justify="between">
-            <Text size="2" color="gray">일정</Text>
-            <Text size="4" weight="bold">
-              {currentWeekSchedules.length}건 중 <span style={{ color: 'var(--accent-9)' }}>{completedCount}건</span> 완료
-            </Text>
-          </Flex>
+      {/* 3일 인디케이터 */}
+      <Flex justify="center" align="center" gap="2">
+        <Button 
+          onClick={() => onNavigateDays('prev')} 
+          variant="ghost" 
+          size="2"
+          disabled={currentDayIndex === 0}
+        >
+          ◀
+        </Button>
+        <div className="grid grid-cols-7 gap-2">
+          {weekDates.map((date, idx) => (
+            <button
+              key={idx}
+              className={`py-2 px-3 rounded-full text-center cursor-pointer transition-colors ${
+                idx >= currentDayIndex && idx < currentDayIndex + 3
+                  ? 'text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              style={{
+                backgroundColor: idx >= currentDayIndex && idx < currentDayIndex + 3
+                  ? 'var(--accent-9)'
+                  : 'var(--gray-3)'
+              }}
+              onClick={() => {
+                // 해당 날짜가 포함된 3일 조합으로 이동
+                const targetIndex = Math.max(0, Math.min(4, idx - 1));
+                onNavigateDays(targetIndex);
+              }}
+            >
+              <Text size="2" weight="medium">{['일', '월', '화', '수', '목', '금', '토'][date.getDay()]}</Text>
+            </button>
+          ))}
         </div>
-        
-        {/* 세로 구분선 */}
-        <div className="w-px h-6 bg-gray-300 mx-4"></div>
-        
-        {/* 해당 주 수익 */}
-        <div className="flex-1">
-          <Flex align="center" justify="between">
-            <Text size="2" color="gray">수익</Text>
-            <Text size="4" weight="bold">
-              ₩{totalEarnings.toLocaleString()}
-            </Text>
-          </Flex>
-        </div>
+        <Button 
+          onClick={() => onNavigateDays('next')} 
+          variant="ghost" 
+          size="2"
+          disabled={currentDayIndex === 4}
+        >
+          ▶
+        </Button>
       </Flex>
+
+
+
+
     </Flex>
   );
 }

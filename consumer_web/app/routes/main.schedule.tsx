@@ -14,6 +14,7 @@ export default function SchedulePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [currentView, setCurrentView] = useState<'calendar' | 'list'>('calendar');
+  const [currentDayIndex, setCurrentDayIndex] = useState(0); // 현재 표시할 3일의 시작 인덱스
 
   useEffect(() => {
     // 더미 데이터 로드
@@ -423,10 +424,26 @@ export default function SchedulePage() {
   const navigateWeek = (direction: 'prev' | 'next' | 'today') => {
     if (direction === 'today') {
       setCurrentWeek(new Date());
+      setCurrentDayIndex(0); // 오늘 날짜로 이동 시 첫 번째 3일로 설정
     } else {
       const newWeek = new Date(currentWeek);
       newWeek.setDate(currentWeek.getDate() + (direction === 'next' ? 7 : -7));
       setCurrentWeek(newWeek);
+      setCurrentDayIndex(0); // 주가 바뀌면 첫 번째 3일로 설정
+    }
+  };
+
+  const navigateDays = (direction: 'prev' | 'next' | number) => {
+    if (typeof direction === 'number') {
+      // 특정 인덱스로 직접 이동
+      setCurrentDayIndex(Math.max(0, Math.min(4, direction)));
+    } else {
+      // prev/next 이동
+      if (direction === 'prev' && currentDayIndex > 0) {
+        setCurrentDayIndex(currentDayIndex - 1);
+      } else if (direction === 'next' && currentDayIndex < 4) { // 0-4 (총 5개 3일 조합)
+        setCurrentDayIndex(currentDayIndex + 1);
+      }
     }
   };
 
@@ -459,12 +476,14 @@ export default function SchedulePage() {
             {/* 캘린더 뷰 헤더 */}
             <ScheduleHeader 
               currentWeek={currentWeek} 
-              schedules={schedules}
+              currentDayIndex={currentDayIndex}
               onNavigateWeek={navigateWeek}
+              onNavigateDays={navigateDays}
             />
             <ScheduleGridBody 
               schedules={schedules} 
               currentWeek={currentWeek} 
+              currentDayIndex={currentDayIndex}
             />
           </>
         ) : (
