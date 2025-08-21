@@ -8,7 +8,8 @@ import {
   TextArea,
   Heading,
   Select,
-  Dialog
+  Dialog,
+  Badge
 } from "@radix-ui/themes";
 import {
   CreditCard,
@@ -74,6 +75,7 @@ export default function ApplicationFormPage() {
   const [isPreferredDaysDialogOpen, setIsPreferredDaysDialogOpen] = useState(false);
   const [isPreferredHoursDialogOpen, setIsPreferredHoursDialogOpen] = useState(false);
   const [isDurationDialogOpen, setIsDurationDialogOpen] = useState(false);
+  const [isApplicationConfirmDialogOpen, setIsApplicationConfirmDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
 
@@ -119,6 +121,12 @@ export default function ApplicationFormPage() {
       return;
     }
 
+    // 신청서 확인 다이얼로그 열기
+    setIsApplicationConfirmDialogOpen(true);
+  };
+
+  const handleConfirmApplication = async () => {
+    setIsApplicationConfirmDialogOpen(false);
     setIsLoading(true);
 
     try {
@@ -137,6 +145,10 @@ export default function ApplicationFormPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEditApplication = () => {
+    setIsApplicationConfirmDialogOpen(false);
   };
 
 
@@ -311,6 +323,112 @@ export default function ApplicationFormPage() {
           </div>
         </div>
       </div>
+
+      {/* 신청서 확인 다이얼로그 */}
+      <Dialog.Root open={isApplicationConfirmDialogOpen} onOpenChange={setIsApplicationConfirmDialogOpen}>
+        <Dialog.Content className="max-w-md">
+          <Flex direction="column" gap="4">
+            <Flex justify="between" align="center">
+              <Dialog.Title className="flex items-center">신청서 확인</Dialog.Title>
+              <Button
+                variant="ghost"
+                size="2"
+                onClick={() => setIsApplicationConfirmDialogOpen(false)}
+                className="flex items-center gap-1 self-center -mt-4"
+              >
+                <X size={16} />
+                <Text size="2" weight="medium">닫기</Text>
+              </Button>
+            </Flex>
+            
+            {/* 안내 멘트 */}
+            <Text size="3" color="gray">
+              작성하신 신청서를 검토해 주세요.<br/>수정이 필요하다면 수정하기를 눌러주세요.
+            </Text>
+            
+            {/* 신청서 내용 카드 */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <Flex direction="column" gap="4">
+                {/* 서비스 유형 및 기간 */}
+                <div>
+                  <Flex justify="between" align="center">
+                    <Text size="2" weight="medium">서비스 유형</Text>
+                    <Badge color="blue">
+                      {serviceTypes.find(s => s.value === form.serviceType)?.label || form.serviceType}
+                    </Badge>
+                  </Flex>
+                </div>
+
+                <div className="w-full h-px bg-gray-200"></div>
+
+                {/* 날짜 및 시간 */}
+                <div>
+                  <Flex justify="between" align="center" className="mb-4">
+                    <Text size="2" weight="medium">서비스 날짜</Text>
+                    <Text size="2" color="gray">
+                      {form.requestedDates.length > 0 ? (
+                        (() => {
+                          const selectedDate = form.requestedDates[0];
+                          const date = new Date(selectedDate);
+                          return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                        })()
+                      ) : (
+                        '선택되지 않음'
+                      )}
+                    </Text>
+                  </Flex>
+                  <Flex justify="between" align="center">
+                    <Text size="2" weight="medium">서비스 시간</Text>
+                    <Text size="2" color="gray">{form.preferredHours.start} ~ {form.preferredHours.end}</Text>
+                  </Flex>
+                  <Flex justify="between" align="center" className="mt-4">
+                    <Text size="2" weight="medium">1회 소요시간</Text>
+                    <Text size="2" color="gray">{form.duration}시간</Text>
+                  </Flex>
+                </div>
+
+                <div className="w-full h-px bg-gray-200"></div>
+
+                {/* 주소 */}
+                <div>
+                  <Flex justify="between" align="center">
+                    <Text size="2" weight="medium">서비스 주소</Text>
+                    <Text size="2">{form.address}</Text>
+                  </Flex>
+                </div>
+
+                {/* 특별 요청사항이 있는 경우에만 표시 */}
+                {form.specialRequests && (
+                  <>
+                    <div className="w-full h-px bg-gray-200"></div>
+                    <div>
+                      <div><Text size="2" weight="medium" className="mb-3">특별 요청사항</Text></div>
+                      <div><Text size="2" className="leading-relaxed whitespace-pre-line">{form.specialRequests}</Text></div>
+                    </div>
+                  </>
+                )}
+              </Flex>
+            </div>
+
+            {/* 버튼 */}
+            <Flex gap="3" className="mt-4">
+              <Button
+                variant="outline"
+                onClick={handleEditApplication}
+                className="flex-1"
+              >
+                수정하기
+              </Button>
+              <Button
+                onClick={handleConfirmApplication}
+                className="flex-1"
+              >
+                후보 보기
+              </Button>
+            </Flex>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
 
       {/* 1회 소요시간 설정 다이얼로그 */}
       <Dialog.Root open={isDurationDialogOpen} onOpenChange={setIsDurationDialogOpen}>
