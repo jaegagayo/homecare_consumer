@@ -90,28 +90,28 @@ export default function HomePage() {
       
       setSchedules([
         {
-          id: "6",
-          time: "14:00 - 16:00",
-          caregiverName: "이요양사",
-          address: "서울시 영등포구 여의도동 789-12",
-          serviceType: "방문요양",
-          status: "upcoming"
-        },
-        {
-          id: "8",
-          time: "10:00 - 12:00",
-          caregiverName: "김요양사",
-          address: "서울시 광진구 구의동",
-          serviceType: "방문요양",
-          status: "upcoming"
-        },
-        {
           id: "1",
           time: "09:00 - 11:00",
-          caregiverName: "박요양사",
+          caregiverName: "김요양사",
           address: "서울시 강남구 역삼동 123-45",
           serviceType: "방문요양",
-          status: "completed"
+          status: "upcoming"
+        },
+        {
+          id: "2",
+          time: "14:00 - 16:00",
+          caregiverName: "박요양사",
+          address: "서울시 서초구 서초동 456-78",
+          serviceType: "방문요양",
+          status: "upcoming"
+        },
+        {
+          id: "3",
+          time: "18:00 - 20:00",
+          caregiverName: "이요양사",
+          address: "서울시 마포구 합정동",
+          serviceType: "방문요양",
+          status: "upcoming"
         }
       ]);
 

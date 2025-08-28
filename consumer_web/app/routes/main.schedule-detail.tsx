@@ -35,67 +35,62 @@ export default function ScheduleDetailPage() {
         const dummySchedules: Schedule[] = [
           {
             id: "1",
-            date: "2025-08-11",
+            date: "2025-08-29",
             time: "09:00 - 11:00",
             clientName: "김영희",
-            
             address: "서울시 강남구 역삼동 123-45",
             serviceType: "방문요양",
-            status: "completed",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 15000
           },
           {
             id: "2",
-            date: "2025-08-11",
+            date: "2025-08-29",
             time: "14:00 - 16:00",
             clientName: "박철수",
-            
             address: "서울시 서초구 서초동 456-78",
             serviceType: "방문요양",
-            status: "completed",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 16000
           },
           {
             id: "3",
-            date: "2025-08-12",
-            time: "08:00 - 10:00",
+            date: "2025-08-29",
+            time: "18:00 - 20:00",
             clientName: "이순자",
-            
             address: "서울시 마포구 합정동",
             serviceType: "방문요양",
-            status: "completed",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 15000
           },
           {
             id: "4",
-            date: "2025-08-12",
-            time: "13:00 - 15:00",
+            date: "2025-08-30",
+            time: "10:00 - 12:00",
             clientName: "최민수",
-            
             address: "서울시 송파구 문정동",
             serviceType: "방문요양",
-            status: "completed",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 17000
           },
           {
             id: "5",
-            date: "2025-08-13",
-            time: "09:00 - 11:00",
+            date: "2025-08-30",
+            time: "15:00 - 17:00",
             clientName: "정미영",
-            
             address: "서울시 강서구 화곡동",
             serviceType: "방문요양",
-            status: "completed",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 15000
           },
           {
             id: "6",
-            date: "2025-08-13",
+            date: "2025-08-31",
             time: "14:00 - 16:00",
             clientName: "김철수",
             
