@@ -41,7 +41,7 @@ export default function RejectionNotification({ rejections }: RejectionNotificat
   return (
     <div>
       <Flex align="center" justify="between" className="mb-4">
-        <Heading size="4">거절 알림</Heading>
+        <Heading size="4">취소된 일정 알림</Heading>
         {rejections.length > 1 && (
           <Flex align="center" gap="4">
             <Button 
@@ -73,7 +73,7 @@ export default function RejectionNotification({ rejections }: RejectionNotificat
             <Flex align="center" gap="2">
               <XCircle size={20} className="text-red-500" />
               <Text size="3" color="gray">
-                거절된 일정이 있습니다. 재매칭이 필요합니다.
+                취소된 일정이 있습니다. 재매칭이 필요합니다.
               </Text>
             </Flex>
 
@@ -121,7 +121,7 @@ export default function RejectionNotification({ rejections }: RejectionNotificat
         </div>
       ) : (
         <div className="bg-white rounded-lg p-6 border border-gray-200 text-center">
-          <Text size="3" color="gray">거절된 서비스 신청이 없습니다</Text>
+          <Text size="3" color="gray">취소된 서비스 신청이 없습니다</Text>
         </div>
       )}
     </div>

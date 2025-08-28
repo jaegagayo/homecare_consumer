@@ -115,7 +115,7 @@ export default function HomePage() {
         }
       ]);
 
-      // 거절 알림 더미 데이터
+      // 취소된 일정 알림 더미 데이터
       setRejections([
         {
           id: "rejected_1",
