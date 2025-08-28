@@ -43,8 +43,10 @@ export default function ScheduleHeader({ currentWeek, currentDayIndex, onNavigat
 
 
 
+
+
   return (
-    <Flex direction="column" gap="3" style={{ flexShrink: 0, marginBottom: '16px' }}>
+    <Flex direction="column" gap="3" style={{ flexShrink: 0, marginBottom: '16px', paddingTop: '4px' }}>
       {/* 날짜 범위와 네비게이션 */}
       <Flex justify="between" align="center">
         <Text size="5" weight="bold">
@@ -82,8 +84,22 @@ export default function ScheduleHeader({ currentWeek, currentDayIndex, onNavigat
                   : 'var(--gray-3)'
               }}
               onClick={() => {
-                // 해당 날짜가 포함된 3일 조합으로 이동
-                const targetIndex = Math.max(0, Math.min(4, idx - 1));
+                // 해당 요일이 3일 중 가운데로 오도록 이동
+                let targetIndex;
+                if (idx <= 1) {
+                  // 일(0), 월(1)은 0-2일 (0,1,2)
+                  targetIndex = 0;
+                } else if (idx >= 5) {
+                  // 금(5), 토(6)는 4-6일 (4,5,6)
+                  targetIndex = 4;
+                } else {
+                  // 화(2), 수(3), 목(4)은 각각 가운데
+                  // 화(2) → 1-3일 (targetIndex = 1)
+                  // 수(3) → 2-4일 (targetIndex = 2)  
+                  // 목(4) → 3-5일 (targetIndex = 3)
+                  targetIndex = idx - 1;
+                }
+
                 onNavigateDays(targetIndex);
               }}
             >
@@ -100,8 +116,6 @@ export default function ScheduleHeader({ currentWeek, currentDayIndex, onNavigat
           ▶
         </Button>
       </Flex>
-
-
 
 
     </Flex>

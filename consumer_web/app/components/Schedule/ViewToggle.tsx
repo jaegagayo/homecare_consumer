@@ -1,4 +1,4 @@
-import { Flex, SegmentedControl, Text } from '@radix-ui/themes';
+import { Button, Text } from '@radix-ui/themes';
 import { CalendarIcon, ListBulletIcon } from '@radix-ui/react-icons';
 
 interface ViewToggleProps {
@@ -7,27 +7,44 @@ interface ViewToggleProps {
 }
 
 export default function ViewToggle({ currentView, onViewChange }: ViewToggleProps) {
+  const handleToggle = () => {
+    onViewChange(currentView === 'calendar' ? 'list' : 'calendar');
+  };
+
   return (
-    <Flex justify="center" style={{ width: '100%', padding: '16px 0' }}>
-      <SegmentedControl.Root 
-        value={currentView} 
-        onValueChange={onViewChange}
-        size="2"
-        style={{ width: '100%' }}
+    <div style={{
+      position: 'fixed',
+      bottom: 'calc(var(--footer-height, 60px) + var(--spacing-lg, 24px))',
+      right: 'var(--spacing-md, 16px)',
+      zIndex: 1000
+    }}>
+      <Button
+        size="3"
+        onClick={handleToggle}
+        style={{
+          borderRadius: '24px',
+          padding: '12px 20px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          minWidth: 'auto',
+          height: 'auto'
+        }}
       >
-        <SegmentedControl.Item value="calendar" style={{ flex: 1 }}>
-          <Flex align="center" gap="1" justify="center">
-            <CalendarIcon width="14" height="14" />
-            <Text size="2">캘린더 보기</Text>
-          </Flex>
-        </SegmentedControl.Item>
-        <SegmentedControl.Item value="list" style={{ flex: 1 }}>
-          <Flex align="center" gap="1" justify="center">
-            <ListBulletIcon width="14" height="14" />
-            <Text size="2">리스트 보기</Text>
-          </Flex>
-        </SegmentedControl.Item>
-      </SegmentedControl.Root>
-    </Flex>
+        {currentView === 'calendar' ? (
+          <>
+            <ListBulletIcon width="18" height="18" />
+            <Text size="2" weight="medium">리스트로 보기</Text>
+          </>
+        ) : (
+          <>
+            <CalendarIcon width="18" height="18" />
+            <Text size="2" weight="medium">캘린더로 보기</Text>
+          </>
+        )}
+      </Button>
+    </div>
   );
 }

@@ -1,7 +1,4 @@
 export { default as ViewToggle } from './ViewToggle';
-
-// CalendarView exports
-export * from './CalendarView';
-
-// ListView exports
-export * from './ListView';
+export { ScheduleListView } from './ListView';
+export { default as ScheduleHeader } from './CalendarView/ScheduleHeader';
+export { default as ScheduleGridBody } from './CalendarView/ScheduleGridBody';

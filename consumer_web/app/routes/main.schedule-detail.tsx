@@ -38,7 +38,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-11",
             time: "09:00 - 11:00",
             clientName: "김영희",
-            caregiverName: "박요양사",
+            
             address: "서울시 강남구 역삼동 123-45",
             serviceType: "방문요양",
             status: "completed",
@@ -50,7 +50,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-11",
             time: "14:00 - 16:00",
             clientName: "박철수",
-            caregiverName: "이요양사",
+            
             address: "서울시 서초구 서초동 456-78",
             serviceType: "방문요양",
             status: "completed",
@@ -62,7 +62,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-12",
             time: "08:00 - 10:00",
             clientName: "이순자",
-            caregiverName: "최요양사",
+            
             address: "서울시 마포구 합정동",
             serviceType: "방문요양",
             status: "completed",
@@ -74,7 +74,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-12",
             time: "13:00 - 15:00",
             clientName: "최민수",
-            caregiverName: "김요양사",
+            
             address: "서울시 송파구 문정동",
             serviceType: "방문요양",
             status: "completed",
@@ -86,7 +86,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-13",
             time: "09:00 - 11:00",
             clientName: "정미영",
-            caregiverName: "박요양사",
+            
             address: "서울시 강서구 화곡동",
             serviceType: "방문요양",
             status: "completed",
@@ -98,7 +98,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-13",
             time: "14:00 - 16:00",
             clientName: "김철수",
-            caregiverName: "이요양사",
+            
             address: "서울시 영등포구 여의도동 789-12",
             serviceType: "방문요양",
             status: "upcoming",
@@ -110,10 +110,10 @@ export default function ScheduleDetailPage() {
             date: "2025-08-13",
             time: "18:00 - 20:00",
             clientName: "박영희",
-            caregiverName: "최요양사",
+            
             address: "서울시 성동구 성수동 345-67",
             serviceType: "방문요양",
-            status: "pending_approval",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 16000
           },
@@ -122,7 +122,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-14",
             time: "10:00 - 12:00",
             clientName: "이미라",
-            caregiverName: "김요양사",
+            
             address: "서울시 광진구 구의동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -136,7 +136,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-14",
             time: "15:00 - 17:00",
             clientName: "최동욱",
-            caregiverName: "박요양사",
+            
             address: "서울시 동대문구 신설동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -148,7 +148,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-15",
             time: "08:00 - 10:00",
             clientName: "한지영",
-            caregiverName: "이요양사",
+            
             address: "서울시 중구 명동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -162,7 +162,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-15",
             time: "13:00 - 15:00",
             clientName: "송민호",
-            caregiverName: "최요양사",
+            
             address: "서울시 용산구 이태원동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -174,7 +174,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-16",
             time: "11:00 - 13:00",
             clientName: "윤서연",
-            caregiverName: "김요양사",
+            
             address: "서울시 서대문구 신촌동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -186,7 +186,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-16",
             time: "16:00 - 18:00",
             clientName: "임태현",
-            caregiverName: "박요양사",
+            
             address: "서울시 종로구 종로",
             serviceType: "방문요양",
             status: "upcoming",
@@ -198,7 +198,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-17",
             time: "09:00 - 11:00",
             clientName: "강미영",
-            caregiverName: "이요양사",
+            
             address: "서울시 노원구 공릉동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -210,7 +210,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-17",
             time: "14:00 - 16:00",
             clientName: "김수진",
-            caregiverName: "박요양사",
+            
             address: "서울시 강남구 청담동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -222,10 +222,10 @@ export default function ScheduleDetailPage() {
             date: "2025-08-17",
             time: "18:00 - 20:00",
             clientName: "이현우",
-            caregiverName: "최요양사",
+            
             address: "서울시 마포구 상암동",
             serviceType: "방문요양",
-            status: "pending_approval",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 16000
           },
@@ -234,7 +234,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-18",
             time: "10:00 - 12:00",
             clientName: "박지민",
-            caregiverName: "최요양사",
+            
             address: "서울시 강북구 번동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -246,7 +246,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-18",
             time: "15:00 - 17:00",
             clientName: "정민수",
-            caregiverName: "김요양사",
+            
             address: "서울시 송파구 잠실동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -258,7 +258,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-19",
             time: "08:00 - 10:00",
             clientName: "최영희",
-            caregiverName: "이요양사",
+            
             address: "서울시 서초구 반포동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -272,7 +272,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-19",
             time: "13:00 - 15:00",
             clientName: "김도현",
-            caregiverName: "박요양사",
+            
             address: "서울시 영등포구 당산동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -284,10 +284,10 @@ export default function ScheduleDetailPage() {
             date: "2025-08-19",
             time: "17:00 - 19:00",
             clientName: "박서연",
-            caregiverName: "최요양사",
+            
             address: "서울시 강서구 화곡동",
             serviceType: "방문요양",
-            status: "pending_approval",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 15000
           },
@@ -296,7 +296,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-20",
             time: "09:00 - 11:00",
             clientName: "이준호",
-            caregiverName: "김요양사",
+            
             address: "서울시 동대문구 답십리동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -308,7 +308,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-20",
             time: "14:00 - 16:00",
             clientName: "정수진",
-            caregiverName: "박요양사",
+            
             address: "서울시 광진구 자양동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -322,7 +322,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-20",
             time: "19:00 - 21:00",
             clientName: "김민지",
-            caregiverName: "이요양사",
+            
             address: "서울시 성동구 왕십리동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -334,7 +334,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-21",
             time: "08:00 - 10:00",
             clientName: "박현우",
-            caregiverName: "최요양사",
+            
             address: "서울시 중구 신당동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -346,7 +346,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-21",
             time: "12:00 - 14:00",
             clientName: "이지은",
-            caregiverName: "김요양사",
+            
             address: "서울시 용산구 한남동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -358,10 +358,10 @@ export default function ScheduleDetailPage() {
             date: "2025-08-21",
             time: "16:00 - 18:00",
             clientName: "최동욱",
-            caregiverName: "박요양사",
+            
             address: "서울시 서대문구 연희동",
             serviceType: "방문요양",
-            status: "pending_approval",
+            status: "upcoming",
             duration: 2,
             hourlyRate: 16000
           },
@@ -370,7 +370,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-22",
             time: "10:00 - 12:00",
             clientName: "김서연",
-            caregiverName: "이요양사",
+            
             address: "서울시 종로구 평창동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -382,7 +382,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-22",
             time: "15:00 - 17:00",
             clientName: "정민호",
-            caregiverName: "최요양사",
+            
             address: "서울시 마포구 합정동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -394,7 +394,7 @@ export default function ScheduleDetailPage() {
             date: "2025-08-22",
             time: "19:00 - 21:00",
             clientName: "박지훈",
-            caregiverName: "김요양사",
+            
             address: "서울시 강남구 논현동",
             serviceType: "방문요양",
             status: "upcoming",
@@ -468,7 +468,7 @@ export default function ScheduleDetailPage() {
   const handleWriteReview = () => {
     if (!schedule) return;
     
-    navigate(`/main/review-write?serviceId=${schedule.id}&caregiverName=${schedule.caregiverName}&serviceType=${schedule.serviceType}&serviceDate=${schedule.date}&serviceTime=${schedule.time}`);
+    navigate(`/main/review-write?serviceId=${schedule.id}&serviceType=${schedule.serviceType}&serviceDate=${schedule.date}&serviceTime=${schedule.time}`);
   };
 
   const handleViewReview = () => {
@@ -512,7 +512,7 @@ export default function ScheduleDetailPage() {
                 {formatDateTime(schedule.date, schedule.time)}
               </Text>
               <Text size="3" weight="medium" color="gray">
-                {schedule.caregiverName} 요양보호사
+                요양보호사
               </Text>
             </Flex>
             <Flex direction="column" align="end" gap="2">
@@ -573,7 +573,7 @@ export default function ScheduleDetailPage() {
             {/* 요양보호사 연락처 */}
             <Flex direction="column" gap="1">
               <Text size="2" color="gray">요양보호사 연락처</Text>
-              <Text size="3" weight="medium">{schedule.caregiverName}</Text>
+              <Text size="3" weight="medium">요양보호사</Text>
               <Text size="2" color="gray">010-1234-5678</Text>
             </Flex>
 
@@ -623,13 +623,10 @@ export default function ScheduleDetailPage() {
         )}
 
         {/* 승인대기, 예정 상태는 안내 메시지 */}
-        {(schedule.status === 'pending_approval' || schedule.status === 'upcoming') && (
+        {(schedule.status === 'upcoming') && (
           <Flex direction="column" gap="3">
             <Text size="2" color="gray" style={{ textAlign: 'center' }}>
-              {schedule.status === 'pending_approval' 
-                ? '승인 대기 중입니다. 승인 완료 후 상세 정보를 확인할 수 있습니다.' 
-                : '확정된 일정입니다.'
-              }
+              '확정된 일정입니다.'
             </Text>
             <Button 
               variant="outline" 

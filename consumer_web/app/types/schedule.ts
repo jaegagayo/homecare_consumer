@@ -3,10 +3,9 @@ export interface Schedule {
   date: string;
   time: string;
   clientName: string;
-  caregiverName: string;
   address: string;
   serviceType: string;
-  status: 'pending_approval' | 'upcoming' | 'completed' | 'cancelled';
+  status: 'upcoming' | 'completed' | 'cancelled';
   duration: number;
   hourlyRate: number;
   isRegular?: boolean;
