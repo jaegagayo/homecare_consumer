@@ -39,9 +39,9 @@ export default function MatchingPage() {
       address: '서울시 강남구 역삼동 123-45',
       specialRequests: '계단이 있는 3층입니다. 보행기 사용이 필요합니다.',
       estimatedUsage: 30000,
-      duration: 2,
+      duration: 120, // 2시간 (분 단위)
       requestedDates: ['2025-01-15'], // 단일 날짜
-      preferredHours: { start: '09:00', end: '11:00' },
+      startTime: '09:00',
       preferredAreas: [] // 신청서에는 선호 지역 선택 기능이 없으므로 빈 배열
     };
   });
@@ -128,7 +128,10 @@ export default function MatchingPage() {
             const date = new Date(selectedDate);
             return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
           })() : '미정',
-        time: `${applicationData.preferredHours.start} ~ ${applicationData.preferredHours.end}`,
+        time: `${applicationData.startTime}부터 ${applicationData.duration >= 60 ? 
+          `${Math.floor(applicationData.duration / 60)}시간${applicationData.duration % 60 > 0 ? ` ${applicationData.duration % 60}분` : ''}` : 
+          `${applicationData.duration}분`
+        }`,
         address: applicationData.address,
         specialRequests: applicationData.specialRequests,
         status: 'pending'

@@ -35,9 +35,6 @@ export interface ApplicationForm {
   estimatedUsage: number;
   duration: number;
   requestedDates: string[];
-  preferredHours: {
-    start: string;
-    end: string;
-  };
+  startTime: string;
   preferredAreas: string[];
 }

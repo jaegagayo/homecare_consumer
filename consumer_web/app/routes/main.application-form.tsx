@@ -38,10 +38,7 @@ interface ApplicationForm {
   // 조건 정보
   duration: number; // 1회 소요시간
   requestedDates: string[]; // 요청 일자 (단일 날짜, YYYY-MM-DD 형식)
-  preferredHours: {
-    start: string;
-    end: string;
-  };
+  startTime: string; // 시작 시간
   preferredAreas: string[];
 }
 
@@ -62,7 +59,6 @@ const serviceTypes: ServiceType[] = [
   { value: 'visiting-nursing', label: '방문간호서비스', description: '전문 간호 서비스' },
 ];
 
-const daysOfWeek = ['월', '화', '수', '목', '금', '토', '일'];
 const timeSlots = [
   '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
   '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
@@ -85,9 +81,9 @@ export default function ApplicationFormPage() {
     address: '',
     specialRequests: '',
     estimatedUsage: 0,
-    duration: 2, // 기본 2시간
+    duration: 120, // 기본 2시간 (분 단위)
     requestedDates: [], // 빈 배열로 시작 (단일 날짜)
-    preferredHours: { start: '09:00', end: '18:00' },
+    startTime: '09:00', // 기본 시작 시간
     preferredAreas: ['서울시 강남구']
   });
 
@@ -105,8 +101,9 @@ export default function ApplicationFormPage() {
     let estimatedCost = 0;
     if (form.serviceType) {
       // 간단한 예상 비용 계산 (실제로는 더 복잡한 로직 필요)
-      const baseHourlyRate = 15000; // 기본 시급
-      estimatedCost = baseHourlyRate * form.duration;
+      const baseHourlyRate = 15000; // 기본 시급 (시간당)
+      const durationInHours = form.duration / 60; // 분을 시간으로 변환
+      estimatedCost = baseHourlyRate * durationInHours;
     }
 
     setForm(prev => ({
@@ -249,11 +246,11 @@ export default function ApplicationFormPage() {
               </Flex>
             </div>
 
-            {/* 가능한 시간대 */}
+            {/* 시작 시간 */}
             <div className="space-y-2">
               <Flex justify="between" align="center" className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 cursor-pointer hover:bg-gray-50" onClick={() => setIsPreferredHoursDialogOpen(true)}>
-                <Text size="2" weight="medium">가능한 시간대</Text>
-                <Text size="2" color="gray">{form.preferredHours.start} ~ {form.preferredHours.end}</Text>
+                <Text size="2" weight="medium">시작 시간</Text>
+                <Text size="2" color="gray">{form.startTime}</Text>
               </Flex>
             </div>
 
@@ -261,7 +258,12 @@ export default function ApplicationFormPage() {
             <div className="space-y-2">
               <Flex justify="between" align="center" className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 cursor-pointer hover:bg-gray-50" onClick={() => setIsDurationDialogOpen(true)}>
                 <Text size="2" weight="medium">1회 소요시간</Text>
-                <Text size="2" color="gray">{form.duration}시간</Text>
+                <Text size="2" color="gray">
+                  {form.duration >= 60 ? 
+                    `${Math.floor(form.duration / 60)}시간${form.duration % 60 > 0 ? ` ${form.duration % 60}분` : ''}` : 
+                    `${form.duration}분`
+                  }
+                </Text>
               </Flex>
             </div>
           </div>
@@ -379,11 +381,22 @@ export default function ApplicationFormPage() {
                   </Flex>
                   <Flex justify="between" align="center">
                     <Text size="2" weight="medium">서비스 시간</Text>
-                    <Text size="2" color="gray">{form.preferredHours.start} ~ {form.preferredHours.end}</Text>
+                    <Text size="2" color="gray">
+                      {form.startTime}부터 {
+                        form.duration >= 60 ? 
+                          `${Math.floor(form.duration / 60)}시간${form.duration % 60 > 0 ? ` ${form.duration % 60}분` : ''}` : 
+                          `${form.duration}분`
+                      }
+                    </Text>
                   </Flex>
                   <Flex justify="between" align="center" className="mt-4">
                     <Text size="2" weight="medium">1회 소요시간</Text>
-                    <Text size="2" color="gray">{form.duration}시간</Text>
+                    <Text size="2" color="gray">
+                      {form.duration >= 60 ? 
+                        `${Math.floor(form.duration / 60)}시간${form.duration % 60 > 0 ? ` ${form.duration % 60}분` : ''}` : 
+                        `${form.duration}분`
+                      }
+                    </Text>
                   </Flex>
                 </div>
 
@@ -447,24 +460,29 @@ export default function ApplicationFormPage() {
               </Button>
             </Flex>
             <Flex direction="column" gap="3">
-              <Text size="2" weight="medium" className="mb-2">시간 선택</Text>
+              <Text size="2" weight="medium" className="mb-2">시간 선택 (30분 단위)</Text>
 
-              <div className="grid grid-cols-2 gap-4">
-                {[1, 2, 3, 4].map((hour) => (
+              <div className="grid grid-cols-3 gap-3">
+                {[60, 90, 120, 150, 180, 210, 240].map((minutes) => (
                   <button
-                    key={hour}
-                    className={`py-3 px-6 rounded-full text-center cursor-pointer transition-colors ${form.duration === hour
+                    key={minutes}
+                    className={`py-3 px-4 rounded-lg text-center cursor-pointer transition-colors ${form.duration === minutes
                         ? 'text-white'
                         : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     style={{
-                      backgroundColor: form.duration === hour
+                      backgroundColor: form.duration === minutes
                         ? 'var(--accent-9)'
                         : 'var(--gray-3)'
                     }}
-                    onClick={() => setForm(prev => ({ ...prev, duration: hour }))}
+                    onClick={() => setForm(prev => ({ ...prev, duration: minutes }))}
                   >
-                    <Text size="2" weight="medium">{hour}시간</Text>
+                    <Text size="2" weight="medium">
+                      {minutes >= 60 ? 
+                        `${Math.floor(minutes / 60)}시간${minutes % 60 > 0 ? ` ${minutes % 60}분` : ''}` : 
+                        `${minutes}분`
+                      }
+                    </Text>
                   </button>
                 ))}
               </div>
@@ -493,12 +511,12 @@ export default function ApplicationFormPage() {
         title="요청 일자 선택"
       />
 
-      {/* 선호 시간대 설정 다이얼로그 */}
+      {/* 시작 시간 설정 다이얼로그 */}
       <Dialog.Root open={isPreferredHoursDialogOpen} onOpenChange={setIsPreferredHoursDialogOpen}>
         <Dialog.Content>
           <Flex direction="column" gap="4">
             <Flex justify="between" align="center">
-              <Dialog.Title className="flex items-center">선호 시간대 설정</Dialog.Title>
+              <Dialog.Title className="flex items-center">시작 시간 설정</Dialog.Title>
               <Button
                 variant="ghost"
                 size="2"
@@ -510,14 +528,14 @@ export default function ApplicationFormPage() {
               </Button>
             </Flex>
             <Flex direction="column" gap="3">
-              <Text size="2" weight="medium" className="mb-2">시간대 선택</Text>
+              <Text size="2" weight="medium" className="mb-2">시작 시간 선택</Text>
 
               <Flex gap="3" align="center" justify="center">
                 <Select.Root
-                  value={form.preferredHours.start}
+                  value={form.startTime}
                   onValueChange={(value) => setForm(prev => ({
                     ...prev,
-                    preferredHours: { ...prev.preferredHours, start: value }
+                    startTime: value
                   }))}
                 >
                   <Select.Trigger className="h-10 text-lg px-6" />
@@ -527,22 +545,7 @@ export default function ApplicationFormPage() {
                     ))}
                   </Select.Content>
                 </Select.Root>
-                <Text size="2" color="gray">부터</Text>
-                <Select.Root
-                  value={form.preferredHours.end}
-                  onValueChange={(value) => setForm(prev => ({
-                    ...prev,
-                    preferredHours: { ...prev.preferredHours, end: value }
-                  }))}
-                >
-                  <Select.Trigger className="h-10 text-lg px-6" />
-                  <Select.Content>
-                    {timeSlots.map((time) => (
-                      <Select.Item key={time} value={time}>{time}</Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Root>
-                <Text size="2" color="gray">까지</Text>
+                <Text size="2" color="gray">부터 시작</Text>
               </Flex>
             </Flex>
 
