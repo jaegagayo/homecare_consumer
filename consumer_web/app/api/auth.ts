@@ -1,17 +1,58 @@
 import { API_CONFIG, API_ENDPOINTS } from './config';
 
-interface LoginRequest {
+// 사용자 생성 요청 타입 (백엔드 UserCreateRequest와 일치)
+export interface UserCreateRequest {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  birthDate: string; // LocalDate를 string으로 변환
+  gender: 'MALE' | 'FEMALE';
+}
+
+// 신청자 생성 요청 타입 (백엔드 ConsumerCreateRequest와 일치)
+export interface ConsumerCreateRequest {
+  residentialAddress: string;
+  visitAddress: string;
+  entranceType: string;
+  careGrade: number;
+  isMedicalAid: boolean;
+  weight: number;
+  disease: string; // Disease enum을 string으로 변환
+  cognitiveStatus: string; // CognitiveStatus enum을 string으로 변환
+  livingSituation: string;
+  guardianName: string;
+  guardianPhone: string;
+}
+
+// 신청자 회원가입 요청 타입 (백엔드 ConsumerSignupRequest와 일치)
+export interface ConsumerSignupRequest {
+  user: UserCreateRequest;
+  consumer: ConsumerCreateRequest;
+}
+
+// 신청자 로그인 요청 타입
+export interface ConsumerLoginRequest {
   email: string;
   password: string;
 }
 
-interface LoginResponse {
-  caregiverId: string;
+// 신청자 로그인 응답 타입
+export interface ConsumerLoginResponse {
+  token: string;
+  consumer: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
 }
 
-export const login = async (email: string, password: string): Promise<LoginResponse> => {
+// 신청자 로그인 API
+export const loginConsumer = async (email: string, password: string): Promise<ConsumerLoginResponse> => {
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.CONSUMER.LOGIN}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,17 +60,18 @@ export const login = async (email: string, password: string): Promise<LoginRespo
       body: JSON.stringify({
         email,
         password,
-      } as LoginRequest),
+      } as ConsumerLoginRequest),
     });
 
     if (!response.ok) {
       throw new Error(`Login failed: ${response.status}`);
     }
 
-    const data: LoginResponse = await response.json();
+    const data: ConsumerLoginResponse = await response.json();
     
-    // caregiverId를 localStorage에 저장
-    localStorage.setItem('caregiverId', data.caregiverId);
+    // 토큰을 localStorage에 저장
+    localStorage.setItem('authToken', data.token);
+    localStorage.setItem('consumerId', data.consumer.id);
     
     return data;
   } catch (error) {
@@ -38,10 +80,43 @@ export const login = async (email: string, password: string): Promise<LoginRespo
   }
 };
 
-export const getStoredCaregiverId = (): string | null => {
-  return localStorage.getItem('caregiverId');
+// 신청자 회원가입 API
+export const registerConsumer = async (request: ConsumerSignupRequest): Promise<void> => {
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.CONSUMER.REGISTER}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Registration failed: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error;
+  }
 };
 
-export const clearStoredCaregiverId = (): void => {
-  localStorage.removeItem('caregiverId');
+// 저장된 신청자 ID 조회
+export const getStoredConsumerId = (): string | null => {
+  return localStorage.getItem('consumerId');
+};
+
+// 저장된 인증 토큰 조회
+export const getStoredAuthToken = (): string | null => {
+  return localStorage.getItem('authToken');
+};
+
+// 로그아웃 (저장된 정보 삭제)
+export const logout = (): void => {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('consumerId');
+};
+
+// 인증 상태 확인
+export const isAuthenticated = (): boolean => {
+  return !!(getStoredAuthToken() && getStoredConsumerId());
 }; 
