@@ -320,12 +320,12 @@ export default function SignupProfile() {
                 onValueChange={(value) => handleChange("medicalBenefit", value)}
               >
                 <Flex direction="column" gap="2">
-                  <label className="flex items-center gap-2">
-                    <RadioGroup.Item value="yes" />
+                  <label className="flex items-center gap-2" htmlFor="medical-benefit-yes">
+                    <RadioGroup.Item value="yes" id="medical-benefit-yes" />
                     <Text size="2">예</Text>
                   </label>
-                  <label className="flex items-center gap-2">
-                    <RadioGroup.Item value="no" />
+                  <label className="flex items-center gap-2" htmlFor="medical-benefit-no">
+                    <RadioGroup.Item value="no" id="medical-benefit-no" />
                     <Text size="2">아니오</Text>
                   </label>
                 </Flex>
@@ -351,15 +351,17 @@ export default function SignupProfile() {
             <Flex direction="column" gap="3">
               <Text size="2" weight="medium">질병 (복수 선택 가능)</Text>
               <Flex direction="column" gap="2">
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2" htmlFor="disease-dementia">
                   <Checkbox 
+                    id="disease-dementia"
                     checked={profileData.diseases.includes("dementia")}
                     onCheckedChange={(checked) => handleDiseaseChange("dementia", checked as boolean)}
                   />
                   <Text size="2">치매</Text>
                 </label>
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2" htmlFor="disease-bedridden">
                   <Checkbox 
+                    id="disease-bedridden"
                     checked={profileData.diseases.includes("bedridden")}
                     onCheckedChange={(checked) => handleDiseaseChange("bedridden", checked as boolean)}
                   />
@@ -407,9 +409,6 @@ export default function SignupProfile() {
       {/* 헤더 */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3">
         <Flex align="center" gap="3">
-          <div className="w-8 h-8 bg-accent-3 rounded-full flex items-center justify-center">
-            <div className="w-4 h-4 text-accent-11">🏠</div>
-          </div>
           <Text size="3" weight="medium">재가가요</Text>
         </Flex>
       </div>

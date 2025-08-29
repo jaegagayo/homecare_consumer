@@ -40,9 +40,6 @@ export default function SignupType() {
           >
             <ArrowLeft size={16} className="text-gray-600" />
           </button>
-          <div className="w-8 h-8 bg-accent-3 rounded-full flex items-center justify-center">
-            <div className="w-4 h-4 text-accent-11">🏠</div>
-          </div>
           <Text size="3" weight="medium">재가가요</Text>
         </Flex>
       </div>

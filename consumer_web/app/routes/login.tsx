@@ -42,9 +42,6 @@ export default function Login() {
       {/* 헤더 */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3">
         <Flex align="center" gap="3">
-          <div className="w-8 h-8 bg-accent-3 rounded-full flex items-center justify-center">
-            <div className="w-4 h-4 text-accent-11">🏠</div>
-          </div>
           <Text size="3" weight="medium">재가가요</Text>
         </Flex>
       </div>
