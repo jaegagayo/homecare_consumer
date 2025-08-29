@@ -6,10 +6,13 @@ import {
   Text, 
   Button,
   Heading,
-  TextArea
+  TextArea,
+  Card,
+  Dialog
 } from "@radix-ui/themes";
 import { 
-  Star
+  Star,
+  X
 } from "lucide-react";
 import { BlacklistRegistrationDialog } from "../components/Blacklist";
 
@@ -40,6 +43,7 @@ export default function ReviewWritePage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBlacklistDialogOpen, setIsBlacklistDialogOpen] = useState(false);
+  const [isRegularServiceDialogOpen, setIsRegularServiceDialogOpen] = useState(false);
 
   const renderStars = (rating: number, interactive: boolean = false) => {
     return (
@@ -84,7 +88,7 @@ export default function ReviewWritePage() {
       // 평점에 따른 후속 처리
       if (reviewForm.rating >= 4) {
         // 4점 이상일 때 정기제안 페이지로 이동
-        navigate(`/main/regular-service-proposal?serviceId=${serviceId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
+        setIsRegularServiceDialogOpen(true);
       } else if (reviewForm.rating <= 2) {
         // 2점 이하일 때 블랙리스트 다이얼로그 표시
         setIsBlacklistDialogOpen(true);
@@ -112,6 +116,16 @@ export default function ReviewWritePage() {
 
   const handleBlacklistCancel = () => {
     setIsBlacklistDialogOpen(false);
+    navigate('/main/home');
+  };
+
+  const handleRegularServiceConfirm = () => {
+    navigate(`/main/regular-service-proposal?serviceId=${serviceId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
+    setIsRegularServiceDialogOpen(false);
+  };
+
+  const handleRegularServiceCancel = () => {
+    setIsRegularServiceDialogOpen(false);
     navigate('/main/home');
   };
 
@@ -191,6 +205,60 @@ export default function ReviewWritePage() {
         onConfirm={handleBlacklistConfirm}
         onCancel={handleBlacklistCancel}
       />
+
+      {/* 정기 신청 확인 다이얼로그 */}
+      <Dialog.Root open={isRegularServiceDialogOpen} onOpenChange={setIsRegularServiceDialogOpen}>
+        <Dialog.Content>
+          <Flex direction="column" gap="4">
+            <Flex justify="between" align="center">
+              <Dialog.Title className="flex items-center">정기 서비스 신청</Dialog.Title>
+              <Button
+                variant="ghost"
+                size="2"
+                onClick={() => setIsRegularServiceDialogOpen(false)}
+                className="flex items-center gap-1 self-center -mt-4"
+              >
+                <X size={16} />
+                <Text size="2" weight="medium">닫기</Text>
+              </Button>
+            </Flex>
+            
+            {/* 안내 문구 */}
+            <Text size="3" color="gray">
+              서비스가 만족스러우셨군요.<br/>
+              해당 요양보호사와 정기 서비스를 신청하시겠습니까?
+            </Text>
+            
+            {/* 서비스 정보 카드 */}
+            <Card className="p-4">
+              <Flex direction="column" gap="2">
+                <Text size="2" weight="medium" color="gray">서비스 정보</Text>
+                <Text size="3" weight="medium">{caregiverName} 요양보호사</Text>
+                <Text size="2" color="gray">
+                  {formatDate(serviceDate || '')} {serviceTime}, {serviceType}
+                </Text>
+              </Flex>
+            </Card>
+
+            {/* CTA 버튼 */}
+            <Flex gap="3" className="mt-4">
+              <Button 
+                variant="outline"
+                onClick={handleRegularServiceCancel}
+                className="flex-1"
+              >
+                나중에 하기
+              </Button>
+              <Button 
+                onClick={handleRegularServiceConfirm}
+                className="flex-1"
+              >
+                정기 서비스 신청
+              </Button>
+            </Flex>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
     </Container>
   );
 }

@@ -68,6 +68,13 @@ export default function RegularServiceProposalPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const recommendationId = searchParams.get('recommendationId');
+  
+  // 리뷰에서 전달되는 파라미터들
+  const serviceId = searchParams.get('serviceId');
+  const caregiverName = searchParams.get('caregiverName');
+  const serviceType = searchParams.get('serviceType');
+  const serviceDate = searchParams.get('serviceDate');
+  const serviceTime = searchParams.get('serviceTime');
 
   const [isPreferredDaysDialogOpen, setIsPreferredDaysDialogOpen] = useState(false);
   const [isPreferredHoursDialogOpen, setIsPreferredHoursDialogOpen] = useState(false);
@@ -98,7 +105,7 @@ export default function RegularServiceProposalPage() {
   // 추천 데이터 로드 (실제로는 API 호출)
   useEffect(() => {
     if (recommendationId) {
-      // 더미 데이터 - 실제로는 API에서 recommendationId로 데이터를 가져와야 함
+      // 기존 추천 ID 기반 로직
       const mockRecommendationData: RecommendationData = {
         id: recommendationId,
         dayOfWeek: "월요일",
@@ -113,33 +120,68 @@ export default function RegularServiceProposalPage() {
       };
 
       setRecommendationData(mockRecommendationData);
-
-      // 시간대 파싱
-      const [startTime, endTime] = mockRecommendationData.timeSlot.split(' - ');
-      
-      // 요일을 요일 배열로 변환
-      const dayMapping: { [key: string]: string } = {
-        '월요일': '월', '화요일': '화', '수요일': '수', '목요일': '목', 
-        '금요일': '금', '토요일': '토', '일요일': '일'
+      initializeFormFromRecommendation(mockRecommendationData);
+    } else if (serviceId && caregiverName) {
+      // 리뷰에서 전달된 파라미터 기반 추천 데이터 생성
+      const getDayOfWeek = (dateString: string) => {
+        const date = new Date(dateString);
+        const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+        return days[date.getDay()];
       };
 
-      // 기간을 날짜로 변환 (현재 날짜 기준)
-      const today = new Date();
-      const startDate = today.toISOString().split('T')[0];
-      const endDate = new Date(today.getTime() + (3 * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]; // 3개월 후
+      const parseTimeSlot = (timeString: string) => {
+        // "09:00-11:00" 형식을 "09:00 - 11:00" 형식으로 변환
+        if (timeString && timeString.includes('-')) {
+          return timeString.replace('-', ' - ');
+        }
+        return "09:00 - 11:00";
+      };
 
-      setForm({
-        serviceType: 'visiting-care',
-        address: '서울시 강남구 테헤란로 123', // 실제로는 사용자 프로필에서 가져와야 함
-        specialRequests: '',
-        estimatedUsage: 0,
-        duration: 2,
-        requestedDates: [startDate, endDate], // 시작일과 종료일
-        preferredHours: { start: startTime, end: endTime },
-        preferredDays: [dayMapping[mockRecommendationData.dayOfWeek] || '월']
-      });
+      const reviewBasedRecommendation: RecommendationData = {
+        id: serviceId,
+        dayOfWeek: getDayOfWeek(serviceDate || new Date().toISOString()),
+        timeSlot: parseTimeSlot(serviceTime || "09:00-11:00"),
+        period: "3개월",
+        caregiverName: caregiverName,
+        serviceType: serviceType || "방문요양",
+        reviewRating: 4.5, // 4점 이상이므로 높은 평점
+        caregiverGender: 'female', // 기본값 또는 API에서 가져옴
+        caregiverAge: 45, // 기본값 또는 API에서 가져옴
+        caregiverExperience: 8 // 기본값 또는 API에서 가져옴
+      };
+
+      setRecommendationData(reviewBasedRecommendation);
+      initializeFormFromRecommendation(reviewBasedRecommendation);
     }
-  }, [recommendationId]);
+  }, [recommendationId, serviceId, caregiverName, serviceType, serviceDate, serviceTime]);
+
+  // 추천 데이터로부터 폼 초기화하는 함수
+  const initializeFormFromRecommendation = (recommendation: RecommendationData) => {
+    // 시간대 파싱
+    const [startTime, endTime] = recommendation.timeSlot.split(' - ');
+    
+    // 요일을 요일 배열로 변환
+    const dayMapping: { [key: string]: string } = {
+      '월요일': '월', '화요일': '화', '수요일': '수', '목요일': '목', 
+      '금요일': '금', '토요일': '토', '일요일': '일'
+    };
+
+    // 기간을 날짜로 변환 (현재 날짜 기준)
+    const today = new Date();
+    const startDate = today.toISOString().split('T')[0];
+    const endDate = new Date(today.getTime() + (3 * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]; // 3개월 후
+
+    setForm({
+      serviceType: 'visiting-care',
+      address: '서울시 강남구 테헤란로 123', // 실제로는 사용자 프로필에서 가져와야 함
+      specialRequests: '',
+      estimatedUsage: 0,
+      duration: 2,
+      requestedDates: [startDate, endDate], // 시작일과 종료일
+      preferredHours: { start: startTime, end: endTime },
+      preferredDays: [dayMapping[recommendation.dayOfWeek] || '월']
+    });
+  };
 
   useEffect(() => {
     // 예상 사용량 계산 (서비스 유형과 소요시간에 따라)
