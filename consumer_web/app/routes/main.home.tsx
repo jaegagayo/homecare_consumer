@@ -13,9 +13,9 @@ import {
   ReviewRequest,
   RegularProposalRecommendation
 } from "../components/Home";
-import { getNextSchedule, getSchedulesWithoutReview } from "../api/home";
+import { getNextSchedule, getSchedulesWithoutReview, getUnreadRecurringOffers } from "../api/home";
 import { getStoredConsumerId } from "../api/auth";
-import { NextScheduleResponse, ScheduleWithoutReviewResponse } from "../types";
+import { NextScheduleResponse, ScheduleWithoutReviewResponse, UnreadRecurringOfferResponse } from "../types";
 
 // 백엔드 API 응답 타입을 사용
 type Schedule = NextScheduleResponse;
@@ -29,14 +29,8 @@ interface RejectedSchedule {
   rejectionReason?: string;
 }
 
-interface RegularProposal {
-  id: string;
-  date: string;
-  time: string;
-  caregiverName: string;
-  serviceType: string;
-  status: 'pending' | 'approved' | 'rejected';
-}
+// 백엔드 API 응답 타입을 사용
+type RegularProposal = UnreadRecurringOfferResponse;
 
 // 백엔드 API 응답 타입을 사용
 type ReviewRequest = ScheduleWithoutReviewResponse;
@@ -96,11 +90,16 @@ export default function HomePage() {
         const reviewRequestsData = await getSchedulesWithoutReview(consumerId);
         setReviewRequests(reviewRequestsData);
 
+        // 정기 제안 알림 API 호출
+        const regularProposalsData = await getUnreadRecurringOffers(consumerId);
+        setRegularProposals(regularProposalsData);
+
       } catch (error) {
         console.error('Failed to load data:', error);
         // 에러 시 빈 배열로 설정
         setSchedules([]);
         setReviewRequests([]);
+        setRegularProposals([]);
       }
 
       // 취소된 일정 알림 더미 데이터
@@ -123,33 +122,7 @@ export default function HomePage() {
         }
       ]);
 
-      // 정기제안 알림 더미 데이터
-      setRegularProposals([
-        {
-          id: "proposal_1",
-          date: "2024-01-20",
-          time: "09:00 - 11:00",
-          caregiverName: "김요양사",
-          serviceType: "방문요양",
-          status: "pending"
-        },
-        {
-          id: "proposal_2",
-          date: "2024-01-22",
-          time: "14:00 - 16:00",
-          caregiverName: "이요양사",
-          serviceType: "방문요양",
-          status: "approved"
-        },
-        {
-          id: "proposal_3",
-          date: "2024-01-25",
-          time: "10:00 - 12:00",
-          caregiverName: "박요양사",
-          serviceType: "방문요양",
-          status: "rejected"
-        }
-      ]);
+
 
       // 정기 제안 추천 더미 데이터
       setRecommendations([

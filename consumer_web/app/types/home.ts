@@ -23,9 +23,11 @@ export interface ScheduleWithoutReviewResponse {
 export interface UnreadRecurringOfferResponse {
   recurringOfferId: string;
   caregiverName: string;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  createdAt: string;
+  serviceStartDate: string;
+  serviceEndDate: string;
+  serviceStartTime: string;
+  serviceEndTime: string;
+  recurringStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 // 정기 제안 추천 조회 응답 타입

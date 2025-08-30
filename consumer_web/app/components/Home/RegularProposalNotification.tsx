@@ -8,15 +8,10 @@ import {
   Button
 } from "@radix-ui/themes";
 import { Info, CheckCircle, XCircle, Calendar, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { UnreadRecurringOfferResponse } from "../../types";
 
-interface RegularProposal {
-  id: string;
-  date: string;
-  time: string;
-  caregiverName: string;
-  serviceType: string;
-  status: 'pending' | 'approved' | 'rejected';
-}
+// 백엔드 API 응답 타입을 사용
+type RegularProposal = UnreadRecurringOfferResponse;
 
 interface RegularProposalNotificationProps {
   proposals: RegularProposal[];
@@ -28,51 +23,51 @@ export default function RegularProposalNotification({ proposals }: RegularPropos
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending': return '승인대기';
-      case 'approved': return '확정';
-      case 'rejected': return '거절';
+      case 'PENDING': return '승인대기';
+      case 'APPROVED': return '확정';
+      case 'REJECTED': return '거절';
       default: return '알 수 없음';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'blue';
-      case 'approved': return 'green';
-      case 'rejected': return 'red';
+      case 'PENDING': return 'blue';
+      case 'APPROVED': return 'green';
+      case 'REJECTED': return 'red';
       default: return 'gray';
     }
   };
 
   const getGuidanceText = (status: string) => {
     switch (status) {
-      case 'pending': return '보호사가 일정을 확인하고 있어요.';
-      case 'approved': return '정기 일정이 확정되었어요.';
-      case 'rejected': return '정기 일정 신청이 거절되었어요.';
+      case 'PENDING': return '보호사가 일정을 확인하고 있어요.';
+      case 'APPROVED': return '정기 일정이 확정되었어요.';
+      case 'REJECTED': return '정기 일정 신청이 거절되었어요.';
       default: return '';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return Info;
-      case 'approved': return CheckCircle;
-      case 'rejected': return XCircle;
+      case 'PENDING': return Info;
+      case 'APPROVED': return CheckCircle;
+      case 'REJECTED': return XCircle;
       default: return Info;
     }
   };
 
   const getStatusIconColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'text-blue-500';
-      case 'approved': return 'text-green-500';
-      case 'rejected': return 'text-red-500';
+      case 'PENDING': return 'text-blue-500';
+      case 'APPROVED': return 'text-green-500';
+      case 'REJECTED': return 'text-red-500';
       default: return 'text-blue-500';
     }
   };
 
   const handleViewDetails = (proposal: RegularProposal) => {
-    navigate(`/main/schedule-detail?id=${proposal.id}`);
+    navigate(`/main/schedule-detail?id=${proposal.recurringOfferId}`);
   };
 
   const handlePrevious = () => {
@@ -118,15 +113,15 @@ export default function RegularProposalNotification({ proposals }: RegularPropos
             <Flex align="center" justify="between">
               <Flex align="center" gap="2">
                 {(() => {
-                  const Icon = getStatusIcon(proposals[currentIndex].status);
-                  return <Icon size={20} className={getStatusIconColor(proposals[currentIndex].status)} />;
+                  const Icon = getStatusIcon(proposals[currentIndex].recurringStatus);
+                  return <Icon size={20} className={getStatusIconColor(proposals[currentIndex].recurringStatus)} />;
                 })()}
                 <Text size="3" color="gray">
-                  {getGuidanceText(proposals[currentIndex].status)}
+                  {getGuidanceText(proposals[currentIndex].recurringStatus)}
                 </Text>
               </Flex>
-              <Badge color={getStatusColor(proposals[currentIndex].status) as any}>
-                {getStatusText(proposals[currentIndex].status)}
+              <Badge color={getStatusColor(proposals[currentIndex].recurringStatus) as 'blue' | 'green' | 'red' | 'gray'}>
+                {getStatusText(proposals[currentIndex].recurringStatus)}
               </Badge>
             </Flex>
 
@@ -134,25 +129,20 @@ export default function RegularProposalNotification({ proposals }: RegularPropos
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <Flex align="center" gap="2">
                 <Calendar size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{proposals[currentIndex].date}</Text>
+                <Text size="3" weight="medium">{proposals[currentIndex].serviceStartDate} ~ {proposals[currentIndex].serviceEndDate}</Text>
               </Flex>
               <Flex align="center" gap="2">
                 <Info size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{proposals[currentIndex].time}</Text>
+                <Text size="3" weight="medium">{proposals[currentIndex].serviceStartTime} - {proposals[currentIndex].serviceEndTime}</Text>
               </Flex>
               <Flex align="center" gap="2">
                 <User size={16} className="text-gray-500" />
                 <Text size="3" weight="medium">{proposals[currentIndex].caregiverName} 요양보호사</Text>
               </Flex>
-              <div className="pt-1">
-                <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded inline-block">
-                  {proposals[currentIndex].serviceType}
-                </Text>
-              </div>
             </div>
 
             {/* CTA 버튼 */}
-            {proposals[currentIndex].status !== 'rejected' && (
+            {proposals[currentIndex].recurringStatus !== 'REJECTED' && (
               <Button 
                 className="w-full"
                 onClick={() => handleViewDetails(proposals[currentIndex])}
