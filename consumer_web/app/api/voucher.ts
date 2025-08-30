@@ -1,12 +1,5 @@
 import { API_CONFIG, API_ENDPOINTS } from './config';
-
-// 바우처 사용 안내 응답 타입
-export interface VoucherUsageGuideResponse {
-  remainingAmount: number;
-  expectedUsageAmount: number;
-  expectedCopay: number;
-  isHighCopayRate: boolean;
-}
+import { VoucherUsageGuideResponse } from '../types';
 
 // 바우처 사용 안내 조회 API
 export const getVoucherUsageGuide = async (consumerId: string): Promise<VoucherUsageGuideResponse> => {

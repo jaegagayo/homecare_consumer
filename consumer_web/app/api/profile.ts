@@ -1,22 +1,8 @@
 import { API_CONFIG, API_ENDPOINTS } from './config';
-
-// 신청자 프로필 수정 요청 타입
-export interface ConsumerProfileUpdateRequest {
-  name?: string;
-  phone?: string;
-  address?: string;
-}
-
-// 신청자 상세 정보 응답 타입
-export interface ConsumerDetailResponse {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import {
+  ConsumerProfileUpdateRequest,
+  ConsumerDetailResponse,
+} from '../types';
 
 // 신청자 프로필 조회 API
 export const getConsumerProfile = async (consumerId: string): Promise<ConsumerDetailResponse> => {

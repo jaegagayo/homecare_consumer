@@ -1,32 +1,8 @@
 import { API_CONFIG, API_ENDPOINTS } from './config';
-
-// 신청자 주간 스케줄 응답 타입
-export interface ConsumerScheduleResponse {
-  serviceMatchId: string;
-  caregiverName: string;
-  serviceDate: string;
-  serviceStartTime: string;
-  serviceEndTime: string;
-  serviceAddress: string;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
-  matchStatus: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
-}
-
-// 신청자 스케줄 상세 응답 타입
-export interface ConsumerScheduleDetailResponse {
-  serviceMatchId: string;
-  caregiverId: string;
-  caregiverName: string;
-  caregiverPhone: string;
-  serviceDate: string;
-  serviceStartTime: string;
-  serviceEndTime: string;
-  serviceAddress: string;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
-  matchStatus: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
-  additionalInformation?: string;
-  reviewId?: string;
-}
+import {
+  ConsumerScheduleResponse,
+  ConsumerScheduleDetailResponse,
+} from '../types';
 
 // 주간 스케줄 조회 API
 export const getConsumerSchedule = async (consumerId: string): Promise<ConsumerScheduleResponse[]> => {

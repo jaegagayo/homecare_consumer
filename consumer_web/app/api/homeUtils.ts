@@ -86,30 +86,4 @@ export const hasNextSchedule = async (): Promise<boolean> => {
   }
 };
 
-// 서비스 타입을 한글로 변환하는 함수
-export const getServiceTypeKorean = (serviceType: string): string => {
-  switch (serviceType) {
-    case 'CARE':
-      return '요양';
-    case 'COMPANION':
-      return '동반';
-    case 'HOUSEKEEPING':
-      return '가사';
-    default:
-      return serviceType;
-  }
-};
 
-// 정기 제안 상태를 한글로 변환하는 함수
-export const getRecurringStatusKorean = (status: string): string => {
-  switch (status) {
-    case 'PENDING':
-      return '승인 대기';
-    case 'APPROVED':
-      return '승인 완료';
-    case 'REJECTED':
-      return '거절';
-    default:
-      return status;
-  }
-};
