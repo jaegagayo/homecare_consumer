@@ -32,10 +32,10 @@ export interface UnreadRecurringOfferResponse {
 
 // 정기 제안 추천 조회 응답 타입
 export interface RecommendRecurringOfferResponse {
-  recurringOfferId: string;
-  caregiverName: string;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
-  averageRating: number;
-  totalReviews: number;
-  createdAt: string;
+  serviceMatchId: string;
+  caregiverId: string;
+  serviceDate: string;
+  serviceStartTime: string;
+  serviceEndTime: string;
+  dayOfWeek: string[];
 }

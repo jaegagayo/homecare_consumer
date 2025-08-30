@@ -7,16 +7,10 @@ import {
   Button
 } from "@radix-ui/themes";
 import { Star, Calendar, Clock, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { RecommendRecurringOfferResponse } from "../../types";
 
-interface RegularProposalRecommendation {
-  id: string;
-  dayOfWeek: string;
-  timeSlot: string;
-  period: string;
-  caregiverName: string;
-  serviceType: string;
-  reviewRating: number;
-}
+// 백엔드 API 응답 타입을 사용
+type RegularProposalRecommendation = RecommendRecurringOfferResponse;
 
 interface RegularProposalRecommendationProps {
   recommendations: RegularProposalRecommendation[];
@@ -27,7 +21,7 @@ export default function RegularProposalRecommendation({ recommendations }: Regul
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleApply = (recommendation: RegularProposalRecommendation) => {
-    navigate(`/main/regular-service-proposal?recommendationId=${recommendation.id}`);
+    navigate(`/main/regular-service-proposal?recommendationId=${recommendation.serviceMatchId}`);
   };
 
   const handlePrevious = () => {
@@ -77,25 +71,20 @@ export default function RegularProposalRecommendation({ recommendations }: Regul
               </Text>
             </Flex>
 
-            {/* 제안 요약 (요일/시간대/기간) */}
+            {/* 제안 요약 (요일/시간대/날짜) */}
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <Flex align="center" gap="2">
                 <Calendar size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{recommendations[currentIndex].dayOfWeek}</Text>
+                <Text size="3" weight="medium">{recommendations[currentIndex].dayOfWeek.join(', ')}</Text>
               </Flex>
               <Flex align="center" gap="2">
                 <Clock size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{recommendations[currentIndex].timeSlot}</Text>
+                <Text size="3" weight="medium">{recommendations[currentIndex].serviceStartTime} - {recommendations[currentIndex].serviceEndTime}</Text>
               </Flex>
               <Flex align="center" gap="2">
                 <CalendarDays size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{recommendations[currentIndex].period}</Text>
+                <Text size="3" weight="medium">{recommendations[currentIndex].serviceDate}</Text>
               </Flex>
-              <div className="pt-1">
-                <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded inline-block">
-                  {recommendations[currentIndex].serviceType}
-                </Text>
-              </div>
             </div>
 
             {/* 신청하기 CTA 버튼 */}

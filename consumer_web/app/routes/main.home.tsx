@@ -13,9 +13,9 @@ import {
   ReviewRequest,
   RegularProposalRecommendation
 } from "../components/Home";
-import { getNextSchedule, getSchedulesWithoutReview, getUnreadRecurringOffers } from "../api/home";
+import { getNextSchedule, getSchedulesWithoutReview, getUnreadRecurringOffers, getRecommendRecurringOffers } from "../api/home";
 import { getStoredConsumerId } from "../api/auth";
-import { NextScheduleResponse, ScheduleWithoutReviewResponse, UnreadRecurringOfferResponse } from "../types";
+import { NextScheduleResponse, ScheduleWithoutReviewResponse, UnreadRecurringOfferResponse, RecommendRecurringOfferResponse } from "../types";
 
 // 백엔드 API 응답 타입을 사용
 type Schedule = NextScheduleResponse;
@@ -35,15 +35,8 @@ type RegularProposal = UnreadRecurringOfferResponse;
 // 백엔드 API 응답 타입을 사용
 type ReviewRequest = ScheduleWithoutReviewResponse;
 
-interface RegularProposalRecommendation {
-  id: string;
-  dayOfWeek: string;
-  timeSlot: string;
-  period: string;
-  caregiverName: string;
-  serviceType: string;
-  reviewRating: number;
-}
+// 백엔드 API 응답 타입을 사용
+type RegularProposalRecommendation = RecommendRecurringOfferResponse;
 
 export default function HomePage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -94,12 +87,17 @@ export default function HomePage() {
         const regularProposalsData = await getUnreadRecurringOffers(consumerId);
         setRegularProposals(regularProposalsData);
 
+        // 정기 제안 추천 API 호출
+        const recommendationsData = await getRecommendRecurringOffers(consumerId);
+        setRecommendations(recommendationsData);
+
       } catch (error) {
         console.error('Failed to load data:', error);
         // 에러 시 빈 배열로 설정
         setSchedules([]);
         setReviewRequests([]);
         setRegularProposals([]);
+        setRecommendations([]);
       }
 
       // 취소된 일정 알림 더미 데이터
@@ -124,36 +122,7 @@ export default function HomePage() {
 
 
 
-      // 정기 제안 추천 더미 데이터
-      setRecommendations([
-        {
-          id: "rec_1",
-          dayOfWeek: "월요일",
-          timeSlot: "09:00 - 11:00",
-          period: "3개월",
-          caregiverName: "김요양사",
-          serviceType: "방문요양",
-          reviewRating: 4.5
-        },
-        {
-          id: "rec_2",
-          dayOfWeek: "수요일",
-          timeSlot: "14:00 - 16:00",
-          period: "6개월",
-          caregiverName: "이요양사",
-          serviceType: "방문요양",
-          reviewRating: 4.8
-        },
-        {
-          id: "rec_3",
-          dayOfWeek: "금요일",
-          timeSlot: "10:00 - 12:00",
-          period: "12개월",
-          caregiverName: "최요양사",
-          serviceType: "방문요양",
-          reviewRating: 4.9
-        }
-      ]);
+
 
       setIsLoading(false);
     };
