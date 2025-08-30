@@ -27,9 +27,8 @@ export const loginConsumer = async (email: string, password: string): Promise<Co
 
     const data: ConsumerLoginResponse = await response.json();
     
-    // 토큰을 localStorage에 저장
-    localStorage.setItem('authToken', data.token);
-    localStorage.setItem('consumerId', data.consumer.id);
+    // consumerId를 localStorage에 저장
+    localStorage.setItem('consumerId', data.consumerId);
     
     return data;
   } catch (error) {
@@ -63,18 +62,12 @@ export const getStoredConsumerId = (): string | null => {
   return localStorage.getItem('consumerId');
 };
 
-// 저장된 인증 토큰 조회
-export const getStoredAuthToken = (): string | null => {
-  return localStorage.getItem('authToken');
-};
-
 // 로그아웃 (저장된 정보 삭제)
 export const logout = (): void => {
-  localStorage.removeItem('authToken');
   localStorage.removeItem('consumerId');
 };
 
 // 인증 상태 확인
 export const isAuthenticated = (): boolean => {
-  return !!(getStoredAuthToken() && getStoredConsumerId());
+  return !!getStoredConsumerId();
 }; 

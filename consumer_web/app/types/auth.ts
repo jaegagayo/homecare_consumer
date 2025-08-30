@@ -35,14 +35,7 @@ export interface ConsumerLoginRequest {
   password: string;
 }
 
-// 신청자 로그인 응답 타입
+// 신청자 로그인 응답 타입 (백엔드 ConsumerLoginResponse와 일치)
 export interface ConsumerLoginResponse {
-  token: string;
-  consumer: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-  };
+  consumerId: string;
 }

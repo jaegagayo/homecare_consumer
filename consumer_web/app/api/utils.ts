@@ -1,4 +1,4 @@
-import { getStoredConsumerId, getStoredAuthToken } from './auth';
+import { getStoredConsumerId } from './auth';
 
 // HTTP 클라이언트 유틸리티
 export class HttpClient {
@@ -15,12 +15,10 @@ export class HttpClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const token = getStoredAuthToken();
 
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
@@ -84,14 +82,9 @@ export const apiUtils = {
     return consumerId;
   },
 
-  // 인증 토큰 가져오기
-  getAuthToken: (): string | null => {
-    return getStoredAuthToken();
-  },
-
   // 인증 상태 확인
   isAuthenticated: (): boolean => {
-    return !!(getStoredAuthToken() && getStoredConsumerId());
+    return !!getStoredConsumerId();
   },
 
   // 서비스 타입을 한글로 변환

@@ -8,6 +8,7 @@ import {
   TextField,
   Callout
 } from "@radix-ui/themes";
+import { loginConsumer } from "../api/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -22,15 +23,15 @@ export default function Login() {
     setError("");
 
     try {
-      // 더미 로그인 - 실제 API 호출로 대체 필요
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 실제 API 호출
+      const response = await loginConsumer(email, password);
       
-      // 로그인 성공 시 토큰 저장
-      localStorage.setItem("consumer_token", "dummy_token");
-      localStorage.setItem("consumer_email", email);
+      // consumerId는 loginConsumer 함수 내에서 자동으로 저장됨
+      // localStorage.setItem('consumerId', response.consumerId);
       
       navigate("/main/home");
     } catch (err) {
+      console.error('로그인 실패:', err);
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
     } finally {
       setIsLoading(false);
