@@ -2,7 +2,6 @@ import { useNavigate } from "@remix-run/react";
 import { 
   Flex, 
   Text,
-  Badge,
   Heading,
   Button
 } from "@radix-ui/themes";
@@ -28,10 +27,6 @@ export default function NextVisitSchedule({ schedules }: NextVisitScheduleProps)
     }
   };
 
-  const formatTime = (startTime: string, endTime: string) => {
-    return `${startTime.substring(0, 5)} - ${endTime.substring(0, 5)}`;
-  };
-
   const calculateTimeRemaining = (serviceDate: string, startTime: string) => {
     // 서비스 날짜와 시작 시간을 결합하여 Date 객체 생성
     const scheduleDateTime = new Date(`${serviceDate}T${startTime}`);
@@ -52,15 +47,6 @@ export default function NextVisitSchedule({ schedules }: NextVisitScheduleProps)
     } else {
       return `${diffMinutes}분`;
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long'
-    });
   };
 
   // 다음 일정이 있는지 확인 (현재 날짜 이후의 일정)
@@ -95,16 +81,16 @@ export default function NextVisitSchedule({ schedules }: NextVisitScheduleProps)
             </div>
             <div>
               <Text size="3" color="gray">
-                시작까지 {calculateTimeRemaining(nextSchedule.serviceDate, nextSchedule.serviceStartTime)} 전 ({formatTime(nextSchedule.serviceStartTime, nextSchedule.serviceEndTime)})
+                시작까지 {calculateTimeRemaining(nextSchedule.serviceDate, nextSchedule.serviceStartTime)} 전 ({nextSchedule.serviceStartTime} - {nextSchedule.serviceEndTime})
               </Text>
             </div>
             <div className="border-t border-gray-200 pt-3">
               <Flex justify="between" align="center">
                 <Flex align="center" gap="2">
                   <Clock size={16} className="text-gray-500" />
-                  <Text size="2" color="gray">{formatTime(nextSchedule.serviceStartTime, nextSchedule.serviceEndTime)}</Text>
+                  <Text size="2" color="gray">{nextSchedule.serviceStartTime} - {nextSchedule.serviceEndTime}</Text>
                 </Flex>
-                <Text size="2" color="gray">{formatDate(nextSchedule.serviceDate)}</Text>
+                <Text size="2" color="gray">{nextSchedule.serviceDate}</Text>
               </Flex>
             </div>
             <div className="pt-2">

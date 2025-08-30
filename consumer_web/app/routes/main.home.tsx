@@ -13,9 +13,9 @@ import {
   ReviewRequest,
   RegularProposalRecommendation
 } from "../components/Home";
-import { getNextSchedule } from "../api/home";
+import { getNextSchedule, getSchedulesWithoutReview } from "../api/home";
 import { getStoredConsumerId } from "../api/auth";
-import { NextScheduleResponse } from "../types";
+import { NextScheduleResponse, ScheduleWithoutReviewResponse } from "../types";
 
 // 백엔드 API 응답 타입을 사용
 type Schedule = NextScheduleResponse;
@@ -38,14 +38,8 @@ interface RegularProposal {
   status: 'pending' | 'approved' | 'rejected';
 }
 
-interface ReviewRequest {
-  id: string;
-  date: string;
-  time: string;
-  caregiverName: string;
-  serviceType: string;
-  completedAt: string;
-}
+// 백엔드 API 응답 타입을 사용
+type ReviewRequest = ScheduleWithoutReviewResponse;
 
 interface RegularProposalRecommendation {
   id: string;
@@ -97,19 +91,16 @@ export default function HomePage() {
         } else {
           setSchedules([]);
         }
+
+        // 리뷰 요청 API 호출
+        const reviewRequestsData = await getSchedulesWithoutReview(consumerId);
+        setReviewRequests(reviewRequestsData);
+
       } catch (error) {
-        console.error('Failed to load next schedule:', error);
-        // 에러 시 더미 데이터 사용
-        setSchedules([
-          {
-            caregiverName: "김요양사",
-            serviceDate: "2024-01-20",
-            serviceStartTime: "09:00:00",
-            serviceEndTime: "11:00:00",
-            serviceAddress: "서울시 강남구 역삼동 123-45",
-            serviceType: "CARE"
-          }
-        ]);
+        console.error('Failed to load data:', error);
+        // 에러 시 빈 배열로 설정
+        setSchedules([]);
+        setReviewRequests([]);
       }
 
       // 취소된 일정 알림 더미 데이터
@@ -157,34 +148,6 @@ export default function HomePage() {
           caregiverName: "박요양사",
           serviceType: "방문요양",
           status: "rejected"
-        }
-      ]);
-
-      // 리뷰 요청 더미 데이터
-      setReviewRequests([
-        {
-          id: "review_1",
-          date: "2024-01-18",
-          time: "14:00 - 16:00",
-          caregiverName: "최요양사",
-          serviceType: "방문요양",
-          completedAt: "2024-01-18T16:00:00"
-        },
-        {
-          id: "review_2",
-          date: "2024-01-16",
-          time: "10:00 - 12:00",
-          caregiverName: "박요양사",
-          serviceType: "방문요양",
-          completedAt: "2024-01-16T12:00:00"
-        },
-        {
-          id: "review_3",
-          date: "2024-01-14",
-          time: "09:00 - 11:00",
-          caregiverName: "정요양사",
-          serviceType: "방문요양",
-          completedAt: "2024-01-14T11:00:00"
         }
       ]);
 

@@ -7,15 +7,10 @@ import {
   Button
 } from "@radix-ui/themes";
 import { Calendar, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { ScheduleWithoutReviewResponse } from "../../types";
 
-interface ReviewRequest {
-  id: string;
-  date: string;
-  time: string;
-  caregiverName: string;
-  serviceType: string;
-  completedAt: string;
-}
+// 백엔드 API 응답 타입을 사용
+type ReviewRequest = ScheduleWithoutReviewResponse;
 
 interface ReviewRequestProps {
   reviewRequests: ReviewRequest[];
@@ -25,8 +20,19 @@ export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const getServiceTypeKorean = (serviceType: string) => {
+    switch (serviceType) {
+      case 'CARE': return '요양';
+      case 'COMPANION': return '동반';
+      case 'HOUSEKEEPING': return '가사';
+      default: return serviceType;
+    }
+  };
+
+
+
   const handleWriteReview = (reviewRequest: ReviewRequest) => {
-    navigate(`/main/review-write?id=${reviewRequest.id}`);
+    navigate(`/main/review-write?id=${reviewRequest.serviceMatchId}`);
   };
 
   const handlePrevious = () => {
@@ -83,15 +89,15 @@ export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
               </Flex>
               <Flex align="center" gap="2">
                 <Calendar size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{reviewRequests[currentIndex].date}</Text>
+                <Text size="3" weight="medium">{reviewRequests[currentIndex].serviceDate}</Text>
               </Flex>
               <Flex align="center" gap="2">
                 <Clock size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{reviewRequests[currentIndex].time}</Text>
+                <Text size="3" weight="medium">{reviewRequests[currentIndex].serviceStartTime} - {reviewRequests[currentIndex].serviceEndTime}</Text>
               </Flex>
               <div className="pt-1">
                 <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded inline-block">
-                  {reviewRequests[currentIndex].serviceType}
+                  {getServiceTypeKorean(reviewRequests[currentIndex].serviceType)}
                 </Text>
               </div>
             </div>
