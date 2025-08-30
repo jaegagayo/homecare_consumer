@@ -1,6 +1,5 @@
 // 다음 일정 조회 응답 타입
 export interface NextScheduleResponse {
-  serviceMatchId: string;
   caregiverName: string;
   serviceDate: string;
   serviceStartTime: string;

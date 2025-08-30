@@ -13,15 +13,12 @@ import {
   ReviewRequest,
   RegularProposalRecommendation
 } from "../components/Home";
+import { getNextSchedule } from "../api/home";
+import { getStoredConsumerId } from "../api/auth";
+import { NextScheduleResponse } from "../types";
 
-interface Schedule {
-  id: string;
-  time: string;
-  caregiverName: string;
-  address: string;
-  serviceType: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-}
+// 백엔드 API 응답 타입을 사용
+type Schedule = NextScheduleResponse;
 
 interface RejectedSchedule {
   id: string;
@@ -84,36 +81,36 @@ export default function HomePage() {
     // 실제로는 API에서 사용자 정보를 가져와야 함
     setUserName("김소비");
 
-    // 더미 데이터 로드
+    // API 데이터 로드
     const loadData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSchedules([
-        {
-          id: "1",
-          time: "09:00 - 11:00",
-          caregiverName: "김요양사",
-          address: "서울시 강남구 역삼동 123-45",
-          serviceType: "방문요양",
-          status: "upcoming"
-        },
-        {
-          id: "2",
-          time: "14:00 - 16:00",
-          caregiverName: "박요양사",
-          address: "서울시 서초구 서초동 456-78",
-          serviceType: "방문요양",
-          status: "upcoming"
-        },
-        {
-          id: "3",
-          time: "18:00 - 20:00",
-          caregiverName: "이요양사",
-          address: "서울시 마포구 합정동",
-          serviceType: "방문요양",
-          status: "upcoming"
+      try {
+        const consumerId = getStoredConsumerId();
+        if (!consumerId) {
+          throw new Error('Consumer ID not found');
         }
-      ]);
+
+        // 다음 일정 조회 API 호출
+        const nextScheduleData = await getNextSchedule(consumerId);
+        
+        if (nextScheduleData) {
+          setSchedules([nextScheduleData]);
+        } else {
+          setSchedules([]);
+        }
+      } catch (error) {
+        console.error('Failed to load next schedule:', error);
+        // 에러 시 더미 데이터 사용
+        setSchedules([
+          {
+            caregiverName: "김요양사",
+            serviceDate: "2024-01-20",
+            serviceStartTime: "09:00:00",
+            serviceEndTime: "11:00:00",
+            serviceAddress: "서울시 강남구 역삼동 123-45",
+            serviceType: "CARE"
+          }
+        ]);
+      }
 
       // 취소된 일정 알림 더미 데이터
       setRejections([
