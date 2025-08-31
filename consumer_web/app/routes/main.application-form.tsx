@@ -12,19 +12,17 @@ import {
   Badge
 } from "@radix-ui/themes";
 import {
-  CreditCard,
   Info,
   X
 } from "lucide-react";
 import { DatePickerDialog } from "../components/DatePicker";
+import { VoucherInfoDisplay } from "../components/VoucherInfo";
 
 interface ServiceType {
   value: string;
   label: string;
   description: string;
 }
-
-
 
 interface ApplicationForm {
   // 기본 정보
@@ -40,14 +38,6 @@ interface ApplicationForm {
   requestedDates: string[]; // 요청 일자 (단일 날짜, YYYY-MM-DD 형식)
   startTime: string; // 시작 시간
   preferredAreas: string[];
-}
-
-interface VoucherInfo {
-  selectedGrade: string;
-  voucherLimit: number;
-  currentUsage: number;
-  selfPayAmount: number;
-  isMedicalBenefitRecipient: boolean;
 }
 
 const serviceTypes: ServiceType[] = [
@@ -87,14 +77,7 @@ export default function ApplicationFormPage() {
     preferredAreas: ['서울시 강남구']
   });
 
-  // 바우처 정보 (실제로는 프로필에서 가져와야 함)
-  const [voucherInfo] = useState<VoucherInfo>({
-    selectedGrade: '3등급',
-    voucherLimit: 1295400,
-    currentUsage: 1200000, // 사용량을 높여서 남은 금액이 적게 설정
-    selfPayAmount: 194310,
-    isMedicalBenefitRecipient: false
-  });
+
 
   useEffect(() => {
     // 예상 사용량 계산 (서비스 유형과 소요시간에 따라)
@@ -148,10 +131,6 @@ export default function ApplicationFormPage() {
     setIsApplicationConfirmDialogOpen(false);
   };
 
-
-
-
-
   // 날짜 선택 다이얼로그 핸들러
   const handleDateConfirm = (dates: string[]) => {
     // 단일 날짜만 사용 (첫 번째 날짜)
@@ -164,15 +143,9 @@ export default function ApplicationFormPage() {
     setIsPreferredDaysDialogOpen(false);
   };
 
-  // 바우처 정보 계산 (단순화)
-  const totalUsage = voucherInfo.currentUsage + form.estimatedUsage;
-  const remainingAmount = voucherInfo.voucherLimit - totalUsage;
-
   return (
     <Container size="2" className="p-4">
       <Flex direction="column" gap="6">
-
-
 
         {/* 서비스 신청서 */}
         <div className="space-y-6">
@@ -296,35 +269,10 @@ export default function ApplicationFormPage() {
       </Flex>
 
       {/* 플로팅 바우처 정보 */}
-      <div className="fixed bottom-20 left-0 right-0 z-50 px-4">
-        <div className="max-w-md mx-auto">
-          <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-            <Flex align="center" justify="between" className="mb-2">
-              <Flex align="center" gap="2">
-                <CreditCard size={16} className="text-blue-600" />
-                <Text size="2" weight="medium">바우처 현황</Text>
-              </Flex>
-            </Flex>
-            <Flex direction="column" gap="1">
-              <Flex justify="between">
-                <Text size="1" color="gray">예상 사용 금액</Text>
-                <Text size="1" weight="medium">{form.estimatedUsage.toLocaleString()}원</Text>
-              </Flex>
-              <Flex justify="between">
-                <Text size="1" color="gray">남은 금액</Text>
-                <Text
-                  size="1"
-                  weight="medium"
-                  color={remainingAmount < 0 ? "red" : remainingAmount < 100000 ? "orange" : "green"}
-                >
-                  {remainingAmount.toLocaleString()}원
-                </Text>
-              </Flex>
-            </Flex>
-
-          </div>
-        </div>
-      </div>
+      <VoucherInfoDisplay 
+        estimatedUsage={form.estimatedUsage}
+        variant="floating"
+      />
 
       {/* 신청서 확인 다이얼로그 */}
       <Dialog.Root open={isApplicationConfirmDialogOpen} onOpenChange={setIsApplicationConfirmDialogOpen}>

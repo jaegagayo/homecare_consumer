@@ -12,10 +12,10 @@ import {
   Badge
 } from "@radix-ui/themes";
 import { 
-  CreditCard,
   X
 } from "lucide-react";
 import { DatePickerDialog } from "../components/DatePicker";
+import { VoucherInfoDisplay } from "../components/VoucherInfo";
 
 interface RegularServiceForm {
   // 기본 정보
@@ -48,16 +48,6 @@ interface RecommendationData {
   caregiverAge: number;
   caregiverExperience: number;
 }
-
-interface VoucherInfo {
-  selectedGrade: string;
-  voucherLimit: number;
-  currentUsage: number;
-  selfPayAmount: number;
-  isMedicalBenefitRecipient: boolean;
-}
-
-
 
 const timeSlots = [
   '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
@@ -93,14 +83,7 @@ export default function RegularServiceProposalPage() {
     preferredDays: []
   });
 
-  // 바우처 정보 (실제로는 프로필에서 가져와야 함)
-  const [voucherInfo] = useState<VoucherInfo>({
-    selectedGrade: '3등급',
-    voucherLimit: 1295400,
-    currentUsage: 1200000,
-    selfPayAmount: 194310,
-    isMedicalBenefitRecipient: false
-  });
+
 
   // 추천 데이터 로드 (실제로는 API 호출)
   useEffect(() => {
@@ -226,10 +209,6 @@ export default function RegularServiceProposalPage() {
   const handleDateDialogClose = () => {
     setIsPreferredDaysDialogOpen(false);
   };
-
-  // 바우처 정보 계산
-  const totalUsage = voucherInfo.currentUsage + form.estimatedUsage;
-  const remainingAmount = voucherInfo.voucherLimit - totalUsage;
 
   if (!recommendationData) {
     return (
@@ -393,34 +372,10 @@ export default function RegularServiceProposalPage() {
       </Flex>
 
       {/* 플로팅 바우처 정보 */}
-      <div className="fixed bottom-20 left-0 right-0 z-50 px-4">
-        <div className="max-w-md mx-auto">
-          <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-            <Flex align="center" justify="between" className="mb-2">
-              <Flex align="center" gap="2">
-                <CreditCard size={16} className="text-blue-600" />
-                <Text size="2" weight="medium">바우처 현황</Text>
-              </Flex>
-            </Flex>
-            <Flex direction="column" gap="1">
-              <Flex justify="between">
-                <Text size="1" color="gray">예상 사용 금액</Text>
-                <Text size="1" weight="medium">{form.estimatedUsage.toLocaleString()}원</Text>
-              </Flex>
-              <Flex justify="between">
-                <Text size="1" color="gray">남은 금액</Text>
-                <Text
-                  size="1"
-                  weight="medium"
-                  color={remainingAmount < 0 ? "red" : remainingAmount < 100000 ? "orange" : "green"}
-                >
-                  {remainingAmount.toLocaleString()}원
-                </Text>
-              </Flex>
-            </Flex>
-          </div>
-        </div>
-      </div>
+      <VoucherInfoDisplay 
+        estimatedUsage={form.estimatedUsage}
+        variant="floating"
+      />
 
       {/* 1회 소요시간 설정 다이얼로그 */}
       <Dialog.Root open={isDurationDialogOpen} onOpenChange={setIsDurationDialogOpen}>
