@@ -1,9 +1,9 @@
 import { Flex, Text, Card } from '@radix-ui/themes';
 import { CreditCard } from 'lucide-react';
-import { Schedule } from '../../../types/schedule';
+import { ConsumerScheduleDetailResponse } from '../../../types/schedule';
 
 interface PaymentInfoCardProps {
-  schedule: Schedule;
+  schedule: ConsumerScheduleDetailResponse;
 }
 
 export default function PaymentInfoCard({ schedule }: PaymentInfoCardProps) {
@@ -32,7 +32,7 @@ export default function PaymentInfoCard({ schedule }: PaymentInfoCardProps) {
         <div>
           <Flex justify="between" align="center" className="mb-2">
             <Text size="2" weight="medium">시간당 요금</Text>
-            <Text size="2" weight="medium">₩{schedule.hourlyRate.toLocaleString()}</Text>
+            <Text size="2" weight="medium">₩15,000</Text>
           </Flex>
           <Flex justify="between" align="center">
             <Text size="2" weight="medium">서비스 시간</Text>
@@ -46,7 +46,7 @@ export default function PaymentInfoCard({ schedule }: PaymentInfoCardProps) {
         <Flex justify="between" align="center">
           <Text size="3" weight="medium">총 금액</Text>
           <Text size="4" weight="bold" style={{ color: 'var(--accent-9)' }}>
-            ₩{(schedule.hourlyRate * schedule.duration).toLocaleString()}
+            ₩{(15000 * schedule.duration).toLocaleString()}
           </Text>
         </Flex>
       </Flex>

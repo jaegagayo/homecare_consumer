@@ -1,9 +1,9 @@
 import { Flex, Text, Card, Button } from '@radix-ui/themes';
 import { Phone, User, Contact } from 'lucide-react';
-import { Schedule } from '../../../types/schedule';
+import { ConsumerScheduleDetailResponse } from '../../../types/schedule';
 
 interface CaregiverInfoCardProps {
-  schedule: Schedule;
+  schedule: ConsumerScheduleDetailResponse;
 }
 
 export default function CaregiverInfoCard({ schedule }: CaregiverInfoCardProps) {
@@ -36,11 +36,11 @@ export default function CaregiverInfoCard({ schedule }: CaregiverInfoCardProps) 
         <Flex gap="3" align="center">
           <User size={16} style={{ color: 'var(--accent-9)' }} />
           <Flex direction="column" gap="1" style={{ flex: 1 }}>
-            <Text size="3" weight="medium">요양보호사</Text>
-            <Text size="2" color="gray">010-1234-5678</Text>
+            <Text size="3" weight="medium">{schedule.caregiverName}</Text>
+            <Text size="2" color="gray">{schedule.caregiverPhone}</Text>
           </Flex>
           <div
-            onClick={() => handleCall("010-1234-5678")}
+            onClick={() => handleCall(schedule.caregiverPhone)}
             style={{ 
               width: '40px', 
               height: '40px', 

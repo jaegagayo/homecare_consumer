@@ -1,10 +1,10 @@
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { useNavigate } from '@remix-run/react';
-import { Schedule } from '../../../types/schedule';
+import { ConsumerScheduleResponse } from '../../../types/schedule';
 
 interface ScheduleGridBodyProps {
-  schedules: Schedule[];
+  schedules: ConsumerScheduleResponse[];
   currentWeek: Date;
   currentDayIndex: number; // 현재 표시할 3일의 시작 인덱스 (0-4)
   onDayIndexChange?: (newIndex: number) => void; // 헤더 동기화를 위한 콜백
@@ -88,20 +88,20 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
       if (schedules.length > 0) {
         // 오늘의 예정된 일정들 필터링
         const todaySchedules = schedules.filter(schedule => {
-          const scheduleDate = schedule.date;
-          const scheduleTime = schedule.time.split(' - ')[0]; // 시작 시간만 추출
+          const scheduleDate = schedule.serviceDate;
+          const scheduleTime = schedule.serviceStartTime;
           const scheduleDateTime = new Date(`${scheduleDate}T${scheduleTime}`);
 
           return scheduleDate === today &&
             scheduleDateTime > now &&
-            schedule.status === 'upcoming';
+            schedule.matchStatus === 'CONFIRMED';
         });
 
         if (todaySchedules.length > 0) {
           // 현재 시간에 가장 가까운 일정 찾기
           const closestSchedule = todaySchedules.reduce((closest, current) => {
-            const currentTime = new Date(`${current.date}T${current.time.split(' - ')[0]}`);
-            const closestTime = new Date(`${closest.date}T${closest.time.split(' - ')[0]}`);
+            const currentTime = new Date(`${current.serviceDate}T${current.serviceStartTime}`);
+            const closestTime = new Date(`${closest.serviceDate}T${closest.serviceStartTime}`);
 
             const currentDiff = Math.abs(currentTime.getTime() - now.getTime());
             const closestDiff = Math.abs(closestTime.getTime() - now.getTime());
@@ -110,7 +110,7 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
           });
 
           // 가장 가까운 일정의 시간으로 스크롤 위치 계산
-          const scheduleTime = closestSchedule.time.split(' - ')[0];
+          const scheduleTime = closestSchedule.serviceStartTime;
           const [scheduleHour, scheduleMinute] = scheduleTime.split(':').map(Number);
           const scheduleMinutes = scheduleHour * 60 + scheduleMinute;
           targetScrollTop = (scheduleMinutes / 60) * HOUR_HEIGHT - 16;
@@ -254,22 +254,22 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
               let targetScrollTop = 0;
 
               if (schedules.length > 0) {
-                // 오늘의 예정된 일정들 필터링
-                const todaySchedules = schedules.filter(schedule => {
-                  const scheduleDate = schedule.date;
-                  const scheduleTime = schedule.time.split(' - ')[0];
-                  const scheduleDateTime = new Date(`${scheduleDate}T${scheduleTime}`);
+                        // 오늘의 예정된 일정들 필터링
+        const todaySchedules = schedules.filter(schedule => {
+          const scheduleDate = schedule.serviceDate;
+          const scheduleTime = schedule.serviceStartTime;
+          const scheduleDateTime = new Date(`${scheduleDate}T${scheduleTime}`);
 
-                  return scheduleDate === today &&
-                    scheduleDateTime > now &&
-                    schedule.status === 'upcoming';
-                });
+          return scheduleDate === today &&
+            scheduleDateTime > now &&
+            schedule.matchStatus === 'CONFIRMED';
+        });
 
                 if (todaySchedules.length > 0) {
                   // 현재 시간에 가장 가까운 일정 찾기
                   const closestSchedule = todaySchedules.reduce((closest, current) => {
-                    const currentTime = new Date(`${current.date}T${current.time.split(' - ')[0]}`);
-                    const closestTime = new Date(`${closest.date}T${closest.time.split(' - ')[0]}`);
+                    const currentTime = new Date(`${current.serviceDate}T${current.serviceStartTime}`);
+                    const closestTime = new Date(`${closest.serviceDate}T${closest.serviceStartTime}`);
 
                     const currentDiff = Math.abs(currentTime.getTime() - now.getTime());
                     const closestDiff = Math.abs(closestTime.getTime() - now.getTime());
@@ -278,7 +278,7 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
                   });
 
                   // 가장 가까운 일정의 시간으로 스크롤 위치 계산
-                  const scheduleTime = closestSchedule.time.split(' - ')[0];
+                  const scheduleTime = closestSchedule.serviceStartTime;
                   const [scheduleHour, scheduleMinute] = scheduleTime.split(':').map(Number);
                   const scheduleMinutes = scheduleHour * 60 + scheduleMinute;
                   targetScrollTop = (scheduleMinutes / 60) * HOUR_HEIGHT - 16;
@@ -339,14 +339,14 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
 
   const getSchedulesForDate = (date: Date) => {
     return schedules.filter(schedule => {
-      const scheduleDate = new Date(schedule.date);
+      const scheduleDate = new Date(schedule.serviceDate);
       return scheduleDate.toDateString() === date.toDateString();
     });
   };
 
   const formatTime = (timeString: string) => {
-    // "09:00 - 11:00" 형태에서 시작 시간만 추출
-    return timeString.split(' - ')[0];
+    // "09:00" 형태의 시간 반환
+    return timeString;
   };
 
   // 스케줄 블록 위치 계산 (그리드 기준)
@@ -368,9 +368,10 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'upcoming': return 'blue';
-      case 'completed': return 'green';
-      case 'cancelled': return 'red';
+      case 'CONFIRMED': return 'blue';
+      case 'COMPLETED': return 'green';
+      case 'CANCELLED': return 'red';
+      case 'PENDING': return 'gray';
       default: return 'gray';
     }
   };
@@ -493,8 +494,13 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
 
                 {/* 스케줄 블록 오버레이 */}
                 {getSchedulesForDate(date).map((schedule, idx) => {
-                  const { top, height } = calculateSchedulePosition(schedule.time, schedule.duration * 60);
-                  const statusColor = getStatusColor(schedule.status);
+                  // 시간 차이 계산으로 duration 추정
+                  const startTime = new Date(`2000-01-01T${schedule.serviceStartTime}`);
+                  const endTime = new Date(`2000-01-01T${schedule.serviceEndTime}`);
+                  const durationMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                  
+                  const { top, height } = calculateSchedulePosition(schedule.serviceStartTime, durationMinutes);
+                  const statusColor = getStatusColor(schedule.matchStatus);
                   return (
                     <button
                       key={idx}
@@ -520,11 +526,11 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
                         boxShadow: '0 1px 2px 0 rgba(0,0,0,0.08)',
                         outline: 'none'
                       }}
-                      onClick={() => navigate(`/main/schedule-detail?id=${schedule.id}`)}
+                      onClick={() => navigate(`/main/schedule-detail?id=${schedule.serviceMatchId}`)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          navigate(`/main/schedule-detail?id=${schedule.id}`);
+                          navigate(`/main/schedule-detail?id=${schedule.serviceMatchId}`);
                         }
                       }}
                     >
@@ -532,7 +538,7 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
                         {schedule.serviceType}
                       </div>
                       <div style={{ fontSize: 10, lineHeight: 1.1, marginTop: 1 }}>
-                        {schedule.clientName}
+                        {schedule.caregiverName}
                       </div>
                     </button>
                   );

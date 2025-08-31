@@ -1,9 +1,9 @@
 import { Flex, Text, Badge, Card } from '@radix-ui/themes';
 import { Calendar, Clock } from 'lucide-react';
-import { Schedule } from '../../../types/schedule';
+import { ConsumerScheduleDetailResponse } from '../../../types/schedule';
 
 interface ServiceInfoCardProps {
-  schedule: Schedule;
+  schedule: ConsumerScheduleDetailResponse;
 }
 
 export default function ServiceInfoCard({ schedule }: ServiceInfoCardProps) {
@@ -29,20 +29,20 @@ export default function ServiceInfoCard({ schedule }: ServiceInfoCardProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending_approval': return 'orange';
-      case 'upcoming': return 'blue';
-      case 'completed': return 'green';
-      case 'cancelled': return 'red';
+      case 'PENDING': return 'orange';
+      case 'CONFIRMED': return 'blue';
+      case 'COMPLETED': return 'green';
+      case 'CANCELLED': return 'red';
       default: return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending_approval': return '승인대기';
-      case 'upcoming': return '예정';
-      case 'completed': return '완료';
-      case 'cancelled': return '취소';
+      case 'PENDING': return '승인대기';
+      case 'CONFIRMED': return '예정';
+      case 'COMPLETED': return '완료';
+      case 'CANCELLED': return '취소';
       default: return '알 수 없음';
     }
   };
@@ -52,18 +52,13 @@ export default function ServiceInfoCard({ schedule }: ServiceInfoCardProps) {
   return (
     <Card className="p-4">
       <Flex direction="column" gap="3">
-        {/* 서비스 상태와 정기 일정 정보 */}
+        {/* 서비스 상태 */}
         <Flex justify="between" align="center">
           <Text size="4" weight="bold">{schedule.serviceType}</Text>
           <Flex gap="2" align="center">
-            <Badge color={getStatusColor(schedule.status) as 'orange' | 'blue' | 'green' | 'red' | 'gray'}>
-              {getStatusText(schedule.status)}
+            <Badge color={getStatusColor(schedule.matchStatus) as 'orange' | 'blue' | 'green' | 'red' | 'gray'}>
+              {getStatusText(schedule.matchStatus)}
             </Badge>
-            {schedule.isRegular && schedule.regularSequence && (
-              <Badge variant="soft" color="purple" size="1">
-                {schedule.regularSequence.current}회차 (총 {schedule.regularSequence.total}회)
-              </Badge>
-            )}
           </Flex>
         </Flex>
 
@@ -71,11 +66,11 @@ export default function ServiceInfoCard({ schedule }: ServiceInfoCardProps) {
         <div className="space-y-2">
           <Flex align="center" gap="2">
             <Calendar size={16} style={{ color: 'var(--accent-9)' }} />
-            <Text size="2" color="gray">{formatDate(schedule.date)}</Text>
+            <Text size="2" color="gray">{formatDate(schedule.serviceDate)}</Text>
           </Flex>
           <Flex align="center" gap="2">
             <Clock size={16} style={{ color: 'var(--accent-9)' }} />
-            <Text size="2" color="gray">{schedule.time} ({getDuration(schedule.time)})</Text>
+            <Text size="2" color="gray">{schedule.serviceStartTime} - {schedule.serviceEndTime} ({schedule.duration}시간)</Text>
           </Flex>
         </div>
 

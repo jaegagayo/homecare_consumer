@@ -1,32 +1,31 @@
 import { useNavigate } from '@remix-run/react';
 import { Flex, Button, Text } from '@radix-ui/themes';
 import { StarIcon } from '@radix-ui/react-icons';
-import { Schedule } from '../../../types/schedule';
+import { ConsumerScheduleDetailResponse } from '../../../types/schedule';
 
 interface ActionButtonsProps {
-  schedule: Schedule;
-  scheduleId: string;
+  schedule: ConsumerScheduleDetailResponse;
   hasReview: boolean;
 }
 
-export default function ActionButtons({ schedule, scheduleId, hasReview }: ActionButtonsProps) {
+export default function ActionButtons({ schedule, hasReview }: ActionButtonsProps) {
   const navigate = useNavigate();
 
   const handleWriteReview = () => {
     if (!schedule) return;
     
-    navigate(`/main/review-write?serviceId=${schedule.id}&serviceType=${schedule.serviceType}&serviceDate=${schedule.date}&serviceTime=${schedule.time}`);
+    navigate(`/main/review-write?serviceId=${schedule.serviceMatchId}&serviceType=${schedule.serviceType}&serviceDate=${schedule.serviceDate}&serviceTime=${schedule.serviceStartTime}-${schedule.serviceEndTime}`);
   };
 
   const handleViewReview = () => {
     // TODO: 작성된 리뷰 보기 페이지로 이동
-    navigate(`/main/reviews?reviewId=${schedule?.id}`);
+    navigate(`/main/reviews?reviewId=${schedule?.serviceMatchId}`);
   };
 
   return (
     <Flex direction="column" gap="4">
       {/* 완료된 일정의 경우 리뷰 버튼 */}
-      {schedule.status === 'completed' && (
+      {schedule.matchStatus === 'COMPLETED' && (
         <>
           {hasReview ? (
             <Button 
@@ -50,7 +49,7 @@ export default function ActionButtons({ schedule, scheduleId, hasReview }: Actio
       )}
 
       {/* 승인대기, 예정 상태는 안내 메시지 */}
-      {(schedule.status === 'upcoming') && (
+      {(schedule.matchStatus === 'CONFIRMED') && (
         <Text size="2" color="gray" style={{ textAlign: 'center' }}>
           확정된 일정입니다.
         </Text>

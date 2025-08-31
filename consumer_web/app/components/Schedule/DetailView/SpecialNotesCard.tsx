@@ -1,9 +1,9 @@
 import { Flex, Text, Card } from '@radix-ui/themes';
 import { MessageSquare } from 'lucide-react';
-import { Schedule } from '../../../types/schedule';
+import { ConsumerScheduleDetailResponse } from '../../../types/schedule';
 
 interface SpecialNotesCardProps {
-  schedule: Schedule;
+  schedule: ConsumerScheduleDetailResponse;
 }
 
 export default function SpecialNotesCard({ schedule }: SpecialNotesCardProps) {

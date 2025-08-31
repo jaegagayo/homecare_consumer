@@ -1,9 +1,9 @@
 import { Flex, Text, Card } from '@radix-ui/themes';
 import { MapPin } from 'lucide-react';
-import { Schedule } from '../../../types/schedule';
+import { ConsumerScheduleDetailResponse } from '../../../types/schedule';
 
 interface VisitLocationCardProps {
-  schedule: Schedule;
+  schedule: ConsumerScheduleDetailResponse;
 }
 
 export default function VisitLocationCard({ schedule }: VisitLocationCardProps) {
@@ -13,11 +13,11 @@ export default function VisitLocationCard({ schedule }: VisitLocationCardProps) 
       <Flex direction="column" gap="4">
         {/* 헤더 */}
         <Flex align="center" gap="2">
-          <div 
-            style={{ 
-              width: '20px', 
-              height: '20px', 
-              backgroundColor: 'var(--accent-9)', 
+          <div
+            style={{
+              width: '20px',
+              height: '20px',
+              backgroundColor: 'var(--accent-9)',
               borderRadius: '4px',
               display: 'flex',
               alignItems: 'center',
@@ -32,7 +32,7 @@ export default function VisitLocationCard({ schedule }: VisitLocationCardProps) 
         {/* 주소 섹션 */}
         <div className="space-y-2">
           <Text size="2" color="gray" className='block mb-1'>주소</Text>
-          <Text size="3" weight="medium">{schedule.address}</Text>
+          <Text size="3" weight="medium">{schedule.serviceAddress}</Text>
         </div>
 
         <div className="w-full h-px bg-gray-200"></div>

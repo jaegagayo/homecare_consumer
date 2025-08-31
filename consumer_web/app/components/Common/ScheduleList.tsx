@@ -9,11 +9,11 @@ import {
   MapPin
 } from "lucide-react";
 import { formatTime, calculateDuration } from "../../utils/formatters";
-import { Schedule } from "../../types/schedule";
+import { ConsumerScheduleResponse } from "../../types/schedule";
 
 interface ScheduleListProps {
-  schedules: Schedule[];
-  filterFunction?: (schedule: Schedule) => boolean;
+  schedules: ConsumerScheduleResponse[];
+  filterFunction?: (schedule: ConsumerScheduleResponse) => boolean;
   showStatus?: boolean;
   getStatusColor?: (status: string) => string;
   getStatusText?: (status: string) => string;
@@ -21,8 +21,8 @@ interface ScheduleListProps {
   emptyMessage?: string;
 }
 
-export default function ScheduleList({ 
-  schedules, 
+export default function ScheduleList({
+  schedules,
   filterFunction,
   showStatus = true,
   getStatusColor,
@@ -55,17 +55,17 @@ export default function ScheduleList({
   return (
     <Flex direction="column" gap="3">
       {filteredSchedules.map((schedule) => {
-        const timeInfo = formatTime(schedule.time);
-        
+        const timeInfo = { start: schedule.serviceStartTime, end: schedule.serviceEndTime };
+
         return (
           <div
-            key={schedule.id} 
+            key={schedule.serviceMatchId}
             className={`p-4 ${onClickSchedule ? 'cursor-pointer hover:bg-gray-50 transition-colors' : ''}`}
-            onClick={() => handleScheduleClick(schedule.id)}
+            onClick={() => handleScheduleClick(schedule.serviceMatchId)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                handleScheduleClick(schedule.id);
+                handleScheduleClick(schedule.serviceMatchId);
               }
             }}
             role={onClickSchedule ? 'button' : undefined}
@@ -89,17 +89,17 @@ export default function ScheduleList({
 
               {/* 중앙: 주요 정보 */}
               <Flex direction="column" gap="2" className="flex-1">
-                {/* 고객명과 상태 */}
+                {/* 요양보호사 이름과 상태 */}
                 <Flex align="center" gap="3">
-                  <Text size="3" weight="medium">{schedule.clientName} 님</Text>
+                  <Text size="3" weight="medium">{schedule.caregiverName} 님</Text>
                   {showStatus && (
                     <>
                       {getStatusColor && getStatusText ? (
-                        <Badge 
-                          color={getStatusColor(schedule.status) as "blue" | "green" | "red" | "gray"}
+                        <Badge
+                          color={getStatusColor(schedule.matchStatus) as "blue" | "green" | "red" | "gray"}
                           className="text-xs"
                         >
-                          {getStatusText(schedule.status)}
+                          {getStatusText(schedule.matchStatus)}
                         </Badge>
                       ) : (
                         <Badge color="blue" className="text-xs">
@@ -119,11 +119,11 @@ export default function ScheduleList({
                 <Flex direction="column" gap="1">
                   <Flex align="center" gap="1">
                     <MapPin size={14} className="text-gray-500" />
-                    <Text size="2" color="gray">{schedule.address}</Text>
+                    <Text size="2" color="gray">{schedule.serviceAddress}</Text>
                   </Flex>
                   <Flex align="center" gap="1">
                     <Clock size={14} className="text-gray-500" />
-                    <Text size="2" color="gray">{calculateDuration(schedule.time)}</Text>
+                    <Text size="2" color="gray">{calculateDuration(`${schedule.serviceStartTime} - ${schedule.serviceEndTime}`)}</Text>
                   </Flex>
                 </Flex>
               </Flex>
