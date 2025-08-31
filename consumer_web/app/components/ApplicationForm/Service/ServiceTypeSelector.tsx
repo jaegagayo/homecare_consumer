@@ -1,25 +1,11 @@
 import { Flex, Text, Heading, Select } from "@radix-ui/themes";
 import { Info } from "lucide-react";
-
-interface ServiceType {
-  value: string;
-  label: string;
-  description: string;
-}
+import { SERVICE_TYPES } from "../../../types";
 
 interface ServiceTypeSelectorProps {
   value: string;
   onChange: (value: string) => void;
 }
-
-const serviceTypes: ServiceType[] = [
-  { value: 'VISITING_CARE', label: '방문요양서비스', description: '가정을 방문하여 일상생활 지원' },
-  { value: 'DAY_NIGHT_CARE', label: '주야간보호서비스', description: '주간 또는 야간 보호 서비스' },
-  { value: 'RESPITE_CARE', label: '단기보호서비스', description: '일시적인 보호 서비스' },
-  { value: 'VISITING_BATH', label: '방문목욕서비스', description: '가정 방문 목욕 서비스' },
-  { value: 'IN_HOME_SUPPORT', label: '재가노인지원서비스', description: '재가 노인을 위한 종합 지원' },
-  { value: 'VISITING_NURSING', label: '방문간호서비스', description: '전문 간호 서비스' },
-];
 
 export default function ServiceTypeSelector({ value, onChange }: ServiceTypeSelectorProps) {
   return (
@@ -28,7 +14,7 @@ export default function ServiceTypeSelector({ value, onChange }: ServiceTypeSele
       <Select.Root value={value} onValueChange={onChange}>
         <Select.Trigger placeholder="서비스 유형을 선택하세요" className="w-full" />
         <Select.Content>
-          {serviceTypes.filter(service => service.value === 'VISITING_CARE').map((service) => (
+          {SERVICE_TYPES.filter(service => service.value === 'VISITING_CARE').map((service) => (
             <Select.Item key={service.value} value={service.value}>
               {service.label}
             </Select.Item>

@@ -1,5 +1,6 @@
 import { Dialog, Flex, Text, Button } from "@radix-ui/themes";
 import { X } from "lucide-react";
+import { formatDuration } from "../../../utils/formatters";
 
 interface DurationSettingDialogProps {
   open: boolean;
@@ -15,15 +16,6 @@ export default function DurationSettingDialog({
   onDurationChange
 }: DurationSettingDialogProps) {
   const durationOptions = [60, 90, 120, 150, 180, 210, 240];
-
-  const formatDuration = (minutes: number) => {
-    if (minutes >= 60) {
-      const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      return `${hours}시간${remainingMinutes > 0 ? ` ${remainingMinutes}분` : ''}`;
-    }
-    return `${minutes}분`;
-  };
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

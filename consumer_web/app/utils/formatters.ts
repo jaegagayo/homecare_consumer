@@ -95,4 +95,18 @@ export const calculateDuration = (timeString: string): string => {
   } else {
     return `${minutes}분`;
   }
+};
+
+/**
+ * 분 단위 시간을 한국어 형식으로 포맷팅
+ * @param minutes - 분 단위 시간
+ * @returns "2시간 30분" 또는 "45분" 형식의 문자열
+ */
+export const formatDuration = (minutes: number): string => {
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}시간${remainingMinutes > 0 ? ` ${remainingMinutes}분` : ''}`;
+  }
+  return `${minutes}분`;
 }; 

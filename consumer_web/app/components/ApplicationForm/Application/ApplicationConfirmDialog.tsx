@@ -1,6 +1,7 @@
 import { Dialog, Flex, Text, Button, Badge } from "@radix-ui/themes";
 import { X } from "lucide-react";
-import { ApplicationForm } from "../../../types";
+import { ApplicationForm, SERVICE_TYPES } from "../../../types";
+import { formatDuration } from "../../../utils/formatters";
 
 interface ApplicationConfirmDialogProps {
   open: boolean;
@@ -17,14 +18,20 @@ export default function ApplicationConfirmDialog({
   onConfirm,
   onEdit
 }: ApplicationConfirmDialogProps) {
-  const formatDuration = (minutes: number) => {
-    if (minutes >= 60) {
-      const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      return `${hours}시간${remainingMinutes > 0 ? ` ${remainingMinutes}분` : ''}`;
-    }
-    return `${minutes}분`;
+  // 서비스 타입 라벨 가져오기
+  const getServiceTypeLabel = (serviceType: string) => {
+    const service = SERVICE_TYPES.find(s => s.value === serviceType);
+    return service ? service.label : serviceType;
   };
+
+  // 날짜 포맷팅
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+  };
+
+  // 소요시간 포맷팅 (한 번만 계산)
+  const durationText = formatDuration(form.duration);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -56,12 +63,7 @@ export default function ApplicationConfirmDialog({
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 유형</Text>
                   <Badge color="blue">
-                    {form.serviceType === 'VISITING_CARE' ? '방문요양서비스' : 
-                     form.serviceType === 'DAY_NIGHT_CARE' ? '주야간보호서비스' :
-                     form.serviceType === 'RESPITE_CARE' ? '단기보호서비스' :
-                     form.serviceType === 'VISITING_BATH' ? '방문목욕서비스' :
-                     form.serviceType === 'IN_HOME_SUPPORT' ? '재가노인지원서비스' :
-                     form.serviceType === 'VISITING_NURSING' ? '방문간호서비스' : form.serviceType}
+                    {getServiceTypeLabel(form.serviceType)}
                   </Badge>
                 </Flex>
               </div>
@@ -73,26 +75,19 @@ export default function ApplicationConfirmDialog({
                 <Flex justify="between" align="center" className="mb-4">
                   <Text size="2" weight="medium">서비스 날짜</Text>
                   <Text size="2" color="gray">
-                    {form.requestDate ? (
-                      (() => {
-                        const date = new Date(form.requestDate);
-                        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-                      })()
-                    ) : (
-                      '선택되지 않음'
-                    )}
+                    {form.requestDate ? formatDate(form.requestDate) : '선택되지 않음'}
                   </Text>
                 </Flex>
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 시간</Text>
                   <Text size="2" color="gray">
-                    {form.preferredStartTime}부터 {formatDuration(form.duration)}
+                    {form.preferredStartTime}부터 {durationText}
                   </Text>
                 </Flex>
                 <Flex justify="between" align="center" className="mt-4">
                   <Text size="2" weight="medium">1회 소요시간</Text>
                   <Text size="2" color="gray">
-                    {formatDuration(form.duration)}
+                    {durationText}
                   </Text>
                 </Flex>
               </div>
