@@ -5,17 +5,19 @@ import {
   Flex, 
   Text, 
   Button,
-  Heading,
-  Select,
-  Dialog,
-  Card,
-  Badge
+  Heading
 } from "@radix-ui/themes";
-import { 
-  X
-} from "lucide-react";
 import { DatePickerDialog } from "../components/DatePicker";
 import { VoucherInfoDisplay } from "../components/VoucherInfo";
+import {
+  DurationSelector,
+  DurationSettingDialog,
+  TimeRangeSelector,
+  TimeRangeSettingDialog,
+  DateRangeSelector,
+  ServiceInfoCard,
+  RecommendationInfoCard
+} from "../components/RegularServiceForm";
 
 interface RegularServiceForm {
   // 기본 정보
@@ -48,11 +50,6 @@ interface RecommendationData {
   caregiverAge: number;
   caregiverExperience: number;
 }
-
-const timeSlots = [
-  '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
-  '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
-];
 
 export default function RegularServiceProposalPage() {
   const navigate = useNavigate();
@@ -234,73 +231,13 @@ export default function RegularServiceProposalPage() {
           </div>
 
           {/* 서비스 정보 (읽기 전용) */}
-          <div>
-            <div className="mb-4">
-              <Heading size="3">서비스 정보</Heading>
-              <Text size="2" color="gray">정기 서비스 신청 시 변경할 수 없습니다.</Text>
-            </div>
-            <Card className="p-4">
-              <Flex direction="column" gap="4">
-                {/* 요양보호사 정보 */}
-                <div>
-                  <Flex justify="between" align="center">
-                    <Text size="2" weight="medium">요양보호사</Text>
-                    <Flex align="center" gap="2">
-                      <Text size="3" weight="medium">
-                        {recommendationData.caregiverName}
-                      </Text>
-                      <Text size="2" color="gray">
-                        {recommendationData.caregiverGender === 'female' ? '여' : '남'} / {recommendationData.caregiverAge}세 / 경력 {recommendationData.caregiverExperience}년
-                      </Text>
-                    </Flex>
-                  </Flex>
-                </div>
-
-                <div className="w-full h-px bg-gray-200"></div>
-
-                {/* 서비스 유형 */}
-                <div>
-                  <Flex justify="between" align="center">
-                    <Text size="2" weight="medium">서비스 유형</Text>
-                    <Badge color="blue">{recommendationData.serviceType}</Badge>
-                  </Flex>
-                </div>
-
-                <div className="w-full h-px bg-gray-200"></div>
-
-                {/* 서비스 주소 */}
-                <div>
-                  <Flex justify="between" align="center">
-                    <Text size="2" weight="medium">서비스 주소</Text>
-                    <Text size="2">{form.address || '주소 정보가 필요합니다'}</Text>
-                  </Flex>
-                </div>
-              </Flex>
-            </Card>
-          </div>
+          <ServiceInfoCard 
+            recommendationData={recommendationData}
+            address={form.address}
+          />
 
           {/* 추천 정보 */}
-          <div>
-          <div className="mb-4">
-              <Heading size="3">추천 정보</Heading>
-              <Text size="2" color="gray">이용하신 서비스를 바탕으로 한 추천 정보입니다.</Text>
-            </div>
-            <Card className="p-4">
-              <Flex direction="column" gap="4">
-                {/* 서비스 일정 */}
-                <div>
-                  <Flex justify="between" align="center" className="mb-2">
-                    <Text size="2" weight="medium">서비스 요일</Text>
-                    <Text size="2">{recommendationData.dayOfWeek}</Text>
-                  </Flex>
-                  <Flex justify="between" align="center">
-                    <Text size="2" weight="medium">서비스 시간</Text>
-                    <Text size="2">{recommendationData.timeSlot}</Text>
-                  </Flex>
-                </div>
-              </Flex>
-            </Card>
-          </div>
+          <RecommendationInfoCard recommendationData={recommendationData} />
 
           {/* 매칭 조건 */}
           <div className="space-y-4">
@@ -310,40 +247,23 @@ export default function RegularServiceProposalPage() {
             </div>
 
             {/* 서비스 기간 */}
-            <div className="space-y-2">
-              <Flex justify="between" align="center" className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 cursor-pointer hover:bg-gray-50" onClick={() => setIsPreferredDaysDialogOpen(true)}>
-                <Text size="2" weight="medium">서비스 기간</Text>
-                <Text size="2" color="gray">
-                  {form.requestedDates.length >= 2 ? (
-                    <>
-                      {(() => {
-                        const startDate = new Date(form.requestedDates[0]);
-                        const endDate = new Date(form.requestedDates[form.requestedDates.length - 1]);
-                        return `${startDate.getFullYear()}년 ${startDate.getMonth() + 1}월 ${startDate.getDate()}일 ~ ${endDate.getFullYear()}년 ${endDate.getMonth() + 1}월 ${endDate.getDate()}일`;
-                      })()}
-                    </>
-                  ) : (
-                    '선택해주세요'
-                  )}
-                </Text>
-              </Flex>
-            </div>
+            <DateRangeSelector 
+              requestedDates={form.requestedDates}
+              onClick={() => setIsPreferredDaysDialogOpen(true)}
+            />
 
             {/* 가능한 시간대 */}
-            <div className="space-y-2">
-              <Flex justify="between" align="center" className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 cursor-pointer hover:bg-gray-50" onClick={() => setIsPreferredHoursDialogOpen(true)}>
-                <Text size="2" weight="medium">가능한 시간대</Text>
-                <Text size="2" color="gray">{form.preferredHours.start} ~ {form.preferredHours.end}</Text>
-              </Flex>
-            </div>
+            <TimeRangeSelector 
+              startTime={form.preferredHours.start}
+              endTime={form.preferredHours.end}
+              onClick={() => setIsPreferredHoursDialogOpen(true)}
+            />
 
             {/* 1회 소요시간 */}
-            <div className="space-y-2">
-              <Flex justify="between" align="center" className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 cursor-pointer hover:bg-gray-50" onClick={() => setIsDurationDialogOpen(true)}>
-                <Text size="2" weight="medium">1회 소요시간</Text>
-                <Text size="2" color="gray">{form.duration}시간</Text>
-              </Flex>
-            </div>
+            <DurationSelector 
+              duration={form.duration}
+              onClick={() => setIsDurationDialogOpen(true)}
+            />
           </div>
 
 
@@ -378,56 +298,12 @@ export default function RegularServiceProposalPage() {
       />
 
       {/* 1회 소요시간 설정 다이얼로그 */}
-      <Dialog.Root open={isDurationDialogOpen} onOpenChange={setIsDurationDialogOpen}>
-        <Dialog.Content>
-          <Flex direction="column" gap="4">
-            <Flex justify="between" align="center">
-              <Dialog.Title className="flex items-center">1회 소요시간 설정</Dialog.Title>
-              <Button
-                variant="ghost"
-                size="2"
-                onClick={() => setIsDurationDialogOpen(false)}
-                className="flex items-center gap-1 self-center -mt-4"
-              >
-                <X size={16} />
-                <Text size="2" weight="medium">닫기</Text>
-              </Button>
-            </Flex>
-            <Flex direction="column" gap="3">
-              <Text size="2" weight="medium" className="mb-2">시간 선택</Text>
-
-              <div className="grid grid-cols-2 gap-4">
-                {[1, 2, 3, 4].map((hour) => (
-                  <button
-                    key={hour}
-                    className={`py-3 px-6 rounded-full text-center cursor-pointer transition-colors ${form.duration === hour
-                        ? 'text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    style={{
-                      backgroundColor: form.duration === hour
-                        ? 'var(--accent-9)'
-                        : 'var(--gray-3)'
-                    }}
-                    onClick={() => setForm(prev => ({ ...prev, duration: hour }))}
-                  >
-                    <Text size="2" weight="medium">{hour}시간</Text>
-                  </button>
-                ))}
-              </div>
-            </Flex>
-
-            <Flex gap="3" className="mt-4">
-              <Button
-                onClick={() => setIsDurationDialogOpen(false)}
-                className="flex-1"
-              >
-                확인
-              </Button>
-            </Flex>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+      <DurationSettingDialog
+        open={isDurationDialogOpen}
+        onOpenChange={setIsDurationDialogOpen}
+        duration={form.duration}
+        onDurationChange={(duration) => setForm(prev => ({ ...prev, duration }))}
+      />
 
       {/* 서비스 기간 설정 다이얼로그 */}
       <DatePickerDialog
@@ -441,69 +317,16 @@ export default function RegularServiceProposalPage() {
       />
 
       {/* 선호 시간대 설정 다이얼로그 */}
-      <Dialog.Root open={isPreferredHoursDialogOpen} onOpenChange={setIsPreferredHoursDialogOpen}>
-        <Dialog.Content>
-          <Flex direction="column" gap="4">
-            <Flex justify="between" align="center">
-              <Dialog.Title className="flex items-center">선호 시간대 설정</Dialog.Title>
-              <Button
-                variant="ghost"
-                size="2"
-                onClick={() => setIsPreferredHoursDialogOpen(false)}
-                className="flex items-center gap-1 self-center -mt-4"
-              >
-                <X size={16} />
-                <Text size="2" weight="medium">닫기</Text>
-              </Button>
-            </Flex>
-            <Flex direction="column" gap="3">
-              <Text size="2" weight="medium" className="mb-2">시간대 선택</Text>
-
-              <Flex gap="3" align="center" justify="center">
-                <Select.Root
-                  value={form.preferredHours.start}
-                  onValueChange={(value) => setForm(prev => ({
-                    ...prev,
-                    preferredHours: { ...prev.preferredHours, start: value }
-                  }))}
-                >
-                  <Select.Trigger className="h-10 text-lg px-6" />
-                  <Select.Content>
-                    {timeSlots.map((time) => (
-                      <Select.Item key={time} value={time}>{time}</Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Root>
-                <Text size="2" color="gray">부터</Text>
-                <Select.Root
-                  value={form.preferredHours.end}
-                  onValueChange={(value) => setForm(prev => ({
-                    ...prev,
-                    preferredHours: { ...prev.preferredHours, end: value }
-                  }))}
-                >
-                  <Select.Trigger className="h-10 text-lg px-6" />
-                  <Select.Content>
-                    {timeSlots.map((time) => (
-                      <Select.Item key={time} value={time}>{time}</Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Root>
-                <Text size="2" color="gray">까지</Text>
-              </Flex>
-            </Flex>
-
-            <Flex gap="3" className="mt-4">
-              <Button
-                onClick={() => setIsPreferredHoursDialogOpen(false)}
-                className="flex-1"
-              >
-                확인
-              </Button>
-            </Flex>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+      <TimeRangeSettingDialog
+        open={isPreferredHoursDialogOpen}
+        onOpenChange={setIsPreferredHoursDialogOpen}
+        startTime={form.preferredHours.start}
+        endTime={form.preferredHours.end}
+        onTimeChange={(startTime, endTime) => setForm(prev => ({
+          ...prev,
+          preferredHours: { start: startTime, end: endTime }
+        }))}
+      />
     </Container>
   );
 }
