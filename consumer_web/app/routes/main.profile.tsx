@@ -7,6 +7,7 @@ import {
   User, Settings, LogOut, Mail, Phone, MapPin, Calendar
 } from "lucide-react";
 import { CameraIcon } from "@radix-ui/react-icons";
+import { logout } from "../api/auth";
 
 export default function ProfilePage() {
   const [userInfo, setUserInfo] = useState({
@@ -38,8 +39,7 @@ export default function ProfilePage() {
 
 
   const handleLogout = () => {
-    localStorage.removeItem("consumer_token");
-    localStorage.removeItem("caregiver_email");
+    logout(); // API 함수 사용하여 일관된 로그아웃 처리
     navigate("/");
   };
 

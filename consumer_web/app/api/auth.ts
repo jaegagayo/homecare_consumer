@@ -64,7 +64,17 @@ export const getStoredConsumerId = (): string | null => {
 
 // 로그아웃 (저장된 정보 삭제)
 export const logout = (): void => {
+  // consumerId 제거
   localStorage.removeItem('consumerId');
+  
+  // 추가 정리 작업 (향후 확장을 위해)
+  // - 세션 정보
+  // - 임시 데이터
+  // - 캐시 등
+  
+  // 잘못된 키들도 함께 제거 (기존 코드와의 호환성)
+  localStorage.removeItem('consumer_token');
+  localStorage.removeItem('caregiver_email');
 };
 
 // 인증 상태 확인
