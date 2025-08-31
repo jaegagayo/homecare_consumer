@@ -21,6 +21,7 @@ import {
   DateSelector
 } from "../components/ApplicationForm";
 import { ApplicationForm } from "../types";
+import { createServiceRequest } from "../api/serviceRequest";
 
 export default function ApplicationFormPage() {
   const navigate = useNavigate();
@@ -31,13 +32,37 @@ export default function ApplicationFormPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [estimatedUsage, setEstimatedUsage] = useState(0);
 
+  // 로그인된 사용자의 consumerId 가져오기
+  const getConsumerId = (): string => {
+    // TODO: 실제 로그인 상태 관리에서 consumerId 가져오기
+    // 현재는 로컬 스토리지에서 가져오는 것으로 가정
+    const consumerId = localStorage.getItem('consumerId');
+    if (!consumerId) {
+      throw new Error('로그인이 필요합니다.');
+    }
+    return consumerId;
+  };
+
+  // 주소 입력 시 위치 정보 업데이트 (간단한 예시)
+  const updateLocationFromAddress = () => {
+    // TODO: 실제로는 주소 검색 API를 사용하여 위도/경도를 가져와야 함
+    // 현재는 기본값으로 설정
+    setForm(prev => ({
+      ...prev,
+      location: {
+        latitude: 37.5665, // 서울시청 기본 위도
+        longitude: 126.9780 // 서울시청 기본 경도
+      }
+    }));
+  };
+
   const [form, setForm] = useState<ApplicationForm>({
-    serviceType: '',
+    serviceType: 'VISITING_CARE',
     serviceAddress: '',
     addressType: 'ROAD',
     location: {
-      latitude: 0,
-      longitude: 0
+      latitude: 37.5665, // 서울시청 기본 위도
+      longitude: 126.9780 // 서울시청 기본 경도
     },
     requestDate: '',
     preferredStartTime: '09:00',
@@ -59,9 +84,34 @@ export default function ApplicationFormPage() {
     setEstimatedUsage(estimatedCost);
   }, [form.serviceType, form.duration]);
 
+  // 종료 시간 자동 계산
+  useEffect(() => {
+    if (form.preferredStartTime && form.duration) {
+      const startTime = new Date(`2000-01-01T${form.preferredStartTime}:00`);
+      const endTime = new Date(startTime.getTime() + form.duration * 60 * 1000);
+      const endTimeString = endTime.toTimeString().slice(0, 5); // HH:MM 형식
+      
+      setForm(prev => ({
+        ...prev,
+        preferredEndTime: endTimeString
+      }));
+    }
+  }, [form.preferredStartTime, form.duration]);
+
   const handleSubmit = async () => {
-    if (!form.serviceType || !form.serviceAddress) {
-      alert('모든 필수 항목을 입력해주세요.');
+    // 필수 필드 검증
+    if (!form.serviceType) {
+      alert('서비스 유형을 선택해주세요.');
+      return;
+    }
+    
+    if (!form.serviceAddress) {
+      alert('서비스 주소를 입력해주세요.');
+      return;
+    }
+    
+    if (!form.requestDate) {
+      alert('요청 일자를 선택해주세요.');
       return;
     }
 
@@ -74,17 +124,35 @@ export default function ApplicationFormPage() {
     setIsLoading(true);
 
     try {
-      // TODO: 실제 API 호출 - 신청서 저장
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // consumerId 설정
+      const serviceRequest = {
+        ...form,
+        consumerId: getConsumerId()
+      };
 
-      // 신청서 데이터를 매칭 페이지로 전달
+      // API 호출
+      const result = await createServiceRequest(serviceRequest);
+
+      // 성공 시 매칭 페이지로 이동
       navigate('/main/matching', { 
         state: { 
           applicationData: form,
+          requestId: result.id,
           fromApplication: true 
         } 
       });
     } catch (error) {
+      console.error('Service request creation error:', error);
+      
+      // 에러 타입에 따른 메시지 표시
+      if (error instanceof Error) {
+        if (error.message === '로그인이 필요합니다.') {
+          alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+          navigate('/login');
+          return;
+        }
+      }
+      
       alert('신청서 저장 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -129,7 +197,10 @@ export default function ApplicationFormPage() {
           {/* 서비스 주소 */}
           <AddressInput 
             value={form.serviceAddress}
-            onChange={(value) => setForm(prev => ({ ...prev, serviceAddress: value }))}
+            onChange={(value) => {
+              setForm(prev => ({ ...prev, serviceAddress: value }));
+              updateLocationFromAddress();
+            }}
           />
 
           {/* 매칭 조건 */}
@@ -170,7 +241,7 @@ export default function ApplicationFormPage() {
         <Button
           size="3"
           onClick={handleSubmit}
-          disabled={isLoading || !form.serviceType || !form.serviceAddress}
+          disabled={isLoading || !form.serviceType || !form.serviceAddress || !form.requestDate}
           className="w-full"
         >
           {isLoading ? '저장 중...' : '후보 보기'}

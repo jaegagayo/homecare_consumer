@@ -56,7 +56,12 @@ export default function ApplicationConfirmDialog({
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 유형</Text>
                   <Badge color="blue">
-                    {form.serviceType === 'VISITING_CARE' ? '방문요양서비스' : form.serviceType}
+                    {form.serviceType === 'VISITING_CARE' ? '방문요양서비스' : 
+                     form.serviceType === 'DAY_NIGHT_CARE' ? '주야간보호서비스' :
+                     form.serviceType === 'RESPITE_CARE' ? '단기보호서비스' :
+                     form.serviceType === 'VISITING_BATH' ? '방문목욕서비스' :
+                     form.serviceType === 'IN_HOME_SUPPORT' ? '재가노인지원서비스' :
+                     form.serviceType === 'VISITING_NURSING' ? '방문간호서비스' : form.serviceType}
                   </Badge>
                 </Flex>
               </div>

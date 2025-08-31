@@ -7,7 +7,8 @@ export interface ServiceType {
 
 // 일반 서비스 신청서 폼 타입 (백엔드 ConsumerServiceRequest와 일치)
 export interface ApplicationForm {
-  serviceType: string;
+  consumerId?: string; // Optional로 추가
+  serviceType: 'VISITING_CARE' | 'VISITING_BATH' | 'VISITING_NURSING' | 'DAY_NIGHT_CARE' | 'RESPITE_CARE' | 'IN_HOME_SUPPORT';
   serviceAddress: string;
   addressType: 'ROAD' | 'JIBUN';
   location: {
@@ -18,7 +19,7 @@ export interface ApplicationForm {
   preferredStartTime: string;
   preferredEndTime: string;
   duration: number;
-  additionalInformation: string;
+  additionalInformation?: string; // Optional로 변경
 }
 
 // 정기 서비스 신청서 폼 타입 (백엔드 CreateRecurringOfferRequest와 일치)

@@ -2,7 +2,7 @@
 export interface CreateServiceRequestRequest {
   consumerId: string;
   serviceAddress: string;
-  addressType: 'HOME' | 'CENTER';
+  addressType: 'ROAD' | 'JIBUN';
   location: {
     latitude: number;
     longitude: number;
@@ -11,7 +11,7 @@ export interface CreateServiceRequestRequest {
   preferredStartTime: string;
   preferredEndTime: string;
   duration: number;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
+  serviceType: 'VISITING_CARE' | 'VISITING_BATH' | 'VISITING_NURSING' | 'DAY_NIGHT_CARE' | 'RESPITE_CARE' | 'IN_HOME_SUPPORT';
   additionalInformation?: string;
 }
 
@@ -20,7 +20,7 @@ export interface ServiceRequestResponse {
   id: string;
   consumerId: string;
   serviceAddress: string;
-  addressType: 'HOME' | 'CENTER';
+  addressType: 'ROAD' | 'JIBUN';
   location: {
     latitude: number;
     longitude: number;
@@ -29,7 +29,7 @@ export interface ServiceRequestResponse {
   preferredStartTime: string;
   preferredEndTime: string;
   duration: number;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
+  serviceType: 'VISITING_CARE' | 'VISITING_BATH' | 'VISITING_NURSING' | 'DAY_NIGHT_CARE' | 'RESPITE_CARE' | 'IN_HOME_SUPPORT';
   additionalInformation?: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
   createdAt: string;
