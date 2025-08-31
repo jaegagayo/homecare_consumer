@@ -20,22 +20,7 @@ import {
   TimeSettingDialog,
   DateSelector
 } from "../components/ApplicationForm";
-
-interface ApplicationForm {
-  // 기본 정보
-  serviceType: string;
-  address: string;
-  specialRequests: string;
-
-  // 바우처 정보 (간소화)
-  estimatedUsage: number;
-
-  // 조건 정보
-  duration: number; // 1회 소요시간
-  requestedDates: string[]; // 요청 일자 (단일 날짜, YYYY-MM-DD 형식)
-  startTime: string; // 시작 시간
-  preferredAreas: string[];
-}
+import { ApplicationForm } from "../types";
 
 export default function ApplicationFormPage() {
   const navigate = useNavigate();
@@ -44,16 +29,21 @@ export default function ApplicationFormPage() {
   const [isDurationDialogOpen, setIsDurationDialogOpen] = useState(false);
   const [isApplicationConfirmDialogOpen, setIsApplicationConfirmDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [estimatedUsage, setEstimatedUsage] = useState(0);
 
   const [form, setForm] = useState<ApplicationForm>({
     serviceType: '',
-    address: '',
-    specialRequests: '',
-    estimatedUsage: 0,
+    serviceAddress: '',
+    addressType: 'ROAD',
+    location: {
+      latitude: 0,
+      longitude: 0
+    },
+    requestDate: '',
+    preferredStartTime: '09:00',
+    preferredEndTime: '11:00',
     duration: 120, // 기본 2시간 (분 단위)
-    requestedDates: [], // 빈 배열로 시작 (단일 날짜)
-    startTime: '09:00', // 기본 시작 시간
-    preferredAreas: ['서울시 강남구']
+    additionalInformation: ''
   });
 
   useEffect(() => {
@@ -66,14 +56,11 @@ export default function ApplicationFormPage() {
       estimatedCost = baseHourlyRate * durationInHours;
     }
 
-    setForm(prev => ({
-      ...prev,
-      estimatedUsage: estimatedCost
-    }));
+    setEstimatedUsage(estimatedCost);
   }, [form.serviceType, form.duration]);
 
   const handleSubmit = async () => {
-    if (!form.serviceType || !form.address) {
+    if (!form.serviceType || !form.serviceAddress) {
       alert('모든 필수 항목을 입력해주세요.');
       return;
     }
@@ -111,8 +98,8 @@ export default function ApplicationFormPage() {
   // 날짜 선택 다이얼로그 핸들러
   const handleDateConfirm = (dates: string[]) => {
     // 단일 날짜만 사용 (첫 번째 날짜)
-    const selectedDate = dates.length > 0 ? [dates[0]] : [];
-    setForm(prev => ({ ...prev, requestedDates: selectedDate }));
+    const selectedDate = dates.length > 0 ? dates[0] : '';
+    setForm(prev => ({ ...prev, requestDate: selectedDate }));
     setIsPreferredDaysDialogOpen(false);
   };
 
@@ -141,8 +128,8 @@ export default function ApplicationFormPage() {
 
           {/* 서비스 주소 */}
           <AddressInput 
-            value={form.address}
-            onChange={(value) => setForm(prev => ({ ...prev, address: value }))}
+            value={form.serviceAddress}
+            onChange={(value) => setForm(prev => ({ ...prev, serviceAddress: value }))}
           />
 
           {/* 매칭 조건 */}
@@ -154,14 +141,14 @@ export default function ApplicationFormPage() {
 
             {/* 요청 일자 */}
             <DateSelector 
-              requestedDates={form.requestedDates}
+              requestedDates={form.requestDate ? [form.requestDate] : []}
               onClick={() => setIsPreferredDaysDialogOpen(true)}
             />
 
             {/* 시작 시간 */}
             <TimeRangeSelector 
-              startTime={form.startTime}
-              onStartTimeChange={(time) => setForm(prev => ({ ...prev, startTime: time }))}
+              startTime={form.preferredStartTime}
+              onStartTimeChange={(time) => setForm(prev => ({ ...prev, preferredStartTime: time }))}
               onClick={() => setIsPreferredHoursDialogOpen(true)}
             />
 
@@ -174,8 +161,8 @@ export default function ApplicationFormPage() {
 
           {/* 특별 요청사항 */}
           <SpecialRequestsInput 
-            value={form.specialRequests}
-            onChange={(value) => setForm(prev => ({ ...prev, specialRequests: value }))}
+            value={form.additionalInformation}
+            onChange={(value) => setForm(prev => ({ ...prev, additionalInformation: value }))}
           />
         </div>
 
@@ -183,7 +170,7 @@ export default function ApplicationFormPage() {
         <Button
           size="3"
           onClick={handleSubmit}
-          disabled={isLoading || !form.serviceType || !form.address}
+          disabled={isLoading || !form.serviceType || !form.serviceAddress}
           className="w-full"
         >
           {isLoading ? '저장 중...' : '후보 보기'}
@@ -195,7 +182,7 @@ export default function ApplicationFormPage() {
 
       {/* 플로팅 바우처 정보 */}
       <VoucherInfoDisplay 
-        estimatedUsage={form.estimatedUsage}
+        estimatedUsage={estimatedUsage}
         variant="floating"
       />
 
@@ -220,7 +207,7 @@ export default function ApplicationFormPage() {
       <DatePickerDialog
         open={isPreferredDaysDialogOpen}
         onOpenChange={setIsPreferredDaysDialogOpen}
-        selectedDates={form.requestedDates}
+        selectedDates={form.requestDate ? [form.requestDate] : []}
         onConfirm={handleDateConfirm}
         onClose={handleDateDialogClose}
         mode="single"
@@ -231,8 +218,8 @@ export default function ApplicationFormPage() {
       <TimeSettingDialog
         open={isPreferredHoursDialogOpen}
         onOpenChange={setIsPreferredHoursDialogOpen}
-        startTime={form.startTime}
-        onStartTimeChange={(time) => setForm(prev => ({ ...prev, startTime: time }))}
+        startTime={form.preferredStartTime}
+        onStartTimeChange={(time) => setForm(prev => ({ ...prev, preferredStartTime: time }))}
       />
 
 

@@ -1,16 +1,6 @@
 import { Dialog, Flex, Text, Button, Badge } from "@radix-ui/themes";
 import { X } from "lucide-react";
-
-interface ApplicationForm {
-  serviceType: string;
-  address: string;
-  specialRequests: string;
-  estimatedUsage: number;
-  duration: number;
-  requestedDates: string[];
-  startTime: string;
-  preferredAreas: string[];
-}
+import { ApplicationForm } from "../../../types";
 
 interface ApplicationConfirmDialogProps {
   open: boolean;
@@ -66,7 +56,7 @@ export default function ApplicationConfirmDialog({
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 유형</Text>
                   <Badge color="blue">
-                    {form.serviceType === 'visiting-care' ? '방문요양서비스' : form.serviceType}
+                    {form.serviceType === 'VISITING_CARE' ? '방문요양서비스' : form.serviceType}
                   </Badge>
                 </Flex>
               </div>
@@ -78,10 +68,9 @@ export default function ApplicationConfirmDialog({
                 <Flex justify="between" align="center" className="mb-4">
                   <Text size="2" weight="medium">서비스 날짜</Text>
                   <Text size="2" color="gray">
-                    {form.requestedDates.length > 0 ? (
+                    {form.requestDate ? (
                       (() => {
-                        const selectedDate = form.requestedDates[0];
-                        const date = new Date(selectedDate);
+                        const date = new Date(form.requestDate);
                         return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
                       })()
                     ) : (
@@ -92,7 +81,7 @@ export default function ApplicationConfirmDialog({
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 시간</Text>
                   <Text size="2" color="gray">
-                    {form.startTime}부터 {formatDuration(form.duration)}
+                    {form.preferredStartTime}부터 {formatDuration(form.duration)}
                   </Text>
                 </Flex>
                 <Flex justify="between" align="center" className="mt-4">
@@ -109,17 +98,17 @@ export default function ApplicationConfirmDialog({
               <div>
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 주소</Text>
-                  <Text size="2">{form.address}</Text>
+                  <Text size="2">{form.serviceAddress}</Text>
                 </Flex>
               </div>
 
               {/* 특별 요청사항이 있는 경우에만 표시 */}
-              {form.specialRequests && (
+              {form.additionalInformation && (
                 <>
                   <div className="w-full h-px bg-gray-200"></div>
                   <div>
                     <div><Text size="2" weight="medium" className="mb-3">특별 요청사항</Text></div>
-                    <div><Text size="2" className="leading-relaxed whitespace-pre-line">{form.specialRequests}</Text></div>
+                    <div><Text size="2" className="leading-relaxed whitespace-pre-line">{form.additionalInformation}</Text></div>
                   </div>
                 </>
               )}
