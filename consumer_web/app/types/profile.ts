@@ -15,3 +15,4 @@ export interface ConsumerDetailResponse {
   createdAt: string;
   updatedAt: string;
 }
+

@@ -9,10 +9,16 @@ export default function Index() {
 
   useEffect(() => {
     // 인증 상태 확인
-    const token = localStorage.getItem("consumer_token");
-    setIsAuthenticated(!!token);
+    const consumerId = localStorage.getItem("consumerId");
+    const authenticated = !!consumerId;
+    setIsAuthenticated(authenticated);
     setIsLoading(false);
-  }, []);
+    
+    // 인증된 사용자는 메인 앱으로 리다이렉트
+    if (authenticated) {
+      navigate("/main/home");
+    }
+  }, [navigate]);
 
   const handleLogin = () => {
     navigate("/login");
@@ -28,12 +34,6 @@ export default function Index() {
         <Text size="4">로딩 중...</Text>
       </Container>
     );
-  }
-
-  if (isAuthenticated) {
-    // 인증된 사용자는 메인 앱으로 리다이렉트
-    navigate("/main/home");
-    return null;
   }
 
   return (

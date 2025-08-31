@@ -9,7 +9,6 @@ import {
 import { Calendar, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { ScheduleWithoutReviewResponse } from "../../types";
 
-// 백엔드 API 응답 타입을 사용
 type ReviewRequest = ScheduleWithoutReviewResponse;
 
 interface ReviewRequestProps {
@@ -19,17 +18,6 @@ interface ReviewRequestProps {
 export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const getServiceTypeKorean = (serviceType: string) => {
-    switch (serviceType) {
-      case 'CARE': return '요양';
-      case 'COMPANION': return '동반';
-      case 'HOUSEKEEPING': return '가사';
-      default: return serviceType;
-    }
-  };
-
-
 
   const handleWriteReview = (reviewRequest: ReviewRequest) => {
     navigate(`/main/review-write?id=${reviewRequest.serviceMatchId}`);
@@ -97,7 +85,7 @@ export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
               </Flex>
               <div className="pt-1">
                 <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded inline-block">
-                  {getServiceTypeKorean(reviewRequests[currentIndex].serviceType)}
+                  {reviewRequests[currentIndex].serviceType}
                 </Text>
               </div>
             </div>

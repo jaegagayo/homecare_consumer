@@ -24,8 +24,8 @@ export default function MainLayout() {
 
   useEffect(() => {
     // 인증 상태 확인
-    const token = localStorage.getItem("consumer_token");
-    if (!token) {
+    const consumerId = localStorage.getItem("consumerId");
+    if (!consumerId) {
       navigate("/");
       return;
     }
@@ -65,7 +65,6 @@ export default function MainLayout() {
       setCurrentPageTitle("정기 신청");
     } else if (path.includes("/main/confirmation")) {
       setCurrentPageTitle("확정 안내");
-
     }
   }, [navigate, location]);
 

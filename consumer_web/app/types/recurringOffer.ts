@@ -45,3 +45,4 @@ export interface RecurringOfferDetailResponse extends RecurringOfferResponse {
   caregiverEmail: string;
   rejectionReason?: string;
 }
+

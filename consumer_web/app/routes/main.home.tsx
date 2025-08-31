@@ -52,8 +52,8 @@ export default function HomePage() {
 
   useEffect(() => {
     // 인증 상태 확인
-    const token = localStorage.getItem("consumer_token");
-    if (!token) {
+    const consumerId = localStorage.getItem("consumerId");
+    if (!consumerId) {
       navigate("/");
       return;
     }
@@ -119,10 +119,6 @@ export default function HomePage() {
           rejectionReason: "일정 변경 요청"
         }
       ]);
-
-
-
-
 
       setIsLoading(false);
     };

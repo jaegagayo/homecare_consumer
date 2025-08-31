@@ -12,3 +12,4 @@ export interface BlacklistResponse {
   consumerId: string;
   createdAt: string;
 }
+

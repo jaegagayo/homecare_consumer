@@ -42,3 +42,4 @@ export interface PendingReviewResponse {
   serviceAddress: string;
   serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
 }
+

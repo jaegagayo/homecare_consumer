@@ -5,3 +5,4 @@ export interface VoucherUsageGuideResponse {
   expectedCopay: number;
   isHighCopayRate: boolean;
 }
+
