@@ -18,6 +18,8 @@ import {
   ServiceInfoCard,
   RecommendationInfoCard
 } from "../components/RegularServiceForm";
+import { createRecurringOffer } from "../api/recurringOffer";
+import { apiUtils } from "../api/utils";
 
 interface RegularServiceForm {
   // 기본 정보
@@ -149,10 +151,10 @@ export default function RegularServiceProposalPage() {
     // 시간대 파싱
     const [startTime, endTime] = recommendation.timeSlot.split(' - ');
     
-    // 요일을 요일 배열로 변환
+    // 요일을 요일 배열로 변환 (백엔드 형식: MONDAY, TUESDAY, ...)
     const dayMapping: { [key: string]: string } = {
-      '월요일': '월', '화요일': '화', '수요일': '수', '목요일': '목', 
-      '금요일': '금', '토요일': '토', '일요일': '일'
+      '월요일': 'MONDAY', '화요일': 'TUESDAY', '수요일': 'WEDNESDAY', '목요일': 'THURSDAY', 
+      '금요일': 'FRIDAY', '토요일': 'SATURDAY', '일요일': 'SUNDAY'
     };
 
     // 기간을 날짜로 변환 (현재 날짜 기준)
@@ -204,12 +206,29 @@ export default function RegularServiceProposalPage() {
     setIsSubmitting(true);
     
     try {
-      // TODO: 정기 서비스 요청 API 호출
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // caregiverId는 추천 데이터에서 가져오기 (실제로는 추천 API에서 가져와야 함)
+      const caregiverId = recommendationData?.id || 'temp-caregiver-id';
+      
+      // form에 필요한 필드들만 추가하여 API 호출
+      const requestData = {
+        ...form,
+        caregiverId,
+        consumerId: apiUtils.getConsumerId()
+      };
+
+      // 정기 서비스 요청 API 호출
+      await createRecurringOffer(requestData);
+      
       alert('정기 서비스 요청이 등록되었습니다.');
       navigate('/main/home'); // 홈으로 이동하여 승인대기 상태 확인
     } catch (error) {
-      alert('정기 서비스 요청 중 오류가 발생했습니다.');
+      console.error('정기 서비스 요청 오류:', error);
+      if (error instanceof Error && error.message.includes('Consumer ID not found')) {
+        alert('로그인이 필요합니다. 다시 로그인해주세요.');
+        navigate('/login');
+      } else {
+        alert('정기 서비스 요청 중 오류가 발생했습니다.');
+      }
     } finally {
       setIsSubmitting(false);
     }
