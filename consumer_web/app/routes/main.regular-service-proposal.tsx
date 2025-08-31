@@ -21,21 +21,24 @@ import {
 
 interface RegularServiceForm {
   // 기본 정보
-  serviceType: string;
-  address: string;
-  specialRequests: string;
+  serviceType: 'VISITING_CARE' | 'VISITING_BATH' | 'VISITING_NURSING' | 'DAY_NIGHT_CARE' | 'RESPITE_CARE' | 'IN_HOME_SUPPORT';
+  serviceAddress: string;
+  addressType: 'ROAD' | 'JIBUN';
+  location: {
+    latitude: number;
+    longitude: number;
+  };
 
   // 바우처 정보 (간소화)
   estimatedUsage: number;
 
   // 조건 정보
-  duration: number; // 1회 소요시간
-  requestedDates: string[]; // 요청 일자 (복수 날짜, YYYY-MM-DD 형식)
-  preferredHours: {
-    start: string;
-    end: string;
-  };
-  preferredDays: string[]; // 선호 요일
+  duration: number; // 1회 소요시간 (분 단위)
+  serviceStartDate: string; // YYYY-MM-DD 형식
+  serviceEndDate: string; // YYYY-MM-DD 형식
+  serviceStartTime: string; // HH:mm:ss 형식
+  serviceEndTime: string; // HH:mm:ss 형식
+  dayOfWeek: string[]; // ['MONDAY', 'TUESDAY', ...]
 }
 
 interface RecommendationData {
@@ -70,14 +73,20 @@ export default function RegularServiceProposalPage() {
   const [recommendationData, setRecommendationData] = useState<RecommendationData | null>(null);
 
   const [form, setForm] = useState<RegularServiceForm>({
-    serviceType: 'visiting-care',
-    address: '',
-    specialRequests: '',
+    serviceType: 'VISITING_CARE',
+    serviceAddress: '',
+    addressType: 'ROAD',
+    location: {
+      latitude: 37.5665, // 서울시청 기본 위도
+      longitude: 126.9780 // 서울시청 기본 경도
+    },
     estimatedUsage: 0,
-    duration: 2,
-    requestedDates: [],
-    preferredHours: { start: '09:00', end: '11:00' },
-    preferredDays: []
+    duration: 120, // 2시간 (분 단위)
+    serviceStartDate: '',
+    serviceEndDate: '',
+    serviceStartTime: '09:00:00',
+    serviceEndTime: '11:00:00',
+    dayOfWeek: []
   });
 
 
@@ -152,14 +161,20 @@ export default function RegularServiceProposalPage() {
     const endDate = new Date(today.getTime() + (3 * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]; // 3개월 후
 
     setForm({
-      serviceType: 'visiting-care',
-      address: '서울시 강남구 테헤란로 123', // 실제로는 사용자 프로필에서 가져와야 함
-      specialRequests: '',
+      serviceType: 'VISITING_CARE',
+      serviceAddress: '서울시 강남구 테헤란로 123', // 실제로는 사용자 프로필에서 가져와야 함
+      addressType: 'ROAD',
+      location: {
+        latitude: 37.5665, // 서울시청 기본 위도
+        longitude: 126.9780 // 서울시청 기본 경도
+      },
       estimatedUsage: 0,
-      duration: 2,
-      requestedDates: [startDate, endDate], // 시작일과 종료일
-      preferredHours: { start: startTime, end: endTime },
-      preferredDays: [dayMapping[recommendation.dayOfWeek] || '월']
+      duration: 120, // 2시간 (분 단위)
+      serviceStartDate: startDate,
+      serviceEndDate: endDate,
+      serviceStartTime: startTime + ':00',
+      serviceEndTime: endTime + ':00',
+      dayOfWeek: [dayMapping[recommendation.dayOfWeek] || 'MONDAY']
     });
   };
 
@@ -168,17 +183,20 @@ export default function RegularServiceProposalPage() {
     let estimatedCost = 0;
     if (form.serviceType) {
       const baseHourlyRate = 15000; // 기본 시급
-      estimatedCost = baseHourlyRate * form.duration * form.requestedDates.length; // 날짜 수만큼 곱하기
+      const durationInHours = form.duration / 60; // 분을 시간으로 변환
+      const daysBetween = form.serviceStartDate && form.serviceEndDate ? 
+        Math.ceil((new Date(form.serviceEndDate).getTime() - new Date(form.serviceStartDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+      estimatedCost = baseHourlyRate * durationInHours * daysBetween;
     }
 
     setForm(prev => ({
       ...prev,
       estimatedUsage: estimatedCost
     }));
-  }, [form.serviceType, form.duration, form.requestedDates.length]);
+  }, [form.serviceType, form.duration, form.serviceStartDate, form.serviceEndDate]);
 
   const handleSubmit = async () => {
-    if (!form.serviceType || form.requestedDates.length < 2) {
+    if (!form.serviceType || !form.serviceStartDate || !form.serviceEndDate) {
       alert('모든 필수 항목을 입력해주세요.');
       return;
     }
@@ -199,7 +217,13 @@ export default function RegularServiceProposalPage() {
 
   // 날짜 선택 다이얼로그 핸들러 (복수 날짜)
   const handleDateConfirm = (dates: string[]) => {
-    setForm(prev => ({ ...prev, requestedDates: dates }));
+    if (dates.length >= 2) {
+      setForm(prev => ({ 
+        ...prev, 
+        serviceStartDate: dates[0],
+        serviceEndDate: dates[dates.length - 1]
+      }));
+    }
     setIsPreferredDaysDialogOpen(false);
   };
 
@@ -233,7 +257,7 @@ export default function RegularServiceProposalPage() {
           {/* 서비스 정보 (읽기 전용) */}
           <ServiceInfoCard 
             recommendationData={recommendationData}
-            address={form.address}
+            address={form.serviceAddress}
           />
 
           {/* 추천 정보 */}
@@ -248,14 +272,14 @@ export default function RegularServiceProposalPage() {
 
             {/* 서비스 기간 */}
             <DateRangeSelector 
-              requestedDates={form.requestedDates}
+              requestedDates={[form.serviceStartDate, form.serviceEndDate].filter(Boolean)}
               onClick={() => setIsPreferredDaysDialogOpen(true)}
             />
 
             {/* 가능한 시간대 */}
             <TimeRangeSelector 
-              startTime={form.preferredHours.start}
-              endTime={form.preferredHours.end}
+              startTime={form.serviceStartTime.substring(0, 5)}
+              endTime={form.serviceEndTime.substring(0, 5)}
               onClick={() => setIsPreferredHoursDialogOpen(true)}
             />
 
@@ -280,7 +304,7 @@ export default function RegularServiceProposalPage() {
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={isSubmitting || !form.serviceType || form.requestedDates.length < 2}
+            disabled={isSubmitting || !form.serviceType || !form.serviceStartDate || !form.serviceEndDate}
             className="flex-1"
           >
             {isSubmitting ? '등록 중...' : '정기 제안'}
@@ -309,7 +333,7 @@ export default function RegularServiceProposalPage() {
       <DatePickerDialog
         open={isPreferredDaysDialogOpen}
         onOpenChange={setIsPreferredDaysDialogOpen}
-        selectedDates={form.requestedDates}
+        selectedDates={[form.serviceStartDate, form.serviceEndDate].filter(Boolean)}
         onConfirm={handleDateConfirm}
         onClose={handleDateDialogClose}
         mode="range"
@@ -320,11 +344,12 @@ export default function RegularServiceProposalPage() {
       <TimeRangeSettingDialog
         open={isPreferredHoursDialogOpen}
         onOpenChange={setIsPreferredHoursDialogOpen}
-        startTime={form.preferredHours.start}
-        endTime={form.preferredHours.end}
+        startTime={form.serviceStartTime.substring(0, 5)}
+        endTime={form.serviceEndTime.substring(0, 5)}
         onTimeChange={(startTime, endTime) => setForm(prev => ({
           ...prev,
-          preferredHours: { start: startTime, end: endTime }
+          serviceStartTime: startTime + ':00',
+          serviceEndTime: endTime + ':00'
         }))}
       />
     </Container>
