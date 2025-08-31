@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "@remix-run/react";
 import {
   Container,
@@ -11,51 +11,77 @@ import {
 import {
   AlertTriangle
 } from "lucide-react";
-
-interface VoucherInfo {
-  selectedGrade: string;
-  voucherLimit: number;
-  currentUsage: number;
-  selfPayAmount: number;
-  isMedicalBenefitRecipient: boolean;
-}
+import { getVoucherUsageGuide } from "../api/voucher";
+import { getStoredConsumerId } from "../api/auth";
+import { VoucherUsageGuideResponse } from "../types/voucher";
 
 export default function VoucherPreviewPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [voucherData, setVoucherData] = useState<VoucherUsageGuideResponse | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
-  // 바우처 정보 (실제로는 프로필에서 가져와야 함)
-  const [voucherInfo] = useState<VoucherInfo>({
-    selectedGrade: '3등급',
-    voucherLimit: 1295400,
-    currentUsage: 1270000, // 사용량을 높여서 남은 금액이 적게 설정
-    selfPayAmount: 194310,
-    isMedicalBenefitRecipient: false
-  });
+  // 바우처 정보 로드
+  useEffect(() => {
+    const loadVoucherInfo = async () => {
+      try {
+        const consumerId = getStoredConsumerId();
+        if (!consumerId) {
+          throw new Error('Consumer ID not found');
+        }
 
-  // 3시간 기준 계산
-  const baseHourlyRate = 15000; // 기본 시급
-  const threeHourCost = baseHourlyRate * 3; // 3시간 기준 비용 (45,000원)
-  
-  // 바우처 사용량 계산 (3시간 서비스 비용의 85%를 바우처에서 차감)
-  const voucherUsageForThreeHours = threeHourCost * 0.85; // 38,250원
-  const totalVoucherUsage = voucherInfo.currentUsage + voucherUsageForThreeHours;
-  
-  // 현재 남은 바우처 금액
-  const currentRemainingAmount = voucherInfo.voucherLimit - voucherInfo.currentUsage;
-  
-  // 3시간 서비스 신청 후 남은 바우처 금액
-  const remainingAmount = voucherInfo.voucherLimit - totalVoucherUsage;
-  
-  // 본인부담금 계산
-  let threeHourSelfPay = threeHourCost * 0.15; // 기본 본인부담금 (6,750원)
-  
-  // 바우처가 부족한 경우 추가 본인부담금 발생
-  if (remainingAmount < 0) {
-    threeHourSelfPay += Math.abs(remainingAmount); // 부족한 바우처 금액만큼 추가 부담
+        const data = await getVoucherUsageGuide(consumerId);
+        setVoucherData(data);
+      } catch (error) {
+        console.error('바우처 정보 로드 실패:', error);
+        // 에러 시 기본값 설정
+        setVoucherData({
+          remainingAmount: 0,
+          expectedUsageAmount: 0,
+          expectedCopay: 0,
+          isHighCopayRate: false
+        });
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadVoucherInfo();
+  }, []);
+
+  // 로딩 중일 때 표시
+  if (isLoadingData) {
+    return (
+      <Container size="2" className="p-4">
+        <Flex direction="column" align="center" gap="4" className="py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <Text>바우처 정보를 불러오는 중...</Text>
+        </Flex>
+      </Container>
+    );
   }
-  
-  const isOverLegalRate = threeHourSelfPay > (threeHourCost * 0.15); // 15% 법정 부담률 초과 여부
+
+  // 바우처 데이터가 없을 때
+  if (!voucherData) {
+    return (
+      <Container size="2" className="p-4">
+        <Flex direction="column" align="center" gap="4" className="py-8">
+          <Text>바우처 정보를 불러올 수 없습니다.</Text>
+          <Button onClick={() => navigate('/main/home')}>
+            홈으로 돌아가기
+          </Button>
+        </Flex>
+      </Container>
+    );
+  }
+
+  // 백엔드에서 받은 데이터 사용
+  const {
+    remainingAmount,
+    expectedUsageAmount,
+    expectedCopay,
+    isHighCopayRate
+  } = voucherData;
 
   const handleContinue = () => {
     setIsLoading(true);
@@ -91,72 +117,54 @@ export default function VoucherPreviewPage() {
                   <Text 
                     size="2" 
                     weight="medium"
-                    color={currentRemainingAmount < 0 ? "red" : currentRemainingAmount < 100000 ? "orange" : "green"}
-                  >
-                    {currentRemainingAmount.toLocaleString()}원
-                  </Text>
-                </Flex>
-              </div>
-
-              <div className="w-full h-px bg-gray-200"></div>
-
-              {/* 3시간 서비스 비용 및 바우처 소진 금액 */}
-              <div>
-                <Flex justify="between" align="center" className="mb-2">
-                  <Text size="2" weight="medium">3시간 서비스 비용</Text>
-                  <Text size="2" weight="medium">
-                    {threeHourCost.toLocaleString()}원
-                  </Text>
-                </Flex>
-                <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">3시간 신청 시 예상 소진 금액</Text>
-                  <Text size="2" weight="medium">
-                    {voucherUsageForThreeHours.toLocaleString()}원
-                  </Text>
-                </Flex>
-              </div>
-
-              <div className="w-full h-px bg-gray-200"></div>
-
-              {/* 소진 후 남은 지원금 */}
-              <div>
-                <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">소진 후 남은 지원금</Text>
-                  <Text 
-                    size="2" 
-                    weight="medium"
                     color={remainingAmount < 0 ? "red" : remainingAmount < 100000 ? "orange" : "green"}
                   >
-                    {remainingAmount.toLocaleString()}원
+                    {remainingAmount < 0 ? "0" : remainingAmount.toLocaleString()}원
+                  </Text>
+                </Flex>
+                {remainingAmount < 0 && (
+                  <Flex justify="end" className="mt-1">
+                    <Text size="1" color="red">
+                      ({Math.abs(remainingAmount).toLocaleString()}원 초과)
+                    </Text>
+                  </Flex>
+                )}
+              </div>
+
+              <div className="w-full h-px bg-gray-200"></div>
+
+              {/* 예상 사용 금액 */}
+              <div>
+                <Flex justify="between" align="center">
+                  <Text size="2" weight="medium">예상 사용 금액</Text>
+                  <Text size="2" weight="medium">
+                    {expectedUsageAmount.toLocaleString()}원
                   </Text>
                 </Flex>
               </div>
 
               <div className="w-full h-px bg-gray-200"></div>
 
-              {/* 3시간 신청 시 예상 본인부담금 */}
+              {/* 예상 본인부담금 */}
               <div>
                 <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">3시간 신청 시 예상 본인부담금</Text>
+                  <Text size="2" weight="medium">예상 본인부담금</Text>
                   <Text 
                     size="2" 
                     weight="medium"
-                    color={isOverLegalRate ? "red" : "green"}
+                    color={isHighCopayRate ? "red" : "green"}
                   >
-                    {threeHourSelfPay.toLocaleString()}원
+                    {expectedCopay.toLocaleString()}원
                   </Text>
                 </Flex>
-                {isOverLegalRate && (
+                {isHighCopayRate && (
                   <Flex justify="between" align="center" className="mt-1">
                     <Flex align="center" gap="1">
                       <AlertTriangle size={12} className="text-red-500" />
                       <Text size="1" color="red">
-                        법정 부담률(15%) 초과
+                        지원금 한도 초과
                       </Text>
                     </Flex>
-                    <Text size="1" color="gray">
-                      (6,750원 + {Math.abs(remainingAmount).toLocaleString()}원)
-                    </Text>
                   </Flex>
                 )}
               </div>
@@ -165,10 +173,10 @@ export default function VoucherPreviewPage() {
         </div>
 
         {/* 안내 메시지 */}
-        {isOverLegalRate ? (
+        {isHighCopayRate ? (
           <Card className="p-4 border-red-200 bg-red-100">    
             <Text size="2" color="red">
-                예상 본인부담금이 법정 부담률(15%)을 초과합니다. 계속 진행하시겠습니까?
+                예상 본인부담금이 지원금 한도를 초과합니다. 계속 진행하시겠습니까?
             </Text>
           </Card>
         ) : (
