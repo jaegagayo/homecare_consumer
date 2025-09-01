@@ -1,6 +1,8 @@
+import { ServiceType, DayOfWeek } from './home';
+
 // 서비스 타입 정의
-export interface ServiceType {
-  value: string;
+export interface ServiceTypeOption {
+  value: ServiceType;
   label: string;
   description: string;
 }
@@ -8,7 +10,7 @@ export interface ServiceType {
 // 일반 서비스 신청서 폼 타입 (백엔드 ConsumerServiceRequest와 일치)
 export interface ApplicationForm {
   consumerId?: string; // Optional로 추가
-  serviceType: 'VISITING_CARE' | 'VISITING_BATH' | 'VISITING_NURSING' | 'DAY_NIGHT_CARE' | 'RESPITE_CARE' | 'IN_HOME_SUPPORT';
+  serviceType: ServiceType;
   serviceAddress: string;
   addressType: 'ROAD' | 'JIBUN';
   location: {
@@ -26,14 +28,14 @@ export interface ApplicationForm {
 export interface RegularServiceForm {
   caregiverId: string;
   consumerId: string;
-  serviceType: string;
+  serviceType: ServiceType;
   serviceAddress: string;
   addressType: 'ROAD' | 'JIBUN';
   location: {
     latitude: number;
     longitude: number;
   };
-  dayOfWeek: string[]; // DayOfWeek enum 값들
+  dayOfWeek: DayOfWeek[]; // DayOfWeek enum 값들
   serviceStartDate: string;
   serviceEndDate: string;
   serviceStartTime: string;
@@ -50,7 +52,7 @@ export interface VoucherInfo {
 }
 
 // 서비스 타입 목록
-export const SERVICE_TYPES: ServiceType[] = [
+export const SERVICE_TYPES: ServiceTypeOption[] = [
   { value: 'VISITING_CARE', label: '방문요양서비스', description: '가정을 방문하여 일상생활 지원' },
   { value: 'DAY_NIGHT_CARE', label: '주야간보호서비스', description: '주간 또는 야간 보호 서비스' },
   { value: 'RESPITE_CARE', label: '단기보호서비스', description: '일시적인 보호 서비스' },

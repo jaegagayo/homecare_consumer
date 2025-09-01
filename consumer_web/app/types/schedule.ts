@@ -1,3 +1,5 @@
+import { ServiceType } from './home';
+
 export interface Schedule {
   id: string;
   date: string;
@@ -20,7 +22,7 @@ export interface ConsumerScheduleResponse {
   serviceStartTime: string;
   serviceEndTime: string;
   serviceAddress: string;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
+  serviceType: ServiceType;
   matchStatus: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
 }
 
@@ -34,7 +36,7 @@ export interface ConsumerScheduleDetailResponse {
   serviceStartTime: string;
   serviceEndTime: string;
   serviceAddress: string;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
+  serviceType: ServiceType;
   matchStatus: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
   additionalInformation?: string;
   reviewId?: string;

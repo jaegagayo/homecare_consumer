@@ -1,3 +1,5 @@
+import { ServiceType } from './home';
+
 export interface Caregiver {
   id: string;
   name: string;
@@ -17,7 +19,7 @@ export interface Caregiver {
 
 export interface ServiceRequest {
   id: string;
-  serviceType: string;
+  serviceType: ServiceType;
   date: string;
   time: string;
   address: string;
@@ -29,7 +31,7 @@ export interface ServiceRequest {
 }
 
 export interface ApplicationForm {
-  serviceType: string;
+  serviceType: ServiceType;
   address: string;
   specialRequests: string;
   estimatedUsage: number;

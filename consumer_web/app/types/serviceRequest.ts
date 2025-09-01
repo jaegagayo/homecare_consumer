@@ -1,3 +1,5 @@
+import { ServiceType } from './home';
+
 // 서비스 요청 생성 요청 타입
 export interface CreateServiceRequestRequest {
   consumerId: string;
@@ -11,7 +13,7 @@ export interface CreateServiceRequestRequest {
   preferredStartTime: string;
   preferredEndTime: string;
   duration: number;
-  serviceType: 'VISITING_CARE' | 'VISITING_BATH' | 'VISITING_NURSING' | 'DAY_NIGHT_CARE' | 'RESPITE_CARE' | 'IN_HOME_SUPPORT';
+  serviceType: ServiceType;
   additionalInformation?: string;
 }
 
@@ -29,7 +31,7 @@ export interface ServiceRequestResponse {
   preferredStartTime: string;
   preferredEndTime: string;
   duration: number;
-  serviceType: 'VISITING_CARE' | 'VISITING_BATH' | 'VISITING_NURSING' | 'DAY_NIGHT_CARE' | 'RESPITE_CARE' | 'IN_HOME_SUPPORT';
+  serviceType: ServiceType;
   additionalInformation?: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
   createdAt: string;

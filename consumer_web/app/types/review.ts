@@ -1,3 +1,5 @@
+import { ServiceType } from './home';
+
 // 리뷰 생성 요청 타입
 export interface CreateReviewRequest {
   consumerId: string;
@@ -26,7 +28,7 @@ export interface ConsumerReviewResponse {
   serviceStartTime: string;
   serviceEndTime: string;
   serviceAddress: string;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
+  serviceType: ServiceType;
   reviewScore: number;
   reviewContent: string;
   createdAt: string;
@@ -40,6 +42,6 @@ export interface PendingReviewResponse {
   serviceStartTime: string;
   serviceEndTime: string;
   serviceAddress: string;
-  serviceType: 'CARE' | 'COMPANION' | 'HOUSEKEEPING';
+  serviceType: ServiceType;
 }
 
