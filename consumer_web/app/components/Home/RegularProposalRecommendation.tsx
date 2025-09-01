@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@remix-run/react";
-import { 
-  Flex, 
+import {
+  Flex,
   Text,
   Heading,
   Button
@@ -21,7 +21,7 @@ export default function RegularProposalRecommendation({ recommendations }: Regul
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleApply = (recommendation: RegularProposalRecommendation) => {
-    navigate(`/main/regular-service-proposal?recommendationId=${recommendation.serviceMatchId}`);
+    navigate(`/main/regular-service-proposal?serviceMatchId=${recommendation.serviceMatchId}&from=recommendation`);
   };
 
   const handlePrevious = () => {
@@ -38,9 +38,9 @@ export default function RegularProposalRecommendation({ recommendations }: Regul
         <Heading size="4">정기 제안 추천</Heading>
         {recommendations.length > 1 && (
           <Flex align="center" gap="4">
-            <Button 
-              variant="ghost" 
-              size="3" 
+            <Button
+              variant="ghost"
+              size="3"
               onClick={handlePrevious}
               className="p-2"
             >
@@ -49,9 +49,9 @@ export default function RegularProposalRecommendation({ recommendations }: Regul
             <Text size="4" color="gray" className="tracking-widest">
               {currentIndex + 1} / {recommendations.length}
             </Text>
-            <Button 
-              variant="ghost" 
-              size="3" 
+            <Button
+              variant="ghost"
+              size="3"
               onClick={handleNext}
               className="p-2"
             >
@@ -88,7 +88,7 @@ export default function RegularProposalRecommendation({ recommendations }: Regul
             </div>
 
             {/* 신청하기 CTA 버튼 */}
-            <Button 
+            <Button
               className="w-full"
               onClick={() => handleApply(recommendations[currentIndex])}
             >

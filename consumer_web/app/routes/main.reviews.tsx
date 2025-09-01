@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@remix-run/react";
-import { 
-  Container, 
-  Flex, 
-  Text, 
+import {
+  Container,
+  Flex,
+  Text,
   Button,
   Heading,
   Card,
   Badge
 } from "@radix-ui/themes";
-import { 
+import {
   Star,
   Calendar,
   MessageSquare
@@ -37,7 +37,7 @@ export default function ReviewsPage() {
     // 더미 데이터 로드
     const loadData = async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setReviews([
         {
           id: "1",
@@ -145,10 +145,10 @@ export default function ReviewsPage() {
                         {review.serviceType}
                       </Text>
                     </Flex>
-                    <Button 
-                      size="2" 
+                    <Button
+                      size="2"
                       onClick={() => {
-                        navigate(`/main/review-write?serviceId=${review.id}&caregiverName=${review.caregiverName}&serviceType=${review.serviceType}&serviceDate=${review.date}&serviceTime=${review.time || '09:00-18:00'}`);
+                        navigate(`/main/review-write?serviceMatchId=${review.id}&caregiverName=${review.caregiverName}&serviceType=${review.serviceType}&serviceDate=${review.date}&serviceTime=${review.time || '09:00-18:00'}`);
                       }}
                     >
                       <MessageSquare size={16} />
@@ -186,11 +186,11 @@ export default function ReviewsPage() {
                       </Flex>
                       <Badge color="green">작성 완료</Badge>
                     </Flex>
-                    
+
                     <div>
                       {renderStars(review.rating)}
                     </div>
-                    
+
                     {review.comment && (
                       <Text size="2" className="bg-gray-50 p-3 rounded-lg">
                         {review.comment}
@@ -206,7 +206,7 @@ export default function ReviewsPage() {
 
 
 
-      {/* 빈 상태 */}
+        {/* 빈 상태 */}
         {reviews.length === 0 && (
           <Card className="p-8 text-center">
             <MessageSquare size={48} className="text-gray-400 mx-auto mb-3" />

@@ -12,11 +12,11 @@ interface ActionButtonsProps {
   isReviewLoading: boolean;
 }
 
-export default function ActionButtons({ 
-  schedule, 
-  hasReview, 
-  onViewReview, 
-  onHideReview, 
+export default function ActionButtons({
+  schedule,
+  hasReview,
+  onViewReview,
+  onHideReview,
   showReview,
   isReviewLoading
 }: ActionButtonsProps) {
@@ -24,7 +24,7 @@ export default function ActionButtons({
 
   const handleWriteReview = () => {
     if (!schedule) return;
-    
+
     navigate(`/main/review-write?serviceId=${schedule.serviceMatchId}&serviceType=${schedule.serviceType}&serviceDate=${schedule.serviceDate}&serviceTime=${schedule.serviceStartTime}-${schedule.serviceEndTime}`);
   };
 
@@ -35,8 +35,8 @@ export default function ActionButtons({
         <>
           {hasReview ? (
             showReview ? (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={onHideReview}
                 style={{ width: '100%' }}
               >
@@ -44,8 +44,8 @@ export default function ActionButtons({
                 리뷰 숨기기
               </Button>
             ) : (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={onViewReview}
                 disabled={isReviewLoading}
                 style={{ width: '100%' }}
@@ -55,7 +55,7 @@ export default function ActionButtons({
               </Button>
             )
           ) : (
-            <Button 
+            <Button
               onClick={handleWriteReview}
               style={{ width: '100%' }}
             >
@@ -74,8 +74,8 @@ export default function ActionButtons({
       )}
 
       {/* 일정 목록으로 돌아가기 버튼 */}
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         onClick={() => navigate('/main/schedule')}
         style={{ width: '100%' }}
       >

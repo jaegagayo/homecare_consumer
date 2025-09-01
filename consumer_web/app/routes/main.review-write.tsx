@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "@remix-run/react";
-import { 
-  Container, 
-  Flex, 
-  Text, 
+import {
+  Container,
+  Flex,
+  Text,
   Button,
   Heading,
   TextArea,
   Card,
   Dialog
 } from "@radix-ui/themes";
-import { 
+import {
   Star,
   X
 } from "lucide-react";
@@ -78,13 +78,13 @@ export default function ReviewWritePage() {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // TODO: 실제 API 호출
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       alert('리뷰가 성공적으로 등록되었습니다.');
-      
+
       // 평점에 따른 후속 처리
       if (reviewForm.rating >= 4) {
         // 4점 이상일 때 정기제안 페이지로 이동
@@ -120,7 +120,7 @@ export default function ReviewWritePage() {
   };
 
   const handleRegularServiceConfirm = () => {
-    navigate(`/main/regular-service-proposal?serviceId=${serviceId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
+    navigate(`/main/regular-service-proposal?serviceMatchId=${serviceId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
     setIsRegularServiceDialogOpen(false);
   };
 
@@ -177,14 +177,14 @@ export default function ReviewWritePage() {
 
         {/* 제출 버튼 */}
         <Flex gap="3" className="mt-4">
-          <Button 
+          <Button
             variant="outline"
             onClick={() => navigate('/main/reviews')}
             className="flex-1"
           >
             취소
           </Button>
-          <Button 
+          <Button
             onClick={handleSubmitReview}
             disabled={isSubmitting || reviewForm.rating === 0 || reviewForm.comment.trim() === ''}
             className="flex-1"
@@ -222,13 +222,13 @@ export default function ReviewWritePage() {
                 <Text size="2" weight="medium">닫기</Text>
               </Button>
             </Flex>
-            
+
             {/* 안내 문구 */}
             <Text size="3" color="gray">
-              서비스가 만족스러우셨군요.<br/>
+              서비스가 만족스러우셨군요.<br />
               해당 요양보호사와 정기 서비스를 신청하시겠습니까?
             </Text>
-            
+
             {/* 서비스 정보 카드 */}
             <Card className="p-4">
               <Flex direction="column" gap="2">
@@ -242,14 +242,14 @@ export default function ReviewWritePage() {
 
             {/* CTA 버튼 */}
             <Flex gap="3" className="mt-4">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={handleRegularServiceCancel}
                 className="flex-1"
               >
                 나중에 하기
               </Button>
-              <Button 
+              <Button
                 onClick={handleRegularServiceConfirm}
                 className="flex-1"
               >
