@@ -5,6 +5,7 @@ import { ConsumerScheduleDetailResponse } from '../../../types/schedule';
 
 interface ActionButtonsProps {
   schedule: ConsumerScheduleDetailResponse;
+  serviceMatchId: string;
   hasReview: boolean;
   onViewReview: () => void;
   onHideReview: () => void;
@@ -14,6 +15,7 @@ interface ActionButtonsProps {
 
 export default function ActionButtons({
   schedule,
+  serviceMatchId,
   hasReview,
   onViewReview,
   onHideReview,
@@ -23,9 +25,9 @@ export default function ActionButtons({
   const navigate = useNavigate();
 
   const handleWriteReview = () => {
-    if (!schedule) return;
+    if (!serviceMatchId) return;
 
-    navigate(`/main/review-write?serviceId=${schedule.serviceMatchId}&serviceType=${schedule.serviceType}&serviceDate=${schedule.serviceDate}&serviceTime=${schedule.serviceStartTime}-${schedule.serviceEndTime}`);
+    navigate(`/main/review-write?serviceMatchId=${serviceMatchId}&serviceType=${schedule.serviceType}&serviceDate=${schedule.serviceDate}&serviceTime=${schedule.serviceStartTime}-${schedule.serviceEndTime}`);
   };
 
   return (

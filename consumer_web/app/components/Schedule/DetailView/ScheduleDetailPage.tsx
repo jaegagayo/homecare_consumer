@@ -138,6 +138,7 @@ export default function ScheduleDetailPage() {
         {/* 액션 버튼들 */}
         <ActionButtons 
           schedule={schedule} 
+          serviceMatchId={scheduleId!}
           hasReview={hasReview} 
           onViewReview={handleViewReview}
           onHideReview={handleHideReview}
