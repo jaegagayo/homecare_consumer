@@ -18,8 +18,10 @@ import {
 } from "../components/RegularServiceForm";
 import { createRecurringOffer } from "../api/recurringOffer";
 import { apiUtils } from "../api/utils";
+import { getScheduleDetail } from "../api/schedule";
 import { RegularServiceForm } from "../types/application";
 import { DayOfWeek } from "../types/home";
+import { ConsumerScheduleDetailResponse } from "../types/schedule";
 
 interface RecommendationData {
   id: string;
@@ -72,28 +74,40 @@ export default function RegularServiceProposalPage() {
 
   // 추천 데이터 로드 (실제로는 API 호출)
   useEffect(() => {
-    if (serviceMatchId && caregiverName) {
+    if (serviceMatchId) {
       // 홈에서 정기 제안 추천을 통한 진입인지 확인
       const isFromRecommendation = searchParams.get('from') === 'recommendation';
 
       if (isFromRecommendation) {
-        // 홈에서 정기 제안 추천을 통한 진입 - 추천 정보 표시 및 자동 채우기
-        const mockRecommendationData: RecommendationData = {
-          id: serviceMatchId,
-          dayOfWeek: "월요일",
-          timeSlot: "09:00 - 11:00",
-          period: "3개월",
-          caregiverName: "김요양사",
-          serviceType: "방문요양",
-          reviewRating: 4.5,
-          caregiverGender: 'female',
-          caregiverAge: 45,
-          caregiverExperience: 8
+        // serviceMatchId로 일정 상세 정보 조회하여 서비스 정보 채우기
+        const loadScheduleDetail = async () => {
+          try {
+            const scheduleData = await getScheduleDetail(serviceMatchId);
+            
+            // 홈에서 넘겨받은 추천 정보 생성 (실제 데이터 기반)
+            const recommendationData: RecommendationData = {
+              id: serviceMatchId,
+              dayOfWeek: getDayOfWeek(scheduleData.serviceDate),
+              timeSlot: `${scheduleData.serviceStartTime} - ${scheduleData.serviceEndTime}`,
+              period: "3개월",
+              caregiverName: scheduleData.caregiverName,
+              serviceType: scheduleData.serviceType,
+              reviewRating: 4.5, // 기본값
+              caregiverGender: 'female', // 기본값
+              caregiverAge: 45, // 기본값
+              caregiverExperience: 8 // 기본값
+            };
+            
+            setRecommendationData(recommendationData);
+            initializeFormFromScheduleData(scheduleData);
+          } catch (error) {
+            console.error('일정 정보 조회 실패:', error);
+            // 에러 처리
+          }
         };
-
-        setRecommendationData(mockRecommendationData);
-        initializeFormFromRecommendation(mockRecommendationData);
-      } else {
+        
+        loadScheduleDetail();
+      } else if (caregiverName) {
         // 다른 경로에서 진입 - 기본 정보만 설정
         const getDayOfWeek = (dateString: string) => {
           const date = new Date(dateString);
@@ -126,6 +140,38 @@ export default function RegularServiceProposalPage() {
       }
     }
   }, [serviceMatchId, caregiverName, serviceType, serviceDate, serviceTime, searchParams]);
+
+  // 요일 변환 헬퍼 함수
+  const getDayOfWeek = (dateString: string) => {
+    const date = new Date(dateString);
+    const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+    return days[date.getDay()];
+  };
+
+  // 일정 데이터로부터 폼 초기화하는 함수
+  const initializeFormFromScheduleData = (scheduleData: ConsumerScheduleDetailResponse) => {
+    // 기간을 날짜로 변환 (현재 날짜 기준)
+    const today = new Date();
+    const startDate = today.toISOString().split('T')[0];
+    const endDate = new Date(today.getTime() + (3 * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]; // 3개월 후
+
+    setForm({
+      caregiverId: '', // 추천 데이터에서 가져올 예정
+      consumerId: '', // API에서 가져올 예정
+      serviceType: scheduleData.serviceType || 'VISITING_CARE',
+      serviceAddress: scheduleData.serviceAddress || '서울시 강남구 테헤란로 123',
+      addressType: 'ROAD',
+      location: {
+        latitude: 37.5665, // 기본값 (실제로는 주소로부터 좌표 변환 필요)
+        longitude: 126.9780 // 기본값 (실제로는 주소로부터 좌표 변환 필요)
+      },
+      dayOfWeek: ['MONDAY'] as DayOfWeek[], // 기본값
+      serviceStartDate: startDate,
+      serviceEndDate: endDate,
+      serviceStartTime: scheduleData.serviceStartTime || '09:00:00',
+      serviceEndTime: scheduleData.serviceEndTime || '11:00:00'
+    });
+  };
 
   // 추천 데이터로부터 폼 초기화하는 함수
   const initializeFormFromRecommendation = (recommendation: RecommendationData) => {
@@ -286,23 +332,7 @@ export default function RegularServiceProposalPage() {
               onClick={() => setIsPreferredHoursDialogOpen(true)}
             />
 
-                        {/* 1회 소요시간 - 시작/종료 시간 차이로 자동 계산됨 */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <Text size="3" weight="medium">1회 소요시간</Text>
-              <Text size="2" color="gray">
-                {(() => {
-                  if (form.serviceStartTime && form.serviceEndTime) {
-                    const startTime = new Date(`2000-01-01T${form.serviceStartTime}`);
-                    const endTime = new Date(`2000-01-01T${form.serviceEndTime}`);
-                    const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
-                    const hours = Math.floor(durationInMinutes / 60);
-                    const minutes = durationInMinutes % 60;
-                    return `${hours}시간 ${minutes}분`;
-                  }
-                  return '시간을 설정해주세요';
-                })()}
-              </Text>
-            </div>
+
           </div>
 
 
