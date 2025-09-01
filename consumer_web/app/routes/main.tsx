@@ -8,11 +8,8 @@ import {
 import { 
   Home, 
   Calendar, 
-  Users, 
-  FileText,
   User,
-  ArrowLeft,
-  Plus
+  ArrowLeft
 } from "lucide-react";
 
 export default function MainLayout() {
@@ -39,22 +36,11 @@ export default function MainLayout() {
     } else if (path.includes("/main/schedule")) {
       setCurrentTab(1);
       setCurrentPageTitle("일정");
-    } else if (path.includes("/main/voucher-preview")) {
+    } else if (path.includes("/main/profile")) {
       setCurrentTab(2);
-      setCurrentPageTitle("바우처 사용 안내");
-    } else if (path.includes("/main/application-form")) {
-      setCurrentTab(2);
-      setCurrentPageTitle("서비스 신청서");
-    } else if (path.includes("/main/matching")) {
-      setCurrentTab(3);
-      setCurrentPageTitle("매칭");
-    } else if (path.includes("/main/reviews")) {
-      setCurrentTab(4);
-      setCurrentPageTitle("리뷰");
+      setCurrentPageTitle("마이페이지");
     } else if (path.includes("/main/service-request")) {
       setCurrentPageTitle("서비스 요청");
-    } else if (path.includes("/main/profile")) {
-      setCurrentPageTitle("프로필");
     } else if (path.includes("/main/application-form")) {
       setCurrentPageTitle("서비스 신청서");
     } else if (path.includes("/main/change-options")) {
@@ -79,9 +65,7 @@ export default function MainLayout() {
   const tabs = [
     { id: 0, label: "홈", icon: Home, path: "/main/home" },
     { id: 1, label: "일정", icon: Calendar, path: "/main/schedule" },
-    { id: 2, label: "신청", icon: Plus, path: "/main/voucher-preview" },
-    { id: 3, label: "매칭", icon: Users, path: "/main/matching" },
-    { id: 4, label: "리뷰", icon: FileText, path: "/main/reviews" },
+    { id: 2, label: "마이페이지", icon: User, path: "/main/profile" },
   ];
 
   const handleTabChange = (tabId: number) => {
