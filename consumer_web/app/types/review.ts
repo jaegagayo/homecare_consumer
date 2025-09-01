@@ -8,30 +8,21 @@ export interface CreateReviewRequest {
   reviewContent: string;
 }
 
-// 리뷰 응답 타입
-export interface ReviewResponse {
-  id: string;
-  consumerId: string;
+// 백엔드 GetReviewResponse와 일치하는 타입
+export interface GetReviewResponse {
+  reviewId: string;
   serviceMatchId: string;
   reviewScore: number;
   reviewContent: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string;  // LocalDateTime이 JSON으로 직렬화된 string
 }
 
-// 신청자 리뷰 응답 타입
+// 신청자 리뷰 응답 타입 (백엔드 ConsumerReviewResponse와 일치)
 export interface ConsumerReviewResponse {
-  id: string;
-  serviceMatchId: string;
+  serviceDate: string;        // LocalDate가 JSON으로 직렬화된 string
   caregiverName: string;
-  serviceDate: string;
-  serviceStartTime: string;
-  serviceEndTime: string;
-  serviceAddress: string;
-  serviceType: ServiceType;
-  reviewScore: number;
+  reviewScore: number;        // Double -> number
   reviewContent: string;
-  createdAt: string;
 }
 
 // 미작성 리뷰 응답 타입

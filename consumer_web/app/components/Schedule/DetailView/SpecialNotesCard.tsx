@@ -36,9 +36,15 @@ export default function SpecialNotesCard({ schedule }: SpecialNotesCardProps) {
             padding: '12px'
           }}
         >
-          <Text size="2" className="whitespace-pre-wrap" style={{ lineHeight: '1.5' }}>
-            고객님께서 계단이 있는 3층에 거주하고 계십니다. 엘리베이터는 1층에만 있어서 2-3층은 계단을 이용해야 합니다. 고객님은 보행기 사용이 필요하시며, 화장실은 복도 끝에 위치해 있습니다. 방문 시에는 반드시 신발을 벗고 들어가시기 바랍니다.
-          </Text>
+          {schedule.additionalInformation ? (
+            <Text size="2" className="whitespace-pre-wrap" style={{ lineHeight: '1.5' }}>
+              {schedule.additionalInformation}
+            </Text>
+          ) : (
+            <Text size="2" color="gray" style={{ lineHeight: '1.5' }}>
+              특이사항이 없습니다.
+            </Text>
+          )}
         </div>
       </Flex>
     </Card>

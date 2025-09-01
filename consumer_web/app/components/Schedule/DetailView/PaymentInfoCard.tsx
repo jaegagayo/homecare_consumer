@@ -32,11 +32,15 @@ export default function PaymentInfoCard({ schedule }: PaymentInfoCardProps) {
         <div>
           <Flex justify="between" align="center" className="mb-2">
             <Text size="2" weight="medium">시간당 요금</Text>
-            <Text size="2" weight="medium">₩15,000</Text>
+            <Text size="2" weight="medium">
+              ₩{schedule.hourlyRate ? schedule.hourlyRate.toLocaleString() : '정보 없음'}
+            </Text>
           </Flex>
           <Flex justify="between" align="center">
             <Text size="2" weight="medium">서비스 시간</Text>
-            <Text size="2" weight="medium">{schedule.duration}시간</Text>
+            <Text size="2" weight="medium">
+              {schedule.duration ? `${schedule.duration}시간` : '정보 없음'}
+            </Text>
           </Flex>
         </div>
 
@@ -46,7 +50,10 @@ export default function PaymentInfoCard({ schedule }: PaymentInfoCardProps) {
         <Flex justify="between" align="center">
           <Text size="3" weight="medium">총 금액</Text>
           <Text size="4" weight="bold" style={{ color: 'var(--accent-9)' }}>
-            ₩{(15000 * schedule.duration).toLocaleString()}
+            {schedule.hourlyRate && schedule.duration 
+              ? `₩${(schedule.hourlyRate * schedule.duration).toLocaleString()}`
+              : '계산 불가'
+            }
           </Text>
         </Flex>
       </Flex>

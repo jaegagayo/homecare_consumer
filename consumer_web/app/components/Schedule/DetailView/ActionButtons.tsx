@@ -6,9 +6,20 @@ import { ConsumerScheduleDetailResponse } from '../../../types/schedule';
 interface ActionButtonsProps {
   schedule: ConsumerScheduleDetailResponse;
   hasReview: boolean;
+  onViewReview: () => void;
+  onHideReview: () => void;
+  showReview: boolean;
+  isReviewLoading: boolean;
 }
 
-export default function ActionButtons({ schedule, hasReview }: ActionButtonsProps) {
+export default function ActionButtons({ 
+  schedule, 
+  hasReview, 
+  onViewReview, 
+  onHideReview, 
+  showReview,
+  isReviewLoading
+}: ActionButtonsProps) {
   const navigate = useNavigate();
 
   const handleWriteReview = () => {
@@ -17,25 +28,32 @@ export default function ActionButtons({ schedule, hasReview }: ActionButtonsProp
     navigate(`/main/review-write?serviceId=${schedule.serviceMatchId}&serviceType=${schedule.serviceType}&serviceDate=${schedule.serviceDate}&serviceTime=${schedule.serviceStartTime}-${schedule.serviceEndTime}`);
   };
 
-  const handleViewReview = () => {
-    // TODO: 작성된 리뷰 보기 페이지로 이동
-    navigate(`/main/reviews?reviewId=${schedule?.serviceMatchId}`);
-  };
-
   return (
     <Flex direction="column" gap="4">
       {/* 완료된 일정의 경우 리뷰 버튼 */}
       {schedule.matchStatus === 'COMPLETED' && (
         <>
           {hasReview ? (
-            <Button 
-              variant="outline" 
-              onClick={handleViewReview}
-              style={{ width: '100%' }}
-            >
-              <StarIcon width="16" height="16" />
-              작성한 리뷰 보기
-            </Button>
+            showReview ? (
+              <Button 
+                variant="outline" 
+                onClick={onHideReview}
+                style={{ width: '100%' }}
+              >
+                <StarIcon width="16" height="16" />
+                리뷰 숨기기
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={onViewReview}
+                disabled={isReviewLoading}
+                style={{ width: '100%' }}
+              >
+                <StarIcon width="16" height="16" />
+                {isReviewLoading ? '로딩 중...' : '작성한 리뷰 보기'}
+              </Button>
+            )
           ) : (
             <Button 
               onClick={handleWriteReview}

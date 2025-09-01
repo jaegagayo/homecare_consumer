@@ -6,7 +6,9 @@ import {
   Text
 } from "@radix-ui/themes";
 import { ConsumerScheduleDetailResponse } from "../../../types/schedule";
+import { GetReviewResponse } from "../../../types/review";
 import { getScheduleDetail } from "../../../api/schedule";
+import { getReviewByServiceMatch } from "../../../api/review";
 import ServiceInfoCard from './ServiceInfoCard';
 import CaregiverInfoCard from './CaregiverInfoCard';
 import VisitLocationCard from './VisitLocationCard';
@@ -14,6 +16,7 @@ import PaymentInfoCard from './PaymentInfoCard';
 
 import SpecialNotesCard from './SpecialNotesCard';
 import ActionButtons from './ActionButtons';
+import ReviewInfoDialog from './ReviewInfoDialog';
 
 export default function ScheduleDetailPage() {
   const [searchParams] = useSearchParams();
@@ -21,8 +24,36 @@ export default function ScheduleDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasReview, setHasReview] = useState(false);
+  const [showReview, setShowReview] = useState(false);
+  const [review, setReview] = useState<GetReviewResponse | null>(null);
+  const [isReviewLoading, setIsReviewLoading] = useState(false);
 
   const scheduleId = searchParams.get('id');
+
+  const handleViewReview = async () => {
+    if (!scheduleId) {
+      console.error('No scheduleId found');
+      return;
+    }
+    
+    try {
+      setIsReviewLoading(true);
+      
+      const reviewData = await getReviewByServiceMatch(scheduleId);
+      
+      setReview(reviewData);
+      setShowReview(true);
+    } catch (error) {
+      console.error('Failed to load review:', error);
+      // 에러 처리 (필요시 사용자에게 알림)
+    } finally {
+      setIsReviewLoading(false);
+    }
+  };
+
+  const handleHideReview = () => {
+    setShowReview(false);
+  };
 
   useEffect(() => {
     const loadScheduleDetail = async () => {
@@ -38,7 +69,9 @@ export default function ScheduleDetailPage() {
         // 일정 상세 조회 API 호출
         const scheduleData = await getScheduleDetail(scheduleId);
         setSchedule(scheduleData);
-        setHasReview(!scheduleData.hasReview);
+        
+        // 백엔드에서 받은 hasReview 값을 그대로 사용
+        setHasReview(scheduleData.hasReview ?? false);
       } catch (error) {
         console.error('Failed to load schedule detail:', error);
         setError("일정 정보를 불러오는데 실패했습니다.");
@@ -103,7 +136,26 @@ export default function ScheduleDetailPage() {
         <SpecialNotesCard schedule={schedule} />
         
         {/* 액션 버튼들 */}
-        <ActionButtons schedule={schedule} hasReview={hasReview} />
+        <ActionButtons 
+          schedule={schedule} 
+          hasReview={hasReview} 
+          onViewReview={handleViewReview}
+          onHideReview={handleHideReview}
+          showReview={showReview}
+          isReviewLoading={isReviewLoading}
+        />
+
+        {/* 리뷰 정보 다이얼로그 (항상 렌더링, open으로 표시/숨김 제어) */}
+        <ReviewInfoDialog 
+          review={review}
+          caregiverName={schedule.caregiverName}
+          serviceDate={schedule.serviceDate}
+          serviceStartTime={schedule.serviceStartTime}
+          serviceEndTime={schedule.serviceEndTime}
+          serviceType={schedule.serviceType}
+          open={showReview}
+          onOpenChange={setShowReview}
+        />
       </Flex>
     </Container>
   );

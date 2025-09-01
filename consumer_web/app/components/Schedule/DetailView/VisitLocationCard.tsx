@@ -40,7 +40,9 @@ export default function VisitLocationCard({ schedule }: VisitLocationCardProps) 
         {/* 출입 방법 섹션 */}
         <div className="space-y-2">
           <Text size="2" color="gray" className='block mb-1'>출입 방법</Text>
-          <Text size="3" weight="medium">1층 엘리베이터 이용 후 3층에서 내려서 301호</Text>
+          <Text size="3" weight="medium">
+            {schedule.entranceType || '출입 방법 정보가 없습니다.'}
+          </Text>
         </div>
 
 

@@ -1,9 +1,9 @@
 import { API_CONFIG, API_ENDPOINTS } from './config';
 import {
   CreateReviewRequest,
-  ReviewResponse,
   ConsumerReviewResponse,
   PendingReviewResponse,
+  GetReviewResponse,
 } from '../types';
 
 // 리뷰 생성 API
@@ -21,19 +21,19 @@ export const createReview = async (request: CreateReviewRequest): Promise<string
       throw new Error(`Review creation failed: ${response.status}`);
     }
 
-    const data: string = await response.json();
-    return data;
+    const reviewId: string = await response.json();
+    return reviewId;
   } catch (error) {
     console.error('Review creation error:', error);
     throw error;
   }
 };
 
-// 신청자가 작성한 리뷰 조회 API
-export const getWrittenReviews = async (consumerId: string): Promise<ConsumerReviewResponse[]> => {
+// ServiceMatch ID로 리뷰 조회 API
+export const getReviewByServiceMatch = async (serviceMatchId: string): Promise<GetReviewResponse> => {
   try {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.REVIEW.GET_WRITTEN}?consumerId=${consumerId}`,
+      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.REVIEW.GET_BY_SERVICE_MATCH}?serviceMatchId=${serviceMatchId}`,
       {
         method: 'GET',
         headers: {
@@ -41,6 +41,28 @@ export const getWrittenReviews = async (consumerId: string): Promise<ConsumerRev
         },
       }
     );
+
+    if (!response.ok) {
+      throw new Error(`Review fetch failed: ${response.status}`);
+    }
+
+    const data: GetReviewResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Review fetch error:', error);
+    throw error;
+  }
+};
+
+// 수요자가 작성한 리뷰 목록 조회 API
+export const getWrittenReviews = async (consumerId: string): Promise<ConsumerReviewResponse[]> => {
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.REVIEW.GET_WRITTEN}?consumerId=${consumerId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Written reviews fetch failed: ${response.status}`);
@@ -54,18 +76,15 @@ export const getWrittenReviews = async (consumerId: string): Promise<ConsumerRev
   }
 };
 
-// 신청자가 작성해야 할 리뷰 조회 API
+// 수요자가 작성해야 할 리뷰 목록 조회 API
 export const getPendingReviews = async (consumerId: string): Promise<PendingReviewResponse[]> => {
   try {
-    const response = await fetch(
-      `${API_CONFIG.BASE_URL}${API_ENDPOINTS.REVIEW.GET_PENDING}?consumerId=${consumerId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.REVIEW.GET_PENDING}?consumerId=${consumerId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Pending reviews fetch failed: ${response.status}`);

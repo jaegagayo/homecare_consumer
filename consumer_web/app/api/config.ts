@@ -18,7 +18,6 @@ export const API_ENDPOINTS = {
     NOTIFICATION_REVIEW: '/consumer/home/notification/review',
     NOTIFICATION_RECURRING: '/consumer/home/notification/recurring',
     RECOMMEND_RECURRING: '/consumer/home/recommend/recurring',
-    CANCELLED_SCHEDULE: '/consumer/home/notification/reject',
   },
   SERVICE_REQUEST: {
     CREATE: '/consumer/request',
@@ -39,6 +38,7 @@ export const API_ENDPOINTS = {
     CREATE: '/consumer/review',
     GET_WRITTEN: '/consumer/my-page/review',
     GET_PENDING: '/consumer/my-page/review/pending',
+    GET_BY_SERVICE_MATCH: '/consumer/serviceMatch',
   },
   BLACKLIST: {
     CREATE: '/consumer/blacklist',

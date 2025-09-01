@@ -28,16 +28,17 @@ export interface ConsumerScheduleResponse {
 
 // 신청자 스케줄 상세 응답 타입
 export interface ConsumerScheduleDetailResponse {
-  serviceMatchId: string;
-  caregiverId: string;
   caregiverName: string;
   caregiverPhone: string;
   serviceDate: string;
   serviceStartTime: string;
   serviceEndTime: string;
+  duration: number;
   serviceAddress: string;
+  entranceType: string;
   serviceType: ServiceType;
   matchStatus: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
-  additionalInformation?: string;
-  reviewId?: string;
+  hourlyRate: number;
+  additionalInformation: string;  // required로 변경
+  hasReview: boolean;  // 리뷰 존재 여부
 }
