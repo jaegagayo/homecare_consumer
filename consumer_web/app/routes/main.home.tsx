@@ -13,36 +13,24 @@ import {
   ReviewRequest,
   RegularProposalRecommendation
 } from "../components/Home";
-import { getNextSchedule, getSchedulesWithoutReview, getUnreadRecurringOffers, getRecommendRecurringOffers, getCancelledSchedules } from "../api/home";
+import { getHomeData } from "../api/home";
 import { getStoredConsumerId } from "../api/auth";
 import { NextScheduleResponse, ScheduleWithoutReviewResponse, UnreadRecurringOfferResponse, RecommendRecurringOfferResponse, CancelledScheduleResponse } from "../types";
 
-// 백엔드 API 응답 타입을 사용
-type Schedule = NextScheduleResponse;
-
-// 백엔드 API 응답 타입을 사용
-type RejectedSchedule = CancelledScheduleResponse;
-
-// 백엔드 API 응답 타입을 사용
-type RegularProposal = UnreadRecurringOfferResponse;
-
-// 백엔드 API 응답 타입을 사용
-type ReviewRequest = ScheduleWithoutReviewResponse;
-
-// 백엔드 API 응답 타입을 사용
-type RegularProposalRecommendation = RecommendRecurringOfferResponse;
+// 홈 데이터 타입 정의
+type HomeData = {
+  nextSchedule: NextScheduleResponse | null;
+  reviewRequests: ScheduleWithoutReviewResponse[];
+  rejections: CancelledScheduleResponse[];
+  regularProposals: UnreadRecurringOfferResponse[];
+  recommendations: RecommendRecurringOfferResponse[];
+};
 
 export default function HomePage() {
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [userName, setUserName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-
-  // API 데이터 상태
-  const [rejections, setRejections] = useState<RejectedSchedule[]>([]);
-  const [regularProposals, setRegularProposals] = useState<RegularProposal[]>([]);
-  const [reviewRequests, setReviewRequests] = useState<ReviewRequest[]>([]);
-  const [recommendations, setRecommendations] = useState<RegularProposalRecommendation[]>([]);
 
   useEffect(() => {
     // 인증 상태 확인
@@ -56,7 +44,7 @@ export default function HomePage() {
     // 실제로는 API에서 사용자 정보를 가져와야 함
     setUserName("김소비");
 
-    // API 데이터 로드
+    // 통합 홈 데이터 로드
     const loadData = async () => {
       try {
         const consumerId = getStoredConsumerId();
@@ -64,42 +52,14 @@ export default function HomePage() {
           throw new Error('Consumer ID not found');
         }
 
-        // 다음 일정 조회 API 호출
-        const nextScheduleData = await getNextSchedule(consumerId);
-        
-        if (nextScheduleData) {
-          setSchedules([nextScheduleData]);
-        } else {
-          setSchedules([]);
-        }
-
-        // 리뷰 요청 API 호출
-        const reviewRequestsData = await getSchedulesWithoutReview(consumerId);
-        setReviewRequests(reviewRequestsData);
-
-        // 취소된 일정 조회 API 호출
-        const cancelledSchedulesData = await getCancelledSchedules(consumerId);
-        setRejections(cancelledSchedulesData);
-
-        // 정기 제안 알림 API 호출
-        const regularProposalsData = await getUnreadRecurringOffers(consumerId);
-        setRegularProposals(regularProposalsData);
-
-        // 정기 제안 추천 API 호출
-        const recommendationsData = await getRecommendRecurringOffers(consumerId);
-        setRecommendations(recommendationsData);
-
+        const data = await getHomeData(consumerId);
+        setHomeData(data);
       } catch (error) {
         console.error('Failed to load data:', error);
-        // 에러 시 빈 배열로 설정
-        setSchedules([]);
-        setReviewRequests([]);
-        setRejections([]);
-        setRegularProposals([]);
-        setRecommendations([]);
+        // 에러가 있어도 기본 UI는 표시
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     loadData();
@@ -128,11 +88,11 @@ export default function HomePage() {
         </div>
 
         {/* 홈 화면 구성 요소들 - 순서 보장 */}
-        <NextVisitSchedule schedules={schedules} />
-        <RejectionNotification rejections={rejections} />
-        <RegularProposalNotification proposals={regularProposals} />
-        <ReviewRequest reviewRequests={reviewRequests} />
-        <RegularProposalRecommendation recommendations={recommendations} />
+        <NextVisitSchedule schedules={homeData?.nextSchedule ? [homeData.nextSchedule] : []} />
+        <RejectionNotification rejections={homeData?.rejections || []} />
+        <RegularProposalNotification proposals={homeData?.regularProposals || []} />
+        <ReviewRequest reviewRequests={homeData?.reviewRequests || []} />
+        <RegularProposalRecommendation recommendations={homeData?.recommendations || []} />
       </Flex>
     </Container>
   );

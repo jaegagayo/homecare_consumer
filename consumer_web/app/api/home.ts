@@ -55,28 +55,6 @@ export const getSchedulesWithoutReview = async (consumerId: string): Promise<Sch
   }
 };
 
-// 취소된 일정 조회 API
-export const getCancelledSchedules = async (consumerId: string): Promise<CancelledScheduleResponse[]> => {
-  try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.HOME.CANCELLED_SCHEDULE}?consumerId=${consumerId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Cancelled schedules fetch failed: ${response.status}`);
-    }
-
-    const data: CancelledScheduleResponse[] = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Cancelled schedules fetch error:', error);
-    throw error;
-  }
-};
-
 // 정기 제안 알림 조회 API
 export const getUnreadRecurringOffers = async (consumerId: string): Promise<UnreadRecurringOfferResponse[]> => {
   try {
@@ -119,4 +97,47 @@ export const getRecommendRecurringOffers = async (consumerId: string): Promise<R
     console.error('Recommend recurring offers fetch error:', error);
     throw error;
   }
+};
+
+// 취소된 일정 조회 API
+export const getCancelledSchedules = async (consumerId: string): Promise<CancelledScheduleResponse[]> => {
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.HOME.CANCELLED_SCHEDULE}?consumerId=${consumerId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Cancelled schedules fetch failed: ${response.status}`);
+    }
+
+    const data: CancelledScheduleResponse[] = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Cancelled schedules fetch error:', error);
+    throw error;
+  }
+};
+
+// 통합 홈 데이터 조회 함수 - Promise.allSettled 사용
+export const getHomeData = async (consumerId: string) => {
+  const results = await Promise.allSettled([
+    getNextSchedule(consumerId),
+    getSchedulesWithoutReview(consumerId),
+    getCancelledSchedules(consumerId),
+    getUnreadRecurringOffers(consumerId),
+    getRecommendRecurringOffers(consumerId),
+  ]);
+
+  const [nextSchedule, reviewRequests, rejections, regularProposals, recommendations] = results;
+
+  return {
+    nextSchedule: nextSchedule.status === 'fulfilled' ? nextSchedule.value : null,
+    reviewRequests: reviewRequests.status === 'fulfilled' ? reviewRequests.value : [],
+    rejections: rejections.status === 'fulfilled' ? rejections.value : [],
+    regularProposals: regularProposals.status === 'fulfilled' ? regularProposals.value : [],
+    recommendations: recommendations.status === 'fulfilled' ? recommendations.value : [],
+  };
 };

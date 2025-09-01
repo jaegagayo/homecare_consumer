@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
     NOTIFICATION_REVIEW: '/consumer/home/notification/review',
     NOTIFICATION_RECURRING: '/consumer/home/notification/recurring',
     RECOMMEND_RECURRING: '/consumer/home/recommend/recurring',
+    CANCELLED_SCHEDULE: '/consumer/home/notification/reject',
   },
   SERVICE_REQUEST: {
     CREATE: '/consumer/request',
