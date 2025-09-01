@@ -65,7 +65,7 @@ export default function MainLayout() {
   const tabs = [
     { id: 0, label: "홈", icon: Home, path: "/main/home" },
     { id: 1, label: "일정", icon: Calendar, path: "/main/schedule" },
-    { id: 2, label: "마이페이지", icon: User, path: "/main/profile" },
+    { id: 2, label: "내 정보", icon: User, path: "/main/profile" },
   ];
 
   const handleTabChange = (tabId: number) => {
