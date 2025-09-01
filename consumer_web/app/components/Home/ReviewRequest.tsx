@@ -7,7 +7,7 @@ import {
   Button
 } from "@radix-ui/themes";
 import { Calendar, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
-import { ScheduleWithoutReviewResponse } from "../../types";
+import { ScheduleWithoutReviewResponse, ServiceType } from "../../types";
 
 type ReviewRequest = ScheduleWithoutReviewResponse;
 
@@ -18,6 +18,18 @@ interface ReviewRequestProps {
 export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const getServiceTypeKorean = (serviceType: ServiceType) => {
+    switch (serviceType) {
+      case 'VISITING_CARE': return '방문요양';
+      case 'VISITING_BATH': return '방문목욕';
+      case 'VISITING_NURSING': return '방문간호';
+      case 'DAY_NIGHT_CARE': return '주야간보호';
+      case 'RESPITE_CARE': return '단기보호';
+      case 'IN_HOME_SUPPORT': return '재가지원';
+      default: return serviceType;
+    }
+  };
 
   const handleWriteReview = (reviewRequest: ReviewRequest) => {
     navigate(`/main/review-write?id=${reviewRequest.serviceMatchId}`);
@@ -85,7 +97,7 @@ export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
               </Flex>
               <div className="pt-1">
                 <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded inline-block">
-                  {reviewRequests[currentIndex].serviceType}
+                  {getServiceTypeKorean(reviewRequests[currentIndex].serviceType)}
                 </Text>
               </div>
             </div>

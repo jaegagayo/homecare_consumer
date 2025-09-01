@@ -4,6 +4,7 @@ import {
   ScheduleWithoutReviewResponse,
   UnreadRecurringOfferResponse,
   RecommendRecurringOfferResponse,
+  CancelledScheduleResponse,
 } from '../types';
 
 // 다음 일정 조회 API
@@ -50,6 +51,28 @@ export const getSchedulesWithoutReview = async (consumerId: string): Promise<Sch
     return data;
   } catch (error) {
     console.error('Schedules without review fetch error:', error);
+    throw error;
+  }
+};
+
+// 취소된 일정 조회 API
+export const getCancelledSchedules = async (consumerId: string): Promise<CancelledScheduleResponse[]> => {
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.HOME.CANCELLED_SCHEDULE}?consumerId=${consumerId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Cancelled schedules fetch failed: ${response.status}`);
+    }
+
+    const data: CancelledScheduleResponse[] = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Cancelled schedules fetch error:', error);
     throw error;
   }
 };

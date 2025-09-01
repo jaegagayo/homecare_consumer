@@ -13,21 +13,15 @@ import {
   ReviewRequest,
   RegularProposalRecommendation
 } from "../components/Home";
-import { getNextSchedule, getSchedulesWithoutReview, getUnreadRecurringOffers, getRecommendRecurringOffers } from "../api/home";
+import { getNextSchedule, getSchedulesWithoutReview, getUnreadRecurringOffers, getRecommendRecurringOffers, getCancelledSchedules } from "../api/home";
 import { getStoredConsumerId } from "../api/auth";
-import { NextScheduleResponse, ScheduleWithoutReviewResponse, UnreadRecurringOfferResponse, RecommendRecurringOfferResponse } from "../types";
+import { NextScheduleResponse, ScheduleWithoutReviewResponse, UnreadRecurringOfferResponse, RecommendRecurringOfferResponse, CancelledScheduleResponse } from "../types";
 
 // 백엔드 API 응답 타입을 사용
 type Schedule = NextScheduleResponse;
 
-interface RejectedSchedule {
-  id: string;
-  date: string;
-  time: string;
-  caregiverName: string;
-  serviceType: string;
-  rejectionReason?: string;
-}
+// 백엔드 API 응답 타입을 사용
+type RejectedSchedule = CancelledScheduleResponse;
 
 // 백엔드 API 응답 타입을 사용
 type RegularProposal = UnreadRecurringOfferResponse;
@@ -44,7 +38,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 더미 데이터 - 나중에 실제 API로 교체
+  // API 데이터 상태
   const [rejections, setRejections] = useState<RejectedSchedule[]>([]);
   const [regularProposals, setRegularProposals] = useState<RegularProposal[]>([]);
   const [reviewRequests, setReviewRequests] = useState<ReviewRequest[]>([]);
@@ -83,6 +77,10 @@ export default function HomePage() {
         const reviewRequestsData = await getSchedulesWithoutReview(consumerId);
         setReviewRequests(reviewRequestsData);
 
+        // 취소된 일정 조회 API 호출
+        const cancelledSchedulesData = await getCancelledSchedules(consumerId);
+        setRejections(cancelledSchedulesData);
+
         // 정기 제안 알림 API 호출
         const regularProposalsData = await getUnreadRecurringOffers(consumerId);
         setRegularProposals(regularProposalsData);
@@ -96,29 +94,10 @@ export default function HomePage() {
         // 에러 시 빈 배열로 설정
         setSchedules([]);
         setReviewRequests([]);
+        setRejections([]);
         setRegularProposals([]);
         setRecommendations([]);
       }
-
-      // 취소된 일정 알림 더미 데이터
-      setRejections([
-        {
-          id: "rejected_1",
-          date: "2024-01-15",
-          time: "14:00 - 16:00",
-          caregiverName: "최요양사",
-          serviceType: "방문요양",
-          rejectionReason: "개인 사정으로 인한 취소"
-        },
-        {
-          id: "rejected_2", 
-          date: "2024-01-16",
-          time: "10:00 - 12:00",
-          caregiverName: "정요양사",
-          serviceType: "방문요양",
-          rejectionReason: "일정 변경 요청"
-        }
-      ]);
 
       setIsLoading(false);
     };

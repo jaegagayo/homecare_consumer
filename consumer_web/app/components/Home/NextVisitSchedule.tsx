@@ -6,7 +6,7 @@ import {
   Button
 } from "@radix-ui/themes";
 import { Clock } from "lucide-react";
-import { NextScheduleResponse } from "../../types";
+import { NextScheduleResponse, ServiceType } from "../../types";
 
 // 백엔드 API 응답 타입을 사용
 type Schedule = NextScheduleResponse;
@@ -18,11 +18,14 @@ interface NextVisitScheduleProps {
 export default function NextVisitSchedule({ schedules }: NextVisitScheduleProps) {
   const navigate = useNavigate();
 
-  const getServiceTypeKorean = (serviceType: string) => {
+  const getServiceTypeKorean = (serviceType: ServiceType) => {
     switch (serviceType) {
-      case 'CARE': return '요양';
-      case 'COMPANION': return '동반';
-      case 'HOUSEKEEPING': return '가사';
+      case 'VISITING_CARE': return '방문요양';
+      case 'VISITING_BATH': return '방문목욕';
+      case 'VISITING_NURSING': return '방문간호';
+      case 'DAY_NIGHT_CARE': return '주야간보호';
+      case 'RESPITE_CARE': return '단기보호';
+      case 'IN_HOME_SUPPORT': return '재가지원';
       default: return serviceType;
     }
   };

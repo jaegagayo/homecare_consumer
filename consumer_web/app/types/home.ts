@@ -38,6 +38,15 @@ export interface ScheduleWithoutReviewResponse {
   // 백엔드에 serviceAddress 필드가 없으므로 제거
 }
 
+// 취소된 일정 조회 응답 타입
+export interface CancelledScheduleResponse {
+  serviceMatchId: string;
+  serviceDate: string;           // LocalDate가 JSON으로 직렬화된 string
+  startTime: string;             // LocalTime이 JSON으로 직렬화된 string
+  endTime: string;               // LocalTime이 JSON으로 직렬화된 string
+  caregiverName: string;
+}
+
 // 정기 제안 알림 조회 응답 타입
 export interface UnreadRecurringOfferResponse {
   recurringOfferId: string;

@@ -7,27 +7,19 @@ import {
   Button
 } from "@radix-ui/themes";
 import { XCircle, Calendar, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
-
-interface RejectedSchedule {
-  id: string;
-  date: string;
-  time: string;
-  caregiverName: string;
-  serviceType: string;
-  rejectionReason?: string;
-}
+import { CancelledScheduleResponse } from "../../types";
 
 interface RejectionNotificationProps {
-  rejections: RejectedSchedule[];
+  rejections: CancelledScheduleResponse[];
 }
 
 export default function RejectionNotification({ rejections }: RejectionNotificationProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleRematch = (rejection: RejectedSchedule) => {
+  const handleRematch = (rejection: CancelledScheduleResponse) => {
     // 기존 신청 내역을 자동 입력된 신청서 작성 화면으로 이동
-    navigate(`/main/application-form?rejectedId=${rejection.id}`);
+    navigate(`/main/application-form?rejectedId=${rejection.serviceMatchId}`);
   };
 
   const handlePrevious = () => {
@@ -81,47 +73,30 @@ export default function RejectionNotification({ rejections }: RejectionNotificat
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <Flex align="center" gap="2">
                 <Calendar size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{rejections[currentIndex].date}</Text>
+                <Text size="3" weight="medium">{rejections[currentIndex].serviceDate}</Text>
               </Flex>
               <Flex align="center" gap="2">
                 <Clock size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{rejections[currentIndex].time}</Text>
+                <Text size="3" weight="medium">{rejections[currentIndex].startTime} - {rejections[currentIndex].endTime}</Text>
               </Flex>
               <Flex align="center" gap="2">
                 <User size={16} className="text-gray-500" />
                 <Text size="3" weight="medium">{rejections[currentIndex].caregiverName} 요양보호사</Text>
               </Flex>
-              <div className="pt-1">
-                <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded inline-block">
-                  {rejections[currentIndex].serviceType}
-                </Text>
-              </div>
             </div>
 
-            {/* CTA 버튼들 */}
-            <Flex gap="3">
-              <Button 
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  // 신청 취소 로직
-                  console.log('신청 취소:', rejections[currentIndex].id);
-                }}
-              >
-                신청 취소
-              </Button>
-              <Button 
-                className="flex-1"
-                onClick={() => handleRematch(rejections[currentIndex])}
-              >
-                재매칭
-              </Button>
-            </Flex>
+            {/* 재매칭 CTA 버튼 */}
+            <Button 
+              className="w-full"
+              onClick={() => handleRematch(rejections[currentIndex])}
+            >
+              재매칭 신청
+            </Button>
           </Flex>
         </div>
       ) : (
         <div className="bg-white rounded-lg p-6 border border-gray-200 text-center">
-          <Text size="3" color="gray">취소된 서비스 신청이 없습니다</Text>
+          <Text size="3" color="gray">취소된 일정이 없습니다</Text>
         </div>
       )}
     </div>
