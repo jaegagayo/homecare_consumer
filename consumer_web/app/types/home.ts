@@ -19,6 +19,7 @@ export type DayOfWeek =
 
 // 다음 일정 조회 응답 타입
 export interface NextScheduleResponse {
+  serviceMatchId: string;        // 서비스 매칭 ID
   caregiverName: string;
   serviceDate: string;           // LocalDate가 JSON으로 직렬화된 string
   serviceStartTime: string;      // LocalTime이 JSON으로 직렬화된 string

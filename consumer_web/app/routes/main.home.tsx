@@ -8,6 +8,7 @@ import {
 } from "@radix-ui/themes";
 import {
   NextVisitSchedule,
+  ServiceRequestCTA,
   RejectionNotification,
   RegularProposalNotification,
   ReviewRequest,
@@ -89,6 +90,7 @@ export default function HomePage() {
 
         {/* 홈 화면 구성 요소들 - 순서 보장 */}
         <NextVisitSchedule schedules={homeData?.nextSchedule ? [homeData.nextSchedule] : []} />
+        <ServiceRequestCTA />
         <RejectionNotification rejections={homeData?.rejections || []} />
         <RegularProposalNotification proposals={homeData?.regularProposals || []} />
         <ReviewRequest reviewRequests={homeData?.reviewRequests || []} />

@@ -3,9 +3,10 @@ import {
   Flex, 
   Text,
   Heading,
-  Button
+  Button,
+  Badge
 } from "@radix-ui/themes";
-import { Clock } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
 import { NextScheduleResponse, ServiceType } from "../../types";
 
 // 백엔드 API 응답 타입을 사용
@@ -64,51 +65,52 @@ export default function NextVisitSchedule({ schedules }: NextVisitScheduleProps)
     <div>
       <Heading size="4" className="mb-4">다음 방문 일정</Heading>
       {nextSchedule ? (
-        <div className="bg-white rounded-lg p-6 border border-gray-200">
-          <div className="space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-0">
-                <div>
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          {/* 시간 정보 - 카드 바깥쪽으로 확장 */}
+          <div className="rounded-t-lg p-4 space-y-2" style={{ backgroundColor: 'var(--accent-3)' }}>
+            <Text size="4" weight="medium" className="block" style={{ color: 'var(--accent-11)' }}>
+              {nextSchedule.serviceStartTime} ~ {nextSchedule.serviceEndTime}
+            </Text>
+            <Text size="3" style={{ color: 'var(--accent-11)' }}>
+              시작까지 {calculateTimeRemaining(nextSchedule.serviceDate, nextSchedule.serviceStartTime)} 전
+            </Text>
+          </div>
+          
+          <div className="p-6">
+            <div className="space-y-4">
+              {/* 요양보호사 정보 */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
                   <Text size="5" weight="bold">{nextSchedule.caregiverName} 요양보호사</Text>
+                  <div className="flex gap-2">
+                    <Badge color="blue" className="text-xs">{getServiceTypeKorean(nextSchedule.serviceType)}</Badge>
+                  </div>
                 </div>
-                <div>
+                
+                {/* 주소 */}
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} className="text-gray-500" />
                   <Text size="3" color="gray">{nextSchedule.serviceAddress}</Text>
                 </div>
               </div>
-              <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded">
-                {getServiceTypeKorean(nextSchedule.serviceType)}
-              </Text>
-            </div>
-            <div className="w-full aspect-[4/3] bg-gray-200 rounded-lg flex items-center justify-center">
-              <Text size="2" color="gray">지도 영역</Text>
-            </div>
-            <div>
-              <Text size="3" color="gray">
-                시작까지 {calculateTimeRemaining(nextSchedule.serviceDate, nextSchedule.serviceStartTime)} 전 ({nextSchedule.serviceStartTime} - {nextSchedule.serviceEndTime})
-              </Text>
-            </div>
-            <div className="border-t border-gray-200 pt-3">
-              <Flex justify="between" align="center">
-                <Flex align="center" gap="2">
-                  <Clock size={16} className="text-gray-500" />
-                  <Text size="2" color="gray">{nextSchedule.serviceStartTime} - {nextSchedule.serviceEndTime}</Text>
-                </Flex>
-                <Text size="2" color="gray">{nextSchedule.serviceDate}</Text>
-              </Flex>
-            </div>
-            <div className="pt-2">
-              <Button 
-                className="w-full"
-                onClick={() => navigate(`/main/schedule-detail?id=${nextSchedule.caregiverName}`)}
-              >
-                상세 보기
-              </Button>
+
+
+
+              {/* 상세 보기 버튼 */}
+              <div className="pt-2">
+                <Button 
+                  className="w-full"
+                  onClick={() => navigate(`/main/schedule-detail?id=${nextSchedule.serviceMatchId}`)}
+                >
+                  상세 보기
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg p-6 border border-gray-200 text-center">
-          <Text size="3" color="gray">아직 신청한 일정이 없습니다</Text>
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <Text color="gray">오늘 예정된 일정이 없습니다.</Text>
         </div>
       )}
     </div>
