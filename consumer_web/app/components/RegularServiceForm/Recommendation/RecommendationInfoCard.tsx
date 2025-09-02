@@ -8,9 +8,7 @@ interface RecommendationData {
   caregiverName: string;
   serviceType: string;
   reviewRating: number;
-  caregiverGender: 'male' | 'female';
-  caregiverAge: number;
-  caregiverExperience: number;
+  caregiverPhone: string;
 }
 
 interface RecommendationInfoCardProps {

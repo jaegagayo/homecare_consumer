@@ -32,7 +32,7 @@ export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
   };
 
   const handleWriteReview = (reviewRequest: ReviewRequest) => {
-    navigate(`/main/review-write?id=${reviewRequest.serviceMatchId}`);
+    navigate(`/main/review-write?serviceMatchId=${reviewRequest.serviceMatchId}&caregiverName=${reviewRequest.caregiverName}&serviceType=${reviewRequest.serviceType}&serviceDate=${reviewRequest.serviceDate}&serviceTime=${reviewRequest.serviceStartTime}-${reviewRequest.serviceEndTime}`);
   };
 
   const handlePrevious = () => {

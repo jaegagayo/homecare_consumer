@@ -8,9 +8,7 @@ interface RecommendationData {
   caregiverName: string;
   serviceType: string;
   reviewRating: number;
-  caregiverGender: 'male' | 'female';
-  caregiverAge: number;
-  caregiverExperience: number;
+  caregiverPhone: string;
 }
 
 interface ServiceInfoCardProps {
@@ -36,7 +34,7 @@ export default function ServiceInfoCard({ recommendationData, address }: Service
                   {recommendationData.caregiverName}
                 </Text>
                 <Text size="2" color="gray">
-                  {recommendationData.caregiverGender === 'female' ? '여' : '남'} / {recommendationData.caregiverAge}세 / 경력 {recommendationData.caregiverExperience}년
+                  {recommendationData.caregiverPhone}
                 </Text>
               </Flex>
             </Flex>

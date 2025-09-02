@@ -31,9 +31,7 @@ interface RecommendationData {
   caregiverName: string;
   serviceType: string;
   reviewRating: number;
-  caregiverGender: 'male' | 'female';
-  caregiverAge: number;
-  caregiverExperience: number;
+  caregiverPhone: string;
 }
 
 export default function RegularServiceProposalPage() {
@@ -41,11 +39,7 @@ export default function RegularServiceProposalPage() {
   const [searchParams] = useSearchParams();
   const serviceMatchId = searchParams.get('serviceMatchId');
 
-  // 리뷰에서 전달되는 파라미터들
-  const caregiverName = searchParams.get('caregiverName');
-  const serviceType = searchParams.get('serviceType');
-  const serviceDate = searchParams.get('serviceDate');
-  const serviceTime = searchParams.get('serviceTime');
+
 
   const [isPreferredDaysDialogOpen, setIsPreferredDaysDialogOpen] = useState(false);
   const [isPreferredHoursDialogOpen, setIsPreferredHoursDialogOpen] = useState(false);
@@ -72,74 +66,36 @@ export default function RegularServiceProposalPage() {
 
 
 
-  // 추천 데이터 로드 (실제로는 API 호출)
+  // serviceMatchId로 스케줄 상세 정보 조회
   useEffect(() => {
     if (serviceMatchId) {
-      // 홈에서 정기 제안 추천을 통한 진입인지 확인
-      const isFromRecommendation = searchParams.get('from') === 'recommendation';
-
-      if (isFromRecommendation) {
-        // serviceMatchId로 일정 상세 정보 조회하여 서비스 정보 채우기
-        const loadScheduleDetail = async () => {
-          try {
-            const scheduleData = await getScheduleDetail(serviceMatchId);
-            
-            // 홈에서 넘겨받은 추천 정보 생성 (실제 데이터 기반)
-            const recommendationData: RecommendationData = {
-              id: serviceMatchId,
-              dayOfWeek: getDayOfWeek(scheduleData.serviceDate),
-              timeSlot: `${scheduleData.serviceStartTime} - ${scheduleData.serviceEndTime}`,
-              period: "3개월",
-              caregiverName: scheduleData.caregiverName,
-              serviceType: scheduleData.serviceType,
-              reviewRating: 4.5, // 기본값
-              caregiverGender: 'female', // 기본값
-              caregiverAge: 45, // 기본값
-              caregiverExperience: 8 // 기본값
-            };
-            
-            setRecommendationData(recommendationData);
-            initializeFormFromScheduleData(scheduleData);
-          } catch (error) {
-            console.error('일정 정보 조회 실패:', error);
-            // 에러 처리
-          }
-        };
-        
-        loadScheduleDetail();
-      } else if (caregiverName) {
-        // 다른 경로에서 진입 - 기본 정보만 설정
-        const getDayOfWeek = (dateString: string) => {
-          const date = new Date(dateString);
-          const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
-          return days[date.getDay()];
-        };
-
-        const parseTimeSlot = (timeString: string) => {
-          if (timeString && timeString.includes('-')) {
-            return timeString.replace('-', ' - ');
-          }
-          return "09:00 - 11:00";
-        };
-
-        const reviewBasedRecommendation: RecommendationData = {
-          id: serviceMatchId,
-          dayOfWeek: getDayOfWeek(serviceDate || new Date().toISOString()),
-          timeSlot: parseTimeSlot(serviceTime || "09:00-18:00"),
-          period: "3개월",
-          caregiverName: caregiverName,
-          serviceType: serviceType || "방문요양",
-          reviewRating: 4.5,
-          caregiverGender: 'female',
-          caregiverAge: 45,
-          caregiverExperience: 8
-        };
-
-        setRecommendationData(reviewBasedRecommendation);
-        initializeFormFromRecommendation(reviewBasedRecommendation);
-      }
+      const loadScheduleDetail = async () => {
+        try {
+          const scheduleData = await getScheduleDetail(serviceMatchId);
+          
+          // 스케줄 데이터로 추천 정보 생성
+          const recommendationData: RecommendationData = {
+            id: serviceMatchId,
+            dayOfWeek: getDayOfWeek(scheduleData.serviceDate),
+            timeSlot: `${scheduleData.serviceStartTime} - ${scheduleData.serviceEndTime}`,
+            period: "3개월",
+            caregiverName: scheduleData.caregiverName,
+            serviceType: scheduleData.serviceType,
+            reviewRating: 4.5, // 기본값
+            caregiverPhone: scheduleData.caregiverPhone || '연락처 정보 없음'
+          };
+          
+          setRecommendationData(recommendationData);
+          initializeFormFromScheduleData(scheduleData);
+        } catch (error) {
+          console.error('일정 정보 조회 실패:', error);
+          // 에러 처리
+        }
+      };
+      
+      loadScheduleDetail();
     }
-  }, [serviceMatchId, caregiverName, serviceType, serviceDate, serviceTime, searchParams]);
+  }, [serviceMatchId]);
 
   // 요일 변환 헬퍼 함수
   const getDayOfWeek = (dateString: string) => {
@@ -173,39 +129,7 @@ export default function RegularServiceProposalPage() {
     });
   };
 
-  // 추천 데이터로부터 폼 초기화하는 함수
-  const initializeFormFromRecommendation = (recommendation: RecommendationData) => {
-    // 시간대 파싱
-    const [startTime, endTime] = recommendation.timeSlot.split(' - ');
 
-    // 요일을 요일 배열로 변환 (백엔드 형식: MONDAY, TUESDAY, ...)
-    const dayMapping: { [key: string]: string } = {
-      '월요일': 'MONDAY', '화요일': 'TUESDAY', '수요일': 'WEDNESDAY', '목요일': 'THURSDAY',
-      '금요일': 'FRIDAY', '토요일': 'SATURDAY', '일요일': 'SUNDAY'
-    };
-
-    // 기간을 날짜로 변환 (현재 날짜 기준)
-    const today = new Date();
-    const startDate = today.toISOString().split('T')[0];
-    const endDate = new Date(today.getTime() + (3 * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]; // 3개월 후
-
-    setForm({
-      caregiverId: '', // 추천 데이터에서 가져올 예정
-      consumerId: '', // API에서 가져올 예정
-      serviceType: 'VISITING_CARE',
-      serviceAddress: '서울시 강남구 테헤란로 123', // 실제로는 사용자 프로필에서 가져와야 함
-      addressType: 'ROAD',
-      location: {
-        latitude: 37.5665, // 서울시청 기본 위도
-        longitude: 126.9780 // 서울시청 기본 경도
-      },
-      dayOfWeek: [dayMapping[recommendation.dayOfWeek] || 'MONDAY'] as DayOfWeek[],
-      serviceStartDate: startDate,
-      serviceEndDate: endDate,
-      serviceStartTime: startTime + ':00',
-      serviceEndTime: endTime + ':00'
-    });
-  };
 
     useEffect(() => {
     // 예상 사용량 계산 (서비스 유형과 소요시간에 따라)

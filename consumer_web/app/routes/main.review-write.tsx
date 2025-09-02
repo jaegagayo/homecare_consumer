@@ -28,7 +28,7 @@ interface ReviewForm {
 export default function ReviewWritePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const serviceId = searchParams.get('serviceId');
+  const serviceMatchId = searchParams.get('serviceMatchId');
   const caregiverName = searchParams.get('caregiverName');
   const serviceType = searchParams.get('serviceType');
   const serviceDate = searchParams.get('serviceDate');
@@ -120,7 +120,7 @@ export default function ReviewWritePage() {
   };
 
   const handleRegularServiceConfirm = () => {
-    navigate(`/main/regular-service-proposal?serviceMatchId=${serviceId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
+    navigate(`/main/regular-service-proposal?serviceMatchId=${serviceMatchId}&caregiverName=${caregiverName}&serviceType=${serviceType}&serviceDate=${serviceDate}&serviceTime=${serviceTime}`);
     setIsRegularServiceDialogOpen(false);
   };
 
