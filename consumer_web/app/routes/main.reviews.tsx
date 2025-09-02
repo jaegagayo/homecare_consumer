@@ -14,64 +14,46 @@ import {
   Calendar,
   MessageSquare
 } from "lucide-react";
+import { getWrittenReviews, getPendingReviews } from "../api/review";
+import { getStoredConsumerId } from "../api/auth";
+import { ConsumerReviewResponse, PendingReviewResponse } from "../types";
 
-interface Review {
-  id: string;
-  date: string;
-  time?: string;
-  caregiverName: string;
-  serviceType: string;
-  rating: number;
-  comment: string;
-  status: 'pending' | 'completed';
+// 통합된 리뷰 데이터 타입
+interface ReviewData {
+  writtenReviews: ConsumerReviewResponse[];
+  pendingReviews: PendingReviewResponse[];
 }
-
-
 
 export default function ReviewsPage() {
   const navigate = useNavigate();
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewData, setReviewData] = useState<ReviewData>({ writtenReviews: [], pendingReviews: [] });
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // 더미 데이터 로드
     const loadData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      setReviews([
-        {
-          id: "1",
-          date: "2024-08-13",
-          time: "09:00-18:00",
-          caregiverName: "김케어",
-          serviceType: "방문요양",
-          rating: 5,
-          comment: "매우 친절하고 전문적인 서비스를 받았습니다. 다음에도 꼭 이용하고 싶어요!",
-          status: "completed"
-        },
-        {
-          id: "2",
-          date: "2024-08-12",
-          time: "10:00-16:00",
-          caregiverName: "박케어",
-          serviceType: "방문요양",
-          rating: 4,
-          comment: "시간을 잘 지켜주시고 깔끔하게 서비스를 제공해주셨습니다.",
-          status: "completed"
-        },
-        {
-          id: "3",
-          date: "2024-08-11",
-          time: "14:00-16:00",
-          caregiverName: "이케어",
-          serviceType: "방문목욕",
-          rating: 0,
-          comment: "",
-          status: "pending"
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const consumerId = getStoredConsumerId();
+        if (!consumerId) {
+          throw new Error('로그인이 필요합니다.');
         }
-      ]);
 
-      setIsLoading(false);
+        // 병렬로 두 API 호출
+        const [writtenReviews, pendingReviews] = await Promise.all([
+          getWrittenReviews(consumerId),
+          getPendingReviews(consumerId)
+        ]);
+
+        setReviewData({ writtenReviews, pendingReviews });
+      } catch (err) {
+        console.error('리뷰 데이터 로드 실패:', err);
+        setError(err instanceof Error ? err.message : '리뷰 데이터를 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadData();
@@ -101,12 +83,36 @@ export default function ReviewsPage() {
     );
   };
 
+  const getServiceTypeKorean = (serviceType: string) => {
+    switch (serviceType) {
+      case 'VISITING_CARE': return '방문요양';
+      case 'VISITING_BATH': return '방문목욕';
+      case 'VISITING_NURSING': return '방문간호';
+      case 'DAY_NIGHT_CARE': return '주야간보호';
+      case 'RESPITE_CARE': return '단기보호';
+      case 'IN_HOME_SUPPORT': return '재가지원';
+      default: return serviceType;
+    }
+  };
+
   if (isLoading) {
     return (
       <Container size="2" className="p-4">
         <Flex direction="column" align="center" gap="4" className="py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <Text>로딩 중...</Text>
+          <Text>리뷰 데이터를 불러오는 중...</Text>
+        </Flex>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container size="2" className="p-4">
+        <Flex direction="column" align="center" gap="4" className="py-8">
+          <Text color="red" size="3">오류가 발생했습니다</Text>
+          <Text color="gray" size="2">{error}</Text>
+          <Button onClick={() => window.location.reload()}>다시 시도</Button>
         </Flex>
       </Container>
     );
@@ -124,31 +130,34 @@ export default function ReviewsPage() {
         </div>
 
         {/* 작성 대기 중인 리뷰 */}
-        {reviews.filter(r => r.status === 'pending').length > 0 && (
+        {reviewData.pendingReviews.length > 0 && (
           <div>
             <Heading size="4" className="mb-4">작성 대기 중인 리뷰</Heading>
             <Flex direction="column" gap="3">
-              {reviews.filter(r => r.status === 'pending').map((review) => (
-                <Card key={review.id} className="p-4">
+              {reviewData.pendingReviews.map((review) => (
+                <Card key={review.serviceMatchId} className="p-4">
                   <Flex justify="between" align="center">
                     <Flex direction="column" gap="2" className="flex-1">
                       <Flex align="center" gap="2">
                         <Calendar size={16} className="text-gray-500" />
                         <Text size="2" weight="medium">
-                          {formatDate(review.date)}
+                          {formatDate(review.serviceDate)}
                         </Text>
                       </Flex>
                       <Text size="3" weight="medium">
                         {review.caregiverName} 요양보호사
                       </Text>
                       <Text size="2" color="gray">
-                        {review.serviceType}
+                        {getServiceTypeKorean(review.serviceType)}
+                      </Text>
+                      <Text size="2" color="gray">
+                        {review.serviceStartTime} - {review.serviceEndTime}
                       </Text>
                     </Flex>
                     <Button
                       size="2"
                       onClick={() => {
-                        navigate(`/main/review-write?serviceMatchId=${review.id}&caregiverName=${review.caregiverName}&serviceType=${review.serviceType}&serviceDate=${review.date}&serviceTime=${review.time || '09:00-18:00'}`);
+                        navigate(`/main/review-write?serviceMatchId=${review.serviceMatchId}&caregiverName=${review.caregiverName}&serviceType=${review.serviceType}&serviceDate=${review.serviceDate}&serviceTime=${review.serviceStartTime}-${review.serviceEndTime}`);
                       }}
                     >
                       <MessageSquare size={16} />
@@ -162,38 +171,35 @@ export default function ReviewsPage() {
         )}
 
         {/* 작성된 리뷰 */}
-        {reviews.filter(r => r.status === 'completed').length > 0 && (
+        {reviewData.writtenReviews.length > 0 && (
           <div>
             <Heading size="4" className="mb-4">작성된 리뷰</Heading>
             <Flex direction="column" gap="3">
-              {reviews.filter(r => r.status === 'completed').map((review) => (
-                <Card key={review.id} className="p-4">
+              {reviewData.writtenReviews.map((review, index) => (
+                <Card key={index} className="p-4">
                   <Flex direction="column" gap="3">
                     <Flex justify="between" align="start">
                       <Flex direction="column" gap="2" className="flex-1">
                         <Flex align="center" gap="2">
                           <Calendar size={16} className="text-gray-500" />
                           <Text size="2" weight="medium">
-                            {formatDate(review.date)}
+                            {formatDate(review.serviceDate)}
                           </Text>
                         </Flex>
                         <Text size="3" weight="medium">
                           {review.caregiverName} 요양보호사
-                        </Text>
-                        <Text size="2" color="gray">
-                          {review.serviceType}
                         </Text>
                       </Flex>
                       <Badge color="green">작성 완료</Badge>
                     </Flex>
 
                     <div>
-                      {renderStars(review.rating)}
+                      {renderStars(review.reviewScore)}
                     </div>
 
-                    {review.comment && (
+                    {review.reviewContent && (
                       <Text size="2" className="bg-gray-50 p-3 rounded-lg">
-                        {review.comment}
+                        {review.reviewContent}
                       </Text>
                     )}
                   </Flex>
@@ -203,11 +209,8 @@ export default function ReviewsPage() {
           </div>
         )}
 
-
-
-
         {/* 빈 상태 */}
-        {reviews.length === 0 && (
+        {reviewData.pendingReviews.length === 0 && reviewData.writtenReviews.length === 0 && (
           <Card className="p-8 text-center">
             <MessageSquare size={48} className="text-gray-400 mx-auto mb-3" />
             <Text size="3" color="gray">작성할 리뷰가 없습니다</Text>
