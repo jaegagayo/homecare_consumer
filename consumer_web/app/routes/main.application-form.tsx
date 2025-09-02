@@ -135,10 +135,10 @@ export default function ApplicationFormPage() {
       const result = await createServiceRequest(serviceRequest);
 
       // 성공 시 매칭 페이지로 이동
-      navigate('/main/matching', { 
+      navigate(`/main/matching?requestId=${result.serviceRequestId}`, { 
         state: { 
           applicationData: form,
-          requestId: result.id,
+          requestId: result.serviceRequestId,
           fromApplication: true 
         } 
       });

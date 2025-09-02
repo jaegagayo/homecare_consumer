@@ -10,4 +10,5 @@ export * from './recurringOffer';
 export * from './blacklist';
 export * from './voucher';
 export * from './profile';
-export * from './utils'; 
+export * from './utils';
+export * from './matching'; 

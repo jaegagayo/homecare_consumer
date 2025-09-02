@@ -5,7 +5,7 @@ import {
 } from '../types';
 
 // 서비스 요청 생성 API
-export const createServiceRequest = async (request: CreateServiceRequestRequest): Promise<{ id: string }> => {
+export const createServiceRequest = async (request: CreateServiceRequestRequest): Promise<{ serviceRequestId: string }> => {
   try {
     const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.SERVICE_REQUEST.CREATE}`, {
       method: 'POST',
@@ -19,7 +19,7 @@ export const createServiceRequest = async (request: CreateServiceRequestRequest)
       throw new Error(`Service request creation failed: ${response.status}`);
     }
 
-    const data: { id: string } = await response.json();
+    const data: { serviceRequestId: string } = await response.json();
     return data;
   } catch (error) {
     console.error('Service request creation error:', error);

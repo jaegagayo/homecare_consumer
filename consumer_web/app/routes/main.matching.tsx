@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "@remix-run/react";
+import { useNavigate, useLocation, useSearchParams } from "@remix-run/react";
 import { 
   Container, 
   Flex, 
@@ -15,18 +15,21 @@ import {
   type ServiceRequest
 } from "../types/matching";
 import { type ApplicationForm } from "../types/application";
+import { getMatchingCandidates } from "../api/matching";
 
 export default function MatchingPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCaregiverId, setSelectedCaregiverId] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
   
   // 신청서에서 전달받은 데이터 또는 기본 모킹 데이터
   const [applicationData] = useState<ApplicationForm>(() => {
-    const state = location.state as { applicationData?: ApplicationForm; fromApplication?: boolean };
+    const state = location.state as { applicationData?: ApplicationForm; fromApplication?: boolean; requestId?: string };
     
     if (state?.applicationData && state?.fromApplication) {
       // 신청서에서 전달받은 데이터 사용
@@ -50,98 +53,63 @@ export default function MatchingPage() {
     };
   });
 
+  // serviceRequestId 가져오기 (URL 파라미터 우선, 없으면 state에서)
+  const getServiceRequestId = () => {
+    // 1. URL 파라미터에서 먼저 확인
+    const urlRequestId = searchParams.get('requestId');
+    if (urlRequestId) {
+      return urlRequestId;
+    }
+    
+    // 2. location.state에서 확인
+    const state = location.state as { requestId?: string };
+    return state?.requestId;
+  };
+
   useEffect(() => {
-    // 더미 데이터 로드
     const loadData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setCaregivers([
-        {
-          caregiverId: '1',
-          name: '김영희',
-          gender: 'female',
-          age: 45,
-          experience: 8,
-          rating: 4.8,
-          koreanProficiency: 'native',
-          specialCaseExperience: {
-            dementia: true,
-            bedridden: false
-          },
-          outingAvailable: true,
-          rejectionRate: 2,
-          selfIntroduction: '8년간 요양보호사로 일하며 다양한 케이스를 경험했습니다. 특히 치매 환자 케이어에 전문성을 가지고 있으며, 따뜻한 마음으로 환자와 가족을 돌보겠습니다.'
-        },
-        {
-          caregiverId: '2',
-          name: '박철수',
-          gender: 'male',
-          age: 52,
-          experience: 12,
-          rating: 4.9,
-          koreanProficiency: 'native',
-          specialCaseExperience: {
-            dementia: true,
-            bedridden: true
-          },
-          outingAvailable: true,
-          rejectionRate: 1,
-          selfIntroduction: '12년간 요양보호사로 일하며 치매, 장기침상 등 다양한 케이스를 경험했습니다. 체력이 좋아 무거운 환자도 안전하게 케이어할 수 있습니다.'
-        },
-        {
-          caregiverId: '3',
-          name: '이미영',
-          gender: 'female',
-          age: 38,
-          experience: 5,
-          rating: 4.6,
-          koreanProficiency: 'advanced',
-          specialCaseExperience: {
-            dementia: false,
-            bedridden: false
-          },
-          outingAvailable: false,
-          rejectionRate: 4,
-          selfIntroduction: '5년간 요양보호사로 일하며 기본적인 일상생활 지원에 특화되어 있습니다. 깔끔하고 정확한 케이어를 제공하겠습니다.'
-        },
-        {
-          caregiverId: '4',
-          name: '최민수',
-          gender: 'male',
-          age: 48,
-          experience: 10,
-          rating: 4.7,
-          koreanProficiency: 'native',
-          specialCaseExperience: {
-            dementia: true,
-            bedridden: false
-          },
-          outingAvailable: true,
-          rejectionRate: 3,
-          selfIntroduction: '10년간 요양보호사로 일하며 치매 환자 케이어에 전문성을 가지고 있습니다. 환자의 안전을 최우선으로 생각하며 케이어하겠습니다.'
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const serviceRequestId = getServiceRequestId();
+        
+        if (serviceRequestId) {
+          // 실제 API 호출
+          const candidates = await getMatchingCandidates(serviceRequestId);
+          setCaregivers(candidates);
+        } else {
+          // serviceRequestId가 없는 경우 에러 처리
+          setError('서비스 요청 ID를 찾을 수 없습니다.');
+          setCaregivers([]);
         }
-      ]);
 
-      // 서비스 요청 데이터 생성
-      const serviceRequest: ServiceRequest = {
-        id: "application-request",
-        serviceType: applicationData.serviceType,
-        date: applicationData.requestDate ? 
-          (() => {
-            const date = new Date(applicationData.requestDate);
-            return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-          })() : '미정',
-        time: `${applicationData.preferredStartTime}부터 ${applicationData.duration >= 60 ? 
-          `${Math.floor(applicationData.duration / 60)}시간${applicationData.duration % 60 > 0 ? ` ${applicationData.duration % 60}분` : ''}` : 
-          `${applicationData.duration}분`
-        }`,
-        address: applicationData.serviceAddress,
-        specialRequests: applicationData.additionalInformation || '',
-        status: 'pending'
-      };
+        // 서비스 요청 데이터 생성
+        const serviceRequest: ServiceRequest = {
+          id: "application-request",
+          serviceType: applicationData.serviceType,
+          date: applicationData.requestDate ? 
+            (() => {
+              const date = new Date(applicationData.requestDate);
+              return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+            })() : '미정',
+          time: `${applicationData.preferredStartTime}부터 ${applicationData.duration >= 60 ? 
+            `${Math.floor(applicationData.duration / 60)}시간${applicationData.duration % 60 > 0 ? ` ${applicationData.duration % 60}분` : ''}` : 
+            `${applicationData.duration}분`
+          }`,
+          address: applicationData.serviceAddress,
+          specialRequests: applicationData.additionalInformation || '',
+          status: 'pending'
+        };
 
-      setServiceRequests([serviceRequest]);
-      setIsLoading(false);
+        setServiceRequests([serviceRequest]);
+      } catch (error) {
+        console.error('Failed to load matching candidates:', error);
+        setError('후보 목록을 불러오는데 실패했습니다.');
+        setCaregivers([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadData();
@@ -184,7 +152,29 @@ export default function MatchingPage() {
       <Container size="2" className="p-4">
         <Flex direction="column" align="center" gap="4" className="py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <Text>로딩 중...</Text>
+          <Text>후보 목록을 불러오는 중...</Text>
+      </Flex>
+    </Container>
+  );
+}
+
+if (error) {
+  return (
+    <Container size="2" className="p-4">
+      <Flex direction="column" align="center" gap="4" className="py-8">
+        <Text color="red" size="4">{error}</Text>
+        <Text size="3" color="gray">잠시 후 다시 시도해주세요.</Text>
+      </Flex>
+    </Container>
+  );
+}
+
+if (caregivers.length === 0) {
+  return (
+    <Container size="2" className="p-4">
+      <Flex direction="column" align="center" gap="4" className="py-8">
+        <Text size="4" color="gray">조건에 맞는 요양보호사가 없습니다.</Text>
+        <Text size="3" color="gray">다른 조건으로 다시 검색해보세요.</Text>
         </Flex>
       </Container>
     );

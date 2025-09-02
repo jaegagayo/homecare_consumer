@@ -37,7 +37,7 @@ export const API_ENDPOINTS = {
   },
   REVIEW: {
     CREATE: '/consumer/review',
-    GET_WRITTEN: '/consumer/my-page/review',
+    GET_WITTEN: '/consumer/my-page/review',
     GET_PENDING: '/consumer/my-page/review/pending',
     GET_BY_SERVICE_MATCH: '/consumer/serviceMatch',
   },
@@ -48,5 +48,8 @@ export const API_ENDPOINTS = {
   },
   VOUCHER: {
     GET_GUIDE: '/consumer/request/voucher',
+  },
+  MATCHING: {
+    RECOMMEND_LOGGING: '/match/recommend-logging',
   },
 } as const; 
