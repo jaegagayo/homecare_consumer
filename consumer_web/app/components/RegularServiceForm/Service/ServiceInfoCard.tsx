@@ -1,4 +1,5 @@
 import { Flex, Text, Heading, Card, Badge } from "@radix-ui/themes";
+import { getServiceTypeKorean } from "../../../utils";
 
 interface RecommendationData {
   id: string;
@@ -46,7 +47,7 @@ export default function ServiceInfoCard({ recommendationData, address }: Service
           <div>
             <Flex justify="between" align="center">
               <Text size="2" weight="medium">서비스 유형</Text>
-              <Badge color="blue">{recommendationData.serviceType}</Badge>
+              <Badge color="blue">{getServiceTypeKorean(recommendationData.serviceType as any)}</Badge>
             </Flex>
           </div>
 

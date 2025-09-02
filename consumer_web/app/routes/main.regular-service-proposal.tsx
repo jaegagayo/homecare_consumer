@@ -13,8 +13,7 @@ import {
   TimeRangeSelector,
   TimeRangeSettingDialog,
   DateRangeSelector,
-  ServiceInfoCard,
-  RecommendationInfoCard
+  ServiceInfoCard
 } from "../components/RegularServiceForm";
 import { createRecurringOffer } from "../api/recurringOffer";
 import { apiUtils } from "../api/utils";
@@ -233,9 +232,6 @@ export default function RegularServiceProposalPage() {
             address={form.serviceAddress}
           />
 
-          {/* 추천 정보 */}
-          <RecommendationInfoCard recommendationData={recommendationData} />
-
           {/* 매칭 조건 */}
           <div className="space-y-4">
             <div>
@@ -255,11 +251,7 @@ export default function RegularServiceProposalPage() {
               endTime={form.serviceEndTime.substring(0, 5)}
               onClick={() => setIsPreferredHoursDialogOpen(true)}
             />
-
-
           </div>
-
-
         </div>
 
         {/* 제출 버튼 */}
@@ -280,15 +272,15 @@ export default function RegularServiceProposalPage() {
           </Button>
         </Flex>
 
-        {/* 플로팅 카드 공간 확보 */}
-        <div className="h-20"></div>
+        {/* 플로팅 카드 공간 확보 - 바우처 현황 카드 높이를 고려하여 여백 증가 */}
+        <div className="h-32"></div>
       </Flex>
 
-              {/* 플로팅 바우처 정보 */}
-        <VoucherInfoDisplay 
-          estimatedUsage={estimatedUsage}
-          variant="floating"
-        />
+      {/* 플로팅 바우처 정보 */}
+      <VoucherInfoDisplay 
+        estimatedUsage={estimatedUsage}
+        variant="floating"
+      />
 
 
 

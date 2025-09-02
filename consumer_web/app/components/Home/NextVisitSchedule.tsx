@@ -20,6 +20,12 @@ interface NextVisitScheduleProps {
 export default function NextVisitSchedule({ schedules }: NextVisitScheduleProps) {
   const navigate = useNavigate();
 
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    // HH:MM:SS 형식에서 HH:MM 형식으로 변환
+    return timeString.substring(0, 5);
+  };
+
   const calculateTimeRemaining = (serviceDate: string, startTime: string) => {
     // 서비스 날짜와 시작 시간을 결합하여 Date 객체 생성
     const scheduleDateTime = new Date(`${serviceDate}T${startTime}`);
@@ -58,7 +64,7 @@ export default function NextVisitSchedule({ schedules }: NextVisitScheduleProps)
           {/* 시간 정보 - 카드 바깥쪽으로 확장 */}
           <div className="rounded-t-lg p-4 space-y-2" style={{ backgroundColor: 'var(--accent-3)' }}>
             <Text size="4" weight="medium" className="block" style={{ color: 'var(--accent-11)' }}>
-              {nextSchedule.serviceStartTime} ~ {nextSchedule.serviceEndTime}
+              {formatTime(nextSchedule.serviceStartTime)} ~ {formatTime(nextSchedule.serviceEndTime)}
             </Text>
             <Text size="3" style={{ color: 'var(--accent-11)' }}>
               시작까지 {calculateTimeRemaining(nextSchedule.serviceDate, nextSchedule.serviceStartTime)} 전

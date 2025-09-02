@@ -1,4 +1,5 @@
 import { Flex, Text, Heading, Card } from "@radix-ui/themes";
+import { getDayOfWeekKorean } from "../../../utils";
 
 interface RecommendationData {
   id: string;
@@ -28,7 +29,7 @@ export default function RecommendationInfoCard({ recommendationData }: Recommend
           <div>
             <Flex justify="between" align="center" className="mb-2">
               <Text size="2" weight="medium">서비스 요일</Text>
-              <Text size="2">{recommendationData.dayOfWeek}</Text>
+              <Text size="2">{getDayOfWeekKorean(recommendationData.dayOfWeek)}</Text>
             </Flex>
             <Flex justify="between" align="center">
               <Text size="2" weight="medium">서비스 시간</Text>

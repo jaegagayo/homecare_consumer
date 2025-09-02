@@ -20,6 +20,12 @@ export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    // HH:MM:SS 형식에서 HH:MM 형식으로 변환
+    return timeString.substring(0, 5);
+  };
+
   const handleWriteReview = (reviewRequest: ReviewRequest) => {
     navigate(`/main/review-write?serviceMatchId=${reviewRequest.serviceMatchId}&caregiverName=${reviewRequest.caregiverName}&serviceType=${reviewRequest.serviceType}&serviceDate=${reviewRequest.serviceDate}&serviceTime=${reviewRequest.serviceStartTime}-${reviewRequest.serviceEndTime}`);
   };
@@ -82,7 +88,9 @@ export default function ReviewRequest({ reviewRequests }: ReviewRequestProps) {
               </Flex>
               <Flex align="center" gap="2">
                 <Clock size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{reviewRequests[currentIndex].serviceStartTime} - {reviewRequests[currentIndex].serviceEndTime}</Text>
+                <Text size="3" weight="medium">
+                  {formatTime(reviewRequests[currentIndex].serviceStartTime)} - {formatTime(reviewRequests[currentIndex].serviceEndTime)}
+                </Text>
               </Flex>
               <div className="pt-1">
                 <Text size="2" color="gray" className="bg-gray-100 px-2 py-1 rounded inline-block">

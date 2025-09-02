@@ -22,6 +22,12 @@ export default function RegularProposalNotification({ proposals }: RegularPropos
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    // HH:MM:SS 형식에서 HH:MM 형식으로 변환
+    return timeString.substring(0, 5);
+  };
+
   const getGuidanceText = (status: string) => {
     switch (status) {
       case 'PENDING': return '보호사가 일정을 확인하고 있어요.';
@@ -116,7 +122,9 @@ export default function RegularProposalNotification({ proposals }: RegularPropos
               </Flex>
               <Flex align="center" gap="2">
                 <Info size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{proposals[currentIndex].serviceStartTime} - {proposals[currentIndex].serviceEndTime}</Text>
+                <Text size="3" weight="medium">
+                  {formatTime(proposals[currentIndex].serviceStartTime)} - {formatTime(proposals[currentIndex].serviceEndTime)}
+                </Text>
               </Flex>
               <Flex align="center" gap="2">
                 <User size={16} className="text-gray-500" />

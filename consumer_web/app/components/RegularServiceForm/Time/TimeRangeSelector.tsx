@@ -7,6 +7,12 @@ interface TimeRangeSelectorProps {
 }
 
 export default function TimeRangeSelector({ startTime, endTime, onClick }: TimeRangeSelectorProps) {
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    // HH:MM:SS 형식에서 HH:MM 형식으로 변환
+    return timeString.substring(0, 5);
+  };
+
   // 소요시간 계산
   const calculateDuration = () => {
     if (startTime && endTime) {
@@ -37,7 +43,7 @@ export default function TimeRangeSelector({ startTime, endTime, onClick }: TimeR
       <Flex justify="between" align="center" className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 cursor-pointer hover:bg-gray-50" onClick={onClick}>
         <Text size="2" weight="medium">신청 시간</Text>
         <Text size="2" color="gray">
-          {startTime} ~ {endTime}
+          {formatTime(startTime)} ~ {formatTime(endTime)}
           {duration && <span> ({duration})</span>}
         </Text>
       </Flex>

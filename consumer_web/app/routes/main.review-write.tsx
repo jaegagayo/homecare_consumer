@@ -141,6 +141,25 @@ export default function ReviewWritePage() {
     });
   };
 
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    // HH:MM:SS 형식에서 HH:MM 형식으로 변환
+    return timeString.substring(0, 5);
+  };
+
+  const formatTimeRange = (timeRangeString: string) => {
+    if (!timeRangeString) return '';
+    
+    // "14:00:00-18:00:00" 형식을 "14:00 - 18:00" 형식으로 변환
+    if (timeRangeString.includes('-')) {
+      const [startTime, endTime] = timeRangeString.split('-');
+      return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+    }
+    
+    // 단일 시간인 경우
+    return formatTime(timeRangeString);
+  };
+
   return (
     <Container size="2" className="p-4">
       <Flex direction="column" gap="6">
@@ -158,7 +177,7 @@ export default function ReviewWritePage() {
           <Text size="3" weight="medium">{caregiverName} 요양보호사</Text>
           <br />
           <Text size="2" color="gray">
-            {formatDate(serviceDate || '')} {serviceTime}, {getServiceTypeKorean(serviceType as ServiceType)}
+            {formatDate(serviceDate || '')} {formatTimeRange(serviceTime || '')}, {getServiceTypeKorean(serviceType as ServiceType)}
           </Text>
         </div>
 
@@ -239,7 +258,7 @@ export default function ReviewWritePage() {
                 <Text size="2" weight="medium" color="gray">서비스 정보</Text>
                 <Text size="3" weight="medium">{caregiverName} 요양보호사</Text>
                 <Text size="2" color="gray">
-                  {formatDate(serviceDate || '')} {serviceTime}, {getServiceTypeKorean(serviceType as ServiceType)}
+                  {formatDate(serviceDate || '')} {formatTimeRange(serviceTime || '')}, {getServiceTypeKorean(serviceType as ServiceType)}
                 </Text>
               </Flex>
             </Card>

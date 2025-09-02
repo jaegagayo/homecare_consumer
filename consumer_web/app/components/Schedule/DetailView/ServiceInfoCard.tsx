@@ -19,6 +19,12 @@ export default function ServiceInfoCard({ schedule }: ServiceInfoCardProps) {
     return `${year}년 ${month}월 ${day}일 (${weekday})`;
   };
 
+  // 시간 포맷팅 함수
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    // HH:MM:SS 형식에서 HH:MM 형식으로 변환
+    return timeString.substring(0, 5);
+  };
 
 
   return (
@@ -42,7 +48,9 @@ export default function ServiceInfoCard({ schedule }: ServiceInfoCardProps) {
           </Flex>
           <Flex align="center" gap="2">
             <Clock size={16} style={{ color: 'var(--accent-9)' }} />
-            <Text size="2" color="gray">{schedule.serviceStartTime} - {schedule.serviceEndTime} ({schedule.duration}시간)</Text>
+            <Text size="2" color="gray">
+              {formatTime(schedule.serviceStartTime)} - {formatTime(schedule.serviceEndTime)} ({schedule.duration}시간)
+            </Text>
           </Flex>
         </div>
       </Flex>

@@ -8,6 +8,7 @@ import {
 } from "@radix-ui/themes";
 import { Star, Calendar, Clock, CalendarDays, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { RecommendRecurringOfferResponse } from "../../types";
+import { getDayOfWeekKorean } from "../../utils";
 
 // 백엔드 API 응답 타입을 사용
 type RegularProposalRecommendation = RecommendRecurringOfferResponse;
@@ -19,6 +20,12 @@ interface RegularProposalRecommendationProps {
 export default function RegularProposalRecommendation({ recommendations }: RegularProposalRecommendationProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    // HH:MM:SS 형식에서 HH:MM 형식으로 변환
+    return timeString.substring(0, 5);
+  };
 
   const handleApply = (recommendation: RegularProposalRecommendation) => {
     navigate(`/main/regular-service-proposal?serviceMatchId=${recommendation.serviceMatchId}&from=recommendation`);
@@ -79,11 +86,15 @@ export default function RegularProposalRecommendation({ recommendations }: Regul
               </Flex>
               <Flex align="center" gap="2">
                 <Calendar size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{recommendations[currentIndex].dayOfWeek.join(', ')}</Text>
+                <Text size="3" weight="medium">
+                  {recommendations[currentIndex].dayOfWeek.map(day => getDayOfWeekKorean(day)).join(', ')}
+                </Text>
               </Flex>
               <Flex align="center" gap="2">
                 <Clock size={16} className="text-gray-500" />
-                <Text size="3" weight="medium">{recommendations[currentIndex].serviceStartTime} - {recommendations[currentIndex].serviceEndTime}</Text>
+                <Text size="3" weight="medium">
+                  {formatTime(recommendations[currentIndex].serviceStartTime)} - {formatTime(recommendations[currentIndex].serviceEndTime)}
+                </Text>
               </Flex>
               <Flex align="center" gap="2">
                 <CalendarDays size={16} className="text-gray-500" />
