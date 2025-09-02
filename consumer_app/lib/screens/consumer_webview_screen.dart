@@ -76,6 +76,7 @@ class _ConsumerWebViewScreenState extends State<ConsumerWebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFFFFFF), // 웹의 bg-white와 일치
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),

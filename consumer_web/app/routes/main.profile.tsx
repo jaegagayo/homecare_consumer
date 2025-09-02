@@ -4,7 +4,7 @@ import {
   Container, Flex, Heading, Text, Button, Separator
 } from "@radix-ui/themes";
 import {
-  User, Settings, LogOut, Mail, Phone, MapPin, Calendar
+  User, Settings, LogOut, Mail, Phone, MapPin, Calendar, MessageSquare
 } from "lucide-react";
 import { CameraIcon } from "@radix-ui/react-icons";
 import { logout } from "../api/auth";
@@ -16,27 +16,23 @@ export default function ProfilePage() {
     phone: "",
     address: "",
     birthDate: "",
-    licenseNumber: "",
     profileImage: ""
   });
   const navigate = useNavigate();
 
   useEffect(() => {
     // 로컬 스토리지에서 사용자 정보 가져오기
-    const email = localStorage.getItem("caregiver_email") || "";
+    const email = localStorage.getItem("consumer_email") || "";
     // 실제로는 API에서 사용자 정보를 가져와야 함
     setUserInfo({
-      name: "김케어",
+      name: "김소비",
       email: email,
       phone: "010-1234-5678",
       address: "서울시 강남구",
       birthDate: "1990-01-01",
-      licenseNumber: "2024-001234",
       profileImage: ""
     });
   }, []);
-
-
 
   const handleLogout = () => {
     logout(); // API 함수 사용하여 일관된 로그아웃 처리
@@ -46,6 +42,11 @@ export default function ProfilePage() {
   const handleSettings = () => {
     // 설정 화면으로 이동 (향후 구현)
     console.log("설정 화면으로 이동");
+  };
+
+  const handleViewReviews = () => {
+    // 리뷰 페이지로 이동
+    navigate("/main/reviews");
   };
 
   return (
@@ -90,7 +91,7 @@ export default function ProfilePage() {
           </div>
           <Flex direction="column" align="center" gap="1">
             <Heading size="5">{userInfo.name}</Heading>
-            <Text size="2" color="gray">요양보호사</Text>
+            <Text size="2" color="gray">소비자</Text>
           </Flex>
         </Flex>
 
@@ -121,12 +122,19 @@ export default function ProfilePage() {
           </Flex>
         </Flex>
 
-        {/* 자격 정보 */}
+        {/* 서비스 관련 메뉴 */}
         <Flex direction="column" gap="4" className="py-4">
-          <Heading size="4">자격 정보</Heading>
-          <Flex direction="column" gap="2">
-            <Text size="2" weight="medium">요양보호사 자격번호</Text>
-            <Text size="2" color="gray">{userInfo.licenseNumber}</Text>
+          <Heading size="4">서비스</Heading>
+          <Flex direction="column" gap="3">
+            <Button 
+              variant="ghost" 
+              size="3" 
+              onClick={handleViewReviews}
+              className="justify-start"
+            >
+              <MessageSquare size={16} />
+              <Text>내가 작성한 리뷰</Text>
+            </Button>
           </Flex>
         </Flex>
 
