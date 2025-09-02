@@ -268,7 +268,7 @@ export default function RegularServiceProposalPage() {
             disabled={isSubmitting || !form.serviceType || !form.serviceStartDate || !form.serviceEndDate}
             className="flex-1"
           >
-            {isSubmitting ? '등록 중...' : '정기 제안'}
+            {isSubmitting ? '등록 중...' : '정기 신청'}
           </Button>
         </Flex>
 
