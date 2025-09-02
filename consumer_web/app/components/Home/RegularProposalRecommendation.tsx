@@ -6,7 +6,7 @@ import {
   Heading,
   Button
 } from "@radix-ui/themes";
-import { Star, Calendar, Clock, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Calendar, Clock, CalendarDays, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { RecommendRecurringOfferResponse } from "../../types";
 
 // 백엔드 API 응답 타입을 사용
@@ -71,8 +71,12 @@ export default function RegularProposalRecommendation({ recommendations }: Regul
               </Text>
             </Flex>
 
-            {/* 제안 요약 (요일/시간대/날짜) */}
+            {/* 제안 요약 (요양보호사/요일/시간대/날짜) */}
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <Flex align="center" gap="2">
+                <User size={16} className="text-gray-500" />
+                <Text size="3" weight="medium">{recommendations[currentIndex].caregiverName} 요양보호사</Text>
+              </Flex>
               <Flex align="center" gap="2">
                 <Calendar size={16} className="text-gray-500" />
                 <Text size="3" weight="medium">{recommendations[currentIndex].dayOfWeek.join(', ')}</Text>

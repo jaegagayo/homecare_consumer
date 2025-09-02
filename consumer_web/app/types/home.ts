@@ -63,6 +63,7 @@ export interface UnreadRecurringOfferResponse {
 export interface RecommendRecurringOfferResponse {
   serviceMatchId: string;
   caregiverId: string;
+  caregiverName: string;         // 요양보호사 이름
   serviceDate: string;           // LocalDate가 JSON으로 직렬화된 string
   serviceStartTime: string;      // LocalTime이 JSON으로 직렬화된 string
   serviceEndTime: string;        // LocalTime이 JSON으로 직렬화된 string
