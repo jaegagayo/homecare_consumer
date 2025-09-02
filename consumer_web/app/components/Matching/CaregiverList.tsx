@@ -35,9 +35,9 @@ export default function CaregiverList({
     >
       {caregivers.map((caregiver) => (
         <CaregiverCard
-          key={caregiver.id}
+          key={caregiver.caregiverId}
           caregiver={caregiver}
-          isSelected={selectedCaregiverId === caregiver.id}
+          isSelected={selectedCaregiverId === caregiver.caregiverId}
           onSelect={onCaregiverSelect}
         />
       ))}

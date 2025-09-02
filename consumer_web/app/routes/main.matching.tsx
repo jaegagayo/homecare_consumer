@@ -57,7 +57,7 @@ export default function MatchingPage() {
       
       setCaregivers([
         {
-          id: '1',
+          caregiverId: '1',
           name: '김영희',
           gender: 'female',
           age: 45,
@@ -73,7 +73,7 @@ export default function MatchingPage() {
           selfIntroduction: '8년간 요양보호사로 일하며 다양한 케이스를 경험했습니다. 특히 치매 환자 케이어에 전문성을 가지고 있으며, 따뜻한 마음으로 환자와 가족을 돌보겠습니다.'
         },
         {
-          id: '2',
+          caregiverId: '2',
           name: '박철수',
           gender: 'male',
           age: 52,
@@ -89,7 +89,7 @@ export default function MatchingPage() {
           selfIntroduction: '12년간 요양보호사로 일하며 치매, 장기침상 등 다양한 케이스를 경험했습니다. 체력이 좋아 무거운 환자도 안전하게 케이어할 수 있습니다.'
         },
         {
-          id: '3',
+          caregiverId: '3',
           name: '이미영',
           gender: 'female',
           age: 38,
@@ -105,7 +105,7 @@ export default function MatchingPage() {
           selfIntroduction: '5년간 요양보호사로 일하며 기본적인 일상생활 지원에 특화되어 있습니다. 깔끔하고 정확한 케이어를 제공하겠습니다.'
         },
         {
-          id: '4',
+          caregiverId: '4',
           name: '최민수',
           gender: 'male',
           age: 48,
@@ -154,7 +154,7 @@ export default function MatchingPage() {
     }
     
     // 선택된 보호사 정보
-    const selectedCaregiver = caregivers.find(c => c.id === selectedCaregiverId);
+    const selectedCaregiver = caregivers.find(c => c.caregiverId === selectedCaregiverId);
     if (!selectedCaregiver) {
       alert('선택된 보호사 정보를 찾을 수 없습니다.');
       return;
@@ -210,7 +210,7 @@ export default function MatchingPage() {
 
         {/* 선택된 요양보호사 정보 */}
         <SelectedCaregiverInfo
-          selectedCaregiver={caregivers.find(c => c.id === selectedCaregiverId) || null}
+          selectedCaregiver={caregivers.find(c => c.caregiverId === selectedCaregiverId) || null}
           onConfirm={handleConfirmSelection}
         />
       </Flex>

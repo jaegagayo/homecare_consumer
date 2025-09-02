@@ -1,7 +1,7 @@
 import { ServiceType } from './home';
 
 export interface Caregiver {
-  id: string;
+  caregiverId: string;
   name: string;
   gender: 'male' | 'female';
   age: number;

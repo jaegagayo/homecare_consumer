@@ -65,7 +65,7 @@ export default function SelectedCaregiverInfo({
               size="3"
               onClick={() => {
                 // TODO: 리뷰 보기 다이얼로그 열기
-                console.log('리뷰 보기:', selectedCaregiver.id);
+                console.log('리뷰 보기:', selectedCaregiver.caregiverId);
               }}
             >
               리뷰 보기

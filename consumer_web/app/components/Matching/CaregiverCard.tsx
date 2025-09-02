@@ -30,7 +30,7 @@ const getKoreanProficiencyText = (proficiency: Caregiver['koreanProficiency']) =
 
 export default function CaregiverCard({ caregiver, isSelected, onSelect }: CaregiverCardProps) {
   return (
-    <RadioCards.Item value={caregiver.id} className="w-full">
+    <RadioCards.Item value={caregiver.caregiverId} className="w-full">
       <div className="w-full p-2">
         {/* 카드 상단 섹션 */}
         <div className="flex gap-4 mb-4">
