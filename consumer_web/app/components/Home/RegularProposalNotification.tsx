@@ -9,6 +9,7 @@ import {
 } from "@radix-ui/themes";
 import { Info, CheckCircle, XCircle, Calendar, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { UnreadRecurringOfferResponse } from "../../types";
+import { getRecurringStatusKorean, getRecurringStatusColor } from "../../utils/koreanTranslations";
 
 // 백엔드 API 응답 타입을 사용
 type RegularProposal = UnreadRecurringOfferResponse;
@@ -20,24 +21,6 @@ interface RegularProposalNotificationProps {
 export default function RegularProposalNotification({ proposals }: RegularProposalNotificationProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'PENDING': return '승인대기';
-      case 'APPROVED': return '확정';
-      case 'REJECTED': return '거절';
-      default: return '알 수 없음';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING': return 'blue';
-      case 'APPROVED': return 'green';
-      case 'REJECTED': return 'red';
-      default: return 'gray';
-    }
-  };
 
   const getGuidanceText = (status: string) => {
     switch (status) {
@@ -120,8 +103,8 @@ export default function RegularProposalNotification({ proposals }: RegularPropos
                   {getGuidanceText(proposals[currentIndex].recurringStatus)}
                 </Text>
               </Flex>
-              <Badge color={getStatusColor(proposals[currentIndex].recurringStatus) as 'blue' | 'green' | 'red' | 'gray'}>
-                {getStatusText(proposals[currentIndex].recurringStatus)}
+              <Badge color={getRecurringStatusColor(proposals[currentIndex].recurringStatus) as 'blue' | 'green' | 'red' | 'gray'}>
+                {getRecurringStatusKorean(proposals[currentIndex].recurringStatus)}
               </Badge>
             </Flex>
 

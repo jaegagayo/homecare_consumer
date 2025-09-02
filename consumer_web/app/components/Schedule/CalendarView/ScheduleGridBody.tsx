@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { useNavigate } from '@remix-run/react';
 import { ConsumerScheduleResponse } from '../../../types/schedule';
+import { getMatchStatusColor } from '../../../utils/koreanTranslations';
 
 interface ScheduleGridBodyProps {
   schedules: ConsumerScheduleResponse[];
@@ -366,6 +367,7 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
     return `${day}(${weekday})`; // 모바일용으로 축약
   };
 
+  // 상태 색상은 유틸리티 함수 사용
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'CONFIRMED': return 'blue';
@@ -500,7 +502,7 @@ const ScheduleGridBody = forwardRef<HTMLDivElement, ScheduleGridBodyProps>(({ sc
                   const durationMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
                   
                   const { top, height } = calculateSchedulePosition(schedule.serviceStartTime, durationMinutes);
-                  const statusColor = getStatusColor(schedule.matchStatus);
+                  const statusColor = getMatchStatusColor(schedule.matchStatus);
                   return (
                     <button
                       key={idx}

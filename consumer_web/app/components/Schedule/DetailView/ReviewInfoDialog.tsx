@@ -9,6 +9,7 @@ import {
 import { Star, Calendar, Clock, X } from "lucide-react";
 import { GetReviewResponse } from "../../../types/review";
 import { ServiceType } from "../../../types/home";
+import { getServiceTypeKorean } from "../../../utils/koreanTranslations";
 
 interface ReviewInfoDialogProps {
   review: GetReviewResponse | null;
@@ -31,18 +32,6 @@ export default function ReviewInfoDialog({
   open,
   onOpenChange
 }: ReviewInfoDialogProps) {
-  
-  const getServiceTypeKorean = (serviceType: ServiceType) => {
-    switch (serviceType) {
-      case 'VISITING_CARE': return '방문요양';
-      case 'VISITING_BATH': return '방문목욕';
-      case 'VISITING_NURSING': return '방문간호';
-      case 'DAY_NIGHT_CARE': return '주야간보호';
-      case 'RESPITE_CARE': return '단기보호';
-      case 'IN_HOME_SUPPORT': return '재가지원';
-      default: return serviceType;
-    }
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

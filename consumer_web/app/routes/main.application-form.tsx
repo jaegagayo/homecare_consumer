@@ -249,7 +249,7 @@ export default function ApplicationFormPage() {
         </Button>
 
         {/* 플로팅 카드 공간 확보 */}
-        <div className="h-20"></div>
+        <div className="h-32"></div>
       </Flex>
 
       {/* 플로팅 바우처 정보 */}

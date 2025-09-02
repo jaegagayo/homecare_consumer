@@ -16,6 +16,7 @@ import {
 import { getWrittenReviews, getPendingReviews } from "../api/review";
 import { getStoredConsumerId } from "../api/auth";
 import { ConsumerReviewResponse, PendingReviewResponse } from "../types";
+import { getServiceTypeKorean } from "../utils/koreanTranslations";
 
 // 통합된 리뷰 데이터 타입
 interface ReviewData {
@@ -65,20 +66,6 @@ export default function ReviewsPage() {
       month: 'long',
       day: 'numeric'
     });
-  };
-
-
-
-  const getServiceTypeKorean = (serviceType: string) => {
-    switch (serviceType) {
-      case 'VISITING_CARE': return '방문요양';
-      case 'VISITING_BATH': return '방문목욕';
-      case 'VISITING_NURSING': return '방문간호';
-      case 'DAY_NIGHT_CARE': return '주야간보호';
-      case 'RESPITE_CARE': return '단기보호';
-      case 'IN_HOME_SUPPORT': return '재가지원';
-      default: return serviceType;
-    }
   };
 
   if (isLoading) {

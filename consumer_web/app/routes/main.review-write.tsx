@@ -15,6 +15,8 @@ import {
   X
 } from "lucide-react";
 import { BlacklistRegistrationDialog } from "../components/Blacklist";
+import { getServiceTypeKorean } from "../utils/koreanTranslations";
+import { ServiceType } from "../types";
 
 interface ReviewForm {
   rating: number;
@@ -155,7 +157,9 @@ export default function ReviewWritePage() {
           <Text size="2" weight="medium" color="gray" className="mb-2 block">서비스 정보</Text>
           <Text size="3" weight="medium">{caregiverName} 요양보호사</Text>
           <br />
-          <Text size="2" color="gray">{formatDate(serviceDate || '')} {serviceTime}, {serviceType}</Text>
+          <Text size="2" color="gray">
+            {formatDate(serviceDate || '')} {serviceTime}, {getServiceTypeKorean(serviceType as ServiceType)}
+          </Text>
         </div>
 
         {/* 평점 선택 */}
@@ -199,7 +203,7 @@ export default function ReviewWritePage() {
         open={isBlacklistDialogOpen}
         onOpenChange={setIsBlacklistDialogOpen}
         caregiverName={caregiverName || ''}
-        serviceType={serviceType || ''}
+        serviceType={getServiceTypeKorean(serviceType as ServiceType)}
         serviceDate={serviceDate || ''}
         serviceTime={serviceTime || ''}
         onConfirm={handleBlacklistConfirm}
@@ -235,7 +239,7 @@ export default function ReviewWritePage() {
                 <Text size="2" weight="medium" color="gray">서비스 정보</Text>
                 <Text size="3" weight="medium">{caregiverName} 요양보호사</Text>
                 <Text size="2" color="gray">
-                  {formatDate(serviceDate || '')} {serviceTime}, {serviceType}
+                  {formatDate(serviceDate || '')} {serviceTime}, {getServiceTypeKorean(serviceType as ServiceType)}
                 </Text>
               </Flex>
             </Card>

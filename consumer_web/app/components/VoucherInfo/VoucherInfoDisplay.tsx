@@ -117,7 +117,7 @@ export default function VoucherInfoDisplay({
 
   if (variant === 'floating') {
     return (
-      <div className="fixed bottom-20 left-0 right-0 z-50 px-4">
+      <div className="fixed bottom-24 left-0 right-0 z-50 px-4">
         <div className="max-w-md mx-auto">
           <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
             {content}

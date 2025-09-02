@@ -87,65 +87,7 @@ export const apiUtils = {
     return !!getStoredConsumerId();
   },
 
-  // 서비스 타입을 한글로 변환
-  getServiceTypeKorean: (serviceType: string): string => {
-    switch (serviceType) {
-      case 'CARE':
-        return '요양';
-      case 'COMPANION':
-        return '동반';
-      case 'HOUSEKEEPING':
-        return '가사';
-      default:
-        return serviceType;
-    }
-  },
-
-  // 매치 상태를 한글로 변환
-  getMatchStatusKorean: (status: string): string => {
-    switch (status) {
-      case 'PENDING':
-        return '대기중';
-      case 'CONFIRMED':
-        return '확정';
-      case 'COMPLETED':
-        return '완료';
-      case 'CANCELLED':
-        return '취소';
-      default:
-        return status;
-    }
-  },
-
-  // 정기 제안 상태를 한글로 변환
-  getRecurringStatusKorean: (status: string): string => {
-    switch (status) {
-      case 'PENDING':
-        return '승인 대기';
-      case 'APPROVED':
-        return '승인 완료';
-      case 'REJECTED':
-        return '거절';
-      default:
-        return status;
-    }
-  },
-
-  // 서비스 요청 상태를 한글로 변환
-  getServiceRequestStatusKorean: (status: string): string => {
-    switch (status) {
-      case 'PENDING':
-        return '대기중';
-      case 'APPROVED':
-        return '승인됨';
-      case 'REJECTED':
-        return '거절됨';
-      case 'COMPLETED':
-        return '완료';
-      default:
-        return status;
-    }
-  },
+  // 한글 변환 함수들은 utils/koreanTranslations.ts로 이동
 
   // 날짜 포맷팅
   formatDate: (dateString: string): string => {

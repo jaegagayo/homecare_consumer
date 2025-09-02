@@ -81,7 +81,7 @@ export default function ApplicationConfirmDialog({
                 <Flex justify="between" align="center">
                   <Text size="2" weight="medium">서비스 시간</Text>
                   <Text size="2" color="gray">
-                    {form.preferredStartTime}부터 {durationText}
+                    {form.preferredStartTime} 부터
                   </Text>
                 </Flex>
                 <Flex justify="between" align="center" className="mt-4">
@@ -92,15 +92,14 @@ export default function ApplicationConfirmDialog({
                 </Flex>
               </div>
 
-              <div className="w-full h-px bg-gray-200"></div>
-
               {/* 주소 */}
-              <div>
-                <Flex justify="between" align="center">
-                  <Text size="2" weight="medium">서비스 주소</Text>
-                  <Text size="2">{form.serviceAddress}</Text>
-                </Flex>
-              </div>
+              <>
+                <div className="w-full h-px bg-gray-200"></div>
+                <div>
+                  <div><Text size="2" weight="medium" className="mb-3">서비스 주소</Text></div>
+                  <div><Text size="2" className="leading-relaxed whitespace-pre-line">{form.serviceAddress}</Text></div>
+                </div>
+              </>
 
               {/* 특별 요청사항이 있는 경우에만 표시 */}
               {form.additionalInformation && (

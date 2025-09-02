@@ -83,7 +83,7 @@ export default function VoucherUsageGuide({ voucherData }: VoucherUsageGuideProp
           </Text>
         </Card>
       ) : (
-        <Card className="p-4" style={{ backgroundColor: "var(--accent-3)" }}>
+        <Card className="p-4 mt-4" style={{ backgroundColor: "var(--accent-3)" }}>
           <Flex align="center" gap="3">
             <div>
               <Text size="2" style={{ color: "var(--accent-9)" }}>
