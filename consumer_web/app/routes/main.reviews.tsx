@@ -6,8 +6,7 @@ import {
   Text,
   Button,
   Heading,
-  Card,
-  Badge
+  Card
 } from "@radix-ui/themes";
 import {
   Star,
@@ -68,20 +67,7 @@ export default function ReviewsPage() {
     });
   };
 
-  const renderStars = (rating: number) => {
-    return (
-      <Flex gap="1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            size={20}
-            fill={star <= rating ? "#fbbf24" : "none"}
-            color={star <= rating ? "#fbbf24" : "#d1d5db"}
-          />
-        ))}
-      </Flex>
-    );
-  };
+
 
   const getServiceTypeKorean = (serviceType: string) => {
     switch (serviceType) {
@@ -174,38 +160,71 @@ export default function ReviewsPage() {
         {reviewData.writtenReviews.length > 0 && (
           <div>
             <Heading size="4" className="mb-4">작성된 리뷰</Heading>
-            <Flex direction="column" gap="3">
-              {reviewData.writtenReviews.map((review, index) => (
-                <Card key={index} className="p-4">
-                  <Flex direction="column" gap="3">
-                    <Flex justify="between" align="start">
-                      <Flex direction="column" gap="2" className="flex-1">
-                        <Flex align="center" gap="2">
-                          <Calendar size={16} className="text-gray-500" />
-                          <Text size="2" weight="medium">
-                            {formatDate(review.serviceDate)}
-                          </Text>
-                        </Flex>
-                        <Text size="3" weight="medium">
-                          {review.caregiverName} 요양보호사
-                        </Text>
+            
+            {/* 날짜별로 그룹화된 리뷰 */}
+            {(() => {
+              // 날짜별로 그룹화
+              const groupedByDate = reviewData.writtenReviews.reduce((groups, review) => {
+                const date = review.serviceDate;
+                if (!groups[date]) {
+                  groups[date] = [];
+                }
+                groups[date].push(review);
+                return groups;
+              }, {} as Record<string, typeof reviewData.writtenReviews>);
+
+              // 날짜순으로 정렬 (최신순)
+              const sortedDates = Object.keys(groupedByDate).sort((a, b) => 
+                new Date(b).getTime() - new Date(a).getTime()
+              );
+
+              return (
+                <Flex direction="column" gap="4">
+                  {sortedDates.map((date, dateIndex) => (
+                    <div key={date}>
+                      {/* 날짜 헤더 */}
+                      <div
+                        className="bg-gray-50 mb-4"
+                        style={{
+                          paddingTop: dateIndex === 0 ? '16px' : '16px',
+                        }}
+                      >
+                        <Heading size="4" style={{ marginTop: '-8px' }}>{formatDate(date)}</Heading>
+                      </div>
+                      
+                      {/* 해당 날짜의 리뷰들 */}
+                      <Flex direction="column" gap="3">
+                        {groupedByDate[date].map((review, index) => (
+                          <Card key={`${date}-${index}`} className="p-4">
+                            <Flex direction="column" gap="3">
+                              <Flex justify="between" align="start">
+                                <Flex direction="column" gap="2" className="flex-1">
+                                  <Text size="3" weight="medium">
+                                    {review.caregiverName} 요양보호사
+                                  </Text>
+                                </Flex>
+                                <Flex align="center" gap="1">
+                                  <Star size={16} fill="#fbbf24" color="#fbbf24" />
+                                  <Text size="2" color="gray">
+                                    {review.reviewScore}점
+                                  </Text>
+                                </Flex>
+                              </Flex>
+
+                              {review.reviewContent && (
+                                <Text size="2" className="bg-gray-100 p-3 rounded-lg">
+                                  {review.reviewContent}
+                                </Text>
+                              )}
+                            </Flex>
+                          </Card>
+                        ))}
                       </Flex>
-                      <Badge color="green">작성 완료</Badge>
-                    </Flex>
-
-                    <div>
-                      {renderStars(review.reviewScore)}
                     </div>
-
-                    {review.reviewContent && (
-                      <Text size="2" className="bg-gray-50 p-3 rounded-lg">
-                        {review.reviewContent}
-                      </Text>
-                    )}
-                  </Flex>
-                </Card>
-              ))}
-            </Flex>
+                  ))}
+                </Flex>
+              );
+            })()}
           </div>
         )}
 
