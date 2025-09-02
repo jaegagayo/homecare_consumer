@@ -12,9 +12,9 @@ import {
 } from "../components/Matching";
 import {
   type Caregiver,
-  type ServiceRequest,
-  type ApplicationForm
+  type ServiceRequest
 } from "../types/matching";
+import { type ApplicationForm } from "../types/application";
 
 export default function MatchingPage() {
   const navigate = useNavigate();
@@ -33,16 +33,20 @@ export default function MatchingPage() {
       return state.applicationData;
     }
     
-    // 기본 모킹 데이터
+    // 기본 모킹 데이터 (신청서 타입에 맞게 수정)
     return {
-      serviceType: 'visiting-care',
-      address: '서울시 강남구 역삼동 123-45',
-      specialRequests: '계단이 있는 3층입니다. 보행기 사용이 필요합니다.',
-      estimatedUsage: 30000,
+      serviceType: 'VISITING_CARE',
+      serviceAddress: '서울시 강남구 역삼동 123-45',
+      addressType: 'ROAD',
+      location: {
+        latitude: 37.5665,
+        longitude: 126.9780
+      },
+      requestDate: '2025-01-15',
+      preferredStartTime: '09:00',
+      preferredEndTime: '11:00',
       duration: 120, // 2시간 (분 단위)
-      requestedDates: ['2025-01-15'], // 단일 날짜
-      startTime: '09:00',
-      preferredAreas: [] // 신청서에는 선호 지역 선택 기능이 없으므로 빈 배열
+      additionalInformation: '계단이 있는 3층입니다. 보행기 사용이 필요합니다.'
     };
   });
 
@@ -121,19 +125,18 @@ export default function MatchingPage() {
       // 서비스 요청 데이터 생성
       const serviceRequest: ServiceRequest = {
         id: "application-request",
-        serviceType: applicationData.serviceType === 'visiting-care' ? '방문요양서비스' : applicationData.serviceType,
-        date: applicationData.requestedDates.length > 0 ? 
+        serviceType: applicationData.serviceType,
+        date: applicationData.requestDate ? 
           (() => {
-            const selectedDate = applicationData.requestedDates[0];
-            const date = new Date(selectedDate);
+            const date = new Date(applicationData.requestDate);
             return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
           })() : '미정',
-        time: `${applicationData.startTime}부터 ${applicationData.duration >= 60 ? 
+        time: `${applicationData.preferredStartTime}부터 ${applicationData.duration >= 60 ? 
           `${Math.floor(applicationData.duration / 60)}시간${applicationData.duration % 60 > 0 ? ` ${applicationData.duration % 60}분` : ''}` : 
           `${applicationData.duration}분`
         }`,
-        address: applicationData.address,
-        specialRequests: applicationData.specialRequests,
+        address: applicationData.serviceAddress,
+        specialRequests: applicationData.additionalInformation || '',
         status: 'pending'
       };
 

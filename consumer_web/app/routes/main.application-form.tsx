@@ -21,6 +21,7 @@ import {
   DateSelector
 } from "../components/ApplicationForm";
 import { ApplicationForm } from "../types";
+import { ServiceType } from "../types/home";
 import { createServiceRequest } from "../api/serviceRequest";
 
 export default function ApplicationFormPage() {
@@ -191,7 +192,7 @@ export default function ApplicationFormPage() {
           {/* 서비스 유형 선택 */}
           <ServiceTypeSelector 
             value={form.serviceType}
-            onChange={(value) => setForm(prev => ({ ...prev, serviceType: value }))}
+            onChange={(value) => setForm(prev => ({ ...prev, serviceType: value as ServiceType }))}
           />
 
           {/* 서비스 주소 */}
@@ -218,8 +219,8 @@ export default function ApplicationFormPage() {
 
             {/* 시작 시간 */}
             <TimeRangeSelector 
-              startTime={form.preferredStartTime}
-              onStartTimeChange={(time) => setForm(prev => ({ ...prev, preferredStartTime: time }))}
+              startTime={form.preferredStartTime || '09:00'}
+              onStartTimeChange={(time: string) => setForm(prev => ({ ...prev, preferredStartTime: time }))}
               onClick={() => setIsPreferredHoursDialogOpen(true)}
             />
 
@@ -232,7 +233,7 @@ export default function ApplicationFormPage() {
 
           {/* 특별 요청사항 */}
           <SpecialRequestsInput 
-            value={form.additionalInformation}
+            value={form.additionalInformation || ''}
             onChange={(value) => setForm(prev => ({ ...prev, additionalInformation: value }))}
           />
         </div>
@@ -289,10 +290,9 @@ export default function ApplicationFormPage() {
       <TimeSettingDialog
         open={isPreferredHoursDialogOpen}
         onOpenChange={setIsPreferredHoursDialogOpen}
-        startTime={form.preferredStartTime}
-        onStartTimeChange={(time) => setForm(prev => ({ ...prev, preferredStartTime: time }))}
+        startTime={form.preferredStartTime || '09:00'}
+        onStartTimeChange={(time: string) => setForm(prev => ({ ...prev, preferredStartTime: time }))}
       />
-
 
     </Container>
   );
